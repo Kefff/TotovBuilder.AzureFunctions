@@ -136,7 +136,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
         }
 
         [Fact]
-        public async Task Fetch_WithError_ShouldClearStaticDataFromCache()
+        public async Task Fetch_WithError_ShouldReturnOldStaticDataFromCache()
         {
             // Arrange
             string? itemCategoriesAzureBlobName = "item-categories";
@@ -161,15 +161,15 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
             DataFetcher dataFetcher = new DataFetcher(loggerMock.Object, marketDataQuerierMock.Object, cache, configurationReaderMock.Object, blobFetcherMock.Object);
 
             // Act
-            cache.Store(DataType.ItemCategories, "TestValue");
+            cache.Store(DataType.ItemCategories, "OldValue");
             await dataFetcher.Fetch(DataType.ItemCategories);
 
             // Assert
-            cache.Get(DataType.ItemCategories).Should().Be("[]");
+            cache.Get(DataType.ItemCategories).Should().Be("OldValue");
         }
 
         [Fact]
-        public async Task Fetch_WithError_ShouldClearMarketDataFromCache()
+        public async Task Fetch_WithError_ShouldReturnOldMarketDataFromCache()
         {
             // Arrange
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
@@ -185,12 +185,12 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
             DataFetcher dataFetcher = new DataFetcher(loggerMock.Object, marketDataQuerierMock.Object, cache, configurationReaderMock.Object, blobFetcherMock.Object);
 
             // Act
-            cache.Store(DataType.MarketData, "TestValue");
+            cache.Store(DataType.MarketData, "OldValue");
             await Task.Delay(1500);
             await dataFetcher.Fetch(DataType.MarketData);
 
             // Assert
-            cache.Get(DataType.MarketData).Should().Be("[]");
+            cache.Get(DataType.MarketData).Should().Be("OldValue");
         }
 
         [Fact]

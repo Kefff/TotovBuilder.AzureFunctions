@@ -195,10 +195,6 @@ namespace TotovBuilder.AzureFunctions.Utils
             {
                 Cache.Store(dataType, blobFetchResult.Value);
             }
-            else
-            {
-                Cache.Remove(dataType);
-            }
 
             return;
         }
@@ -225,10 +221,6 @@ namespace TotovBuilder.AzureFunctions.Utils
             if (marketDataResult.IsSuccess)
             {
                 Cache.Store(DataType.MarketData, marketDataResult.Value);
-            }
-            else
-            {
-                Cache.Remove(DataType.MarketData);
             }
             
             Logger.LogInformation(string.Format(Properties.Resources.EndMarketDataFetching));
