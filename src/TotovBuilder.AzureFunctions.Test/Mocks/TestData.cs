@@ -781,6 +781,24 @@
   }
 }";
 
+        public const string EmptyMarketData1 = @"{
+  ""data"": {
+    ""itemsByType"": []
+  }
+}";
+
+        public const string EmptyMarketData2 = @"{
+  ""data"": {
+    ""itemsByType"": []
+  }
+}";
+
+        public const string EmptyMarketData3 = @"{
+  ""data"": {
+    ""itemsByType"": """"
+  }
+}";
+
         public const string MarketDataItemsOnly = "[{\"id\":\"57dc2fa62459775949412633\",\"name\":\"AKS-74U 5.45x39 assault rifle\",\"shortName\":\"AKS-74U\",\"iconLink\":\"https://assets.tarkov-tools.com/57dc2fa62459775949412633-icon.jpg\",\"wikiLink\":\"https://escapefromtarkov.fandom.com/wiki/AKS-74U_5.45x39_assault_rifle\",\"imageLink\":\"https://assets.tarkov-tools.com/57dc2fa62459775949412633-image.jpg\",\"gridImageLink\":\"https://assets.tarkov-tools.com/57dc2fa62459775949412633-grid-image.jpg\",\"link\":\"https://tarkov-tools.com/item/aks-74u-545x39-assault-rifle\",\"buyFor\":[{\"source\":\"prapor\",\"price\":28823,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"loyaltyLevel\",\"value\":1},{\"type\":\"questCompleted\",\"value\":1}]},{\"source\":\"fleaMarket\",\"price\":21164,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"playerLevel\",\"value\":20}]}]},{\"id\":\"5447a9cd4bdc2dbd208b4567\",\"name\":\"Colt M4A1 5.56x45 assault rifle\",\"shortName\":\"M4A1\",\"iconLink\":\"https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-icon.jpg\",\"wikiLink\":\"https://escapefromtarkov.fandom.com/wiki/Colt_M4A1_5.56x45_assault_rifle\",\"imageLink\":\"https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-image.jpg\",\"gridImageLink\":\"https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-grid-image.jpg\",\"link\":\"https://tarkov-tools.com/item/colt-m4a1-556x45-assault-rifle\",\"buyFor\":[{\"source\":\"mechanic\",\"price\":67809,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"loyaltyLevel\",\"value\":1},{\"type\":\"questCompleted\",\"value\":1}]},{\"source\":\"peacekeeper\",\"price\":554,\"currency\":\"USD\",\"requirements\":[{\"type\":\"loyaltyLevel\",\"value\":2}]},{\"source\":\"fleaMarket\",\"price\":61249,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"playerLevel\",\"value\":20}]}]}]";
 
         public const string Presets = @"{

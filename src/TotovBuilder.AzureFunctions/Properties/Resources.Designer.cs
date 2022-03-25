@@ -180,6 +180,26 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Market data fetching response :
+        ///{0}.
+        /// </summary>
+        internal static string MarketDataFetchingResponse {
+            get {
+                return ResourceManager.GetString("MarketDataFetchingResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Market data fetching response data :
+        ///{0}.
+        /// </summary>
+        internal static string MarketDataFetchingResponseData {
+            get {
+                return ResourceManager.GetString("MarketDataFetchingResponseData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Start : Market data fetching..
         /// </summary>
         internal static string StartMarketDataFetching {

@@ -156,6 +156,14 @@
   <data name="MarketDataFetchingError" xml:space="preserve">
     <value>Error while fetching data from the market API : {0}.</value>
   </data>
+  <data name="MarketDataFetchingResponse" xml:space="preserve">
+    <value>Market data fetching response :
+{0}</value>
+  </data>
+  <data name="MarketDataFetchingResponseData" xml:space="preserve">
+    <value>Market data fetching response data :
+{0}</value>
+  </data>
   <data name="StartMarketDataFetching" xml:space="preserve">
     <value>Start : Market data fetching.</value>
   </data>

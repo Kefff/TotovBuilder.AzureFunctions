@@ -93,6 +93,9 @@ namespace TotovBuilder.AzureFunctions.Utils
                 }
 
                 responseData = await fetchTask.Result.Content.ReadAsStringAsync();
+
+                Logger.LogInformation(string.Format(Properties.Resources.MarketDataFetchingResponse, fetchTask.Result.ToString(), responseData));
+                Logger.LogInformation(string.Format(Properties.Resources.MarketDataFetchingResponseData, responseData));
             }
             catch (Exception e)
             {
@@ -113,25 +116,41 @@ namespace TotovBuilder.AzureFunctions.Utils
         /// <returns>Item list.</returns>
         private Result<string> GetResponseItemsOnly(string responseData)
         {
-            JsonElement response = JsonDocument.Parse(responseData).RootElement;
-
-            if (!response.TryGetProperty("data", out JsonElement data))
+            try
             {
-                Logger.LogError(Properties.Resources.InvalidMarketApiResponseData);
+                JsonElement response = JsonDocument.Parse(responseData).RootElement;
 
-                return Result.Fail(string.Empty);
-            }
+                if (!response.TryGetProperty("data", out JsonElement data))
+                {
+                    Logger.LogError(string.Format(Properties.Resources.InvalidMarketApiResponseData, responseData));
 
-            if (!data.TryGetProperty("itemsByType", out JsonElement items))
-            {
-                Logger.LogError(Properties.Resources.InvalidMarketApiResponseData);
+                    return Result.Fail(string.Empty);
+                }
+
+                if (!data.TryGetProperty("itemsByType", out JsonElement items))
+                {
+                    Logger.LogError(string.Format(Properties.Resources.InvalidMarketApiResponseData, responseData));
                 
+                    return Result.Fail(string.Empty);
+                }
+
+                string itemsAsJson = JsonSerializer.Serialize(items);
+
+                if (string.IsNullOrWhiteSpace(itemsAsJson) || itemsAsJson == "[]" || itemsAsJson == "{}")
+                {
+                    Logger.LogError(string.Format(Properties.Resources.InvalidMarketApiResponseData, responseData));
+                
+                    return Result.Fail(string.Empty);
+                }
+
+                return Result.Ok(itemsAsJson);
+            }
+            catch (Exception)
+            {
+                Logger.LogError(string.Format(Properties.Resources.InvalidMarketApiResponseData, responseData));
+
                 return Result.Fail(string.Empty);
             }
-
-            string itemsAsJson = JsonSerializer.Serialize(items);
-
-            return Result.Ok(itemsAsJson);
         }
     }
 }

@@ -136,6 +136,32 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
             responseResult.IsSuccess.Should().BeFalse();
         }
 
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task Fetch_WithEmptyResponseData_ShouldFail(int emptyResponseType)
+        {
+            // Arrange
+            Mock<ILogger<MarketDataFetcher>> logger = new Mock<ILogger<MarketDataFetcher>>();
+            Mock<IConfigurationReader> configurationReaderMock = GetConfigurationReaderMock();
+
+            TestHttpClientFactory httpClientFactory = emptyResponseType switch
+            {
+                1 => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler1()),
+                2 => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler1()),
+                _ => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler1()),
+            };
+
+            MarketDataFetcher fetcher = new MarketDataFetcher(logger.Object, httpClientFactory, configurationReaderMock.Object);
+
+            // Act
+            Result<string> responseResult = await fetcher.Fetch();
+
+            // Assert
+            responseResult.IsSuccess.Should().BeFalse();
+        }
+
         [Fact]
         public async Task Fetch_WithTimeout_ShouldFail()
         {
@@ -237,7 +263,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
         }
 
         /// <summary>
-        /// Represents a test HTTP message handler that executes sucessfully.
+        /// Represents a test HTTP message handler that sucessfully executes.
         /// </summary>
         private class SuccessHttpMessageHandler : HttpMessageHandler
         {
@@ -258,6 +284,42 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
                 SentRequestContent = await request.Content.ReadAsStringAsync();
 
                 return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.MarketData) };
+            }
+        }
+
+        /// <summary>
+        /// Represents a test HTTP message handler that sucessfully executes but return empty data.
+        /// </summary>
+        private class EmptyResponseDataHttpMessageHandler1 : HttpMessageHandler
+        {
+            /// <inheritdoc/>
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.EmptyMarketData1) });
+            }
+        }
+
+        /// <summary>
+        /// Represents a test HTTP message handler that sucessfully executes but return empty data.
+        /// </summary>
+        private class EmptyResponseDataHttpMessageHandler2 : HttpMessageHandler
+        {
+            /// <inheritdoc/>
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.EmptyMarketData2) });
+            }
+        }
+
+        /// <summary>
+        /// Represents a test HTTP message handler that sucessfully executes but return empty data.
+        /// </summary>
+        private class EmptyResponseDataHttpMessageHandler3 : HttpMessageHandler
+        {
+            /// <inheritdoc/>
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.EmptyMarketData3) });
             }
         }
 
