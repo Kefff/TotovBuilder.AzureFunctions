@@ -1,7 +1,6 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -17,9 +16,14 @@ namespace TotovBuilder.AzureFunctions.Utils
     public class MarketDataFetcher : IMarketDataFetcher
     {
         /// <summary>
-        /// API query.
+        /// API barter query.
         /// </summary>
-        private readonly string? ApiQuery;
+        private readonly string? ApiBarterQuery;
+
+        /// <summary>
+        /// API price query.
+        /// </summary>
+        private readonly string? ApiPriceQuery;
 
         /// <summary>
         /// API URL.
@@ -57,8 +61,9 @@ namespace TotovBuilder.AzureFunctions.Utils
             ConfigurationReader = configurationReader;
             HttpClientFactory = httpClientFactory;
             Logger = logger;
-
-            ApiQuery = ConfigurationReader.ReadString(Utils.ConfigurationReader.ApiQuery);
+            
+            ApiBarterQuery = ConfigurationReader.ReadString(Utils.ConfigurationReader.ApiBarterQueryKey);
+            ApiPriceQuery = ConfigurationReader.ReadString(Utils.ConfigurationReader.ApiPriceQueryKey);
             ApiUrl = ConfigurationReader.ReadString(Utils.ConfigurationReader.ApiUrlKey);
             FetchTimeout = ConfigurationReader.ReadInt(Utils.ConfigurationReader.FetchTimeoutKey);
         }
@@ -66,8 +71,8 @@ namespace TotovBuilder.AzureFunctions.Utils
         /// <inheritdoc/>
         public async Task<Result<string>> Fetch()
         {
-            if (string.IsNullOrWhiteSpace(ApiQuery)
-                || string.IsNullOrWhiteSpace(ApiUrl))
+            if (string.IsNullOrWhiteSpace(ApiUrl)
+                || string.IsNullOrWhiteSpace(ApiPriceQuery))
             {
                 return Result.Fail(string.Empty);
             }
@@ -77,7 +82,7 @@ namespace TotovBuilder.AzureFunctions.Utils
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ApiUrl);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            string content = JsonSerializer.Serialize(new { Query = ApiPriceQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             request.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
             try
@@ -136,7 +141,7 @@ namespace TotovBuilder.AzureFunctions.Utils
 
                 string itemsAsJson = JsonSerializer.Serialize(items);
 
-                if (string.IsNullOrWhiteSpace(itemsAsJson) || itemsAsJson == "[]" || itemsAsJson == "{}")
+                if (string.IsNullOrWhiteSpace(itemsAsJson) || itemsAsJson == "\"\"" || itemsAsJson == "[]" || itemsAsJson == "{}")
                 {
                     Logger.LogError(string.Format(Properties.Resources.InvalidMarketApiResponseData, responseData));
                 

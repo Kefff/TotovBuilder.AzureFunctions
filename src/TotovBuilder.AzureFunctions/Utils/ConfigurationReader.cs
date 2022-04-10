@@ -11,7 +11,8 @@ namespace TotovBuilder.AzureFunctions.Utils
     [ExcludeFromCodeCoverage]
     public class ConfigurationReader : IConfigurationReader
     {
-        public static string ApiQuery = "TOTOVBUILDER_ApiQuery";
+        public static string ApiBarterQueryKey = "TOTOVBUILDER_ApiBarterQuery";
+        public static string ApiPriceQueryKey = "TOTOVBUILDER_ApiPriceQuery";
         public static string ApiUrlKey = "TOTOVBUILDER_ApiUrl";
         public static string AzureBlobStorageConnectionStringKey = "TOTOVBUILDER_AzureBlobStorageConnectionString";
         public static string AzureBlobStorageContainerNameKey = "TOTOVBUILDER_AzureBlobStorageContainerName";

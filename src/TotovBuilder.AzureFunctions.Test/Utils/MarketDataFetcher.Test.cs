@@ -37,7 +37,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
             // Assert
             responseResult.IsSuccess.Should().BeTrue();
             responseResult.Value.Should().Be(TestData.MarketDataItemsOnly);
-            httpMessageHandler.SentRequestProperties.Should().Be(@"Method: POST, RequestUri: 'https://tarkov-tools.com/graphql', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
+            httpMessageHandler.SentRequestProperties.Should().Be(@"Method: POST, RequestUri: 'https://test.com/graphql', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
 {
   Accept: application/json
   Content-Type: application/json; charset=utf-8
@@ -149,8 +149,9 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
             TestHttpClientFactory httpClientFactory = emptyResponseType switch
             {
                 1 => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler1()),
-                2 => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler1()),
-                _ => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler1()),
+                2 => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler2()),
+                3 => new TestHttpClientFactory(new EmptyResponseDataHttpMessageHandler3()),
+                _ => throw new NotImplementedException(),
             };
 
             MarketDataFetcher fetcher = new MarketDataFetcher(logger.Object, httpClientFactory, configurationReaderMock.Object);
@@ -288,7 +289,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
         }
 
         /// <summary>
-        /// Represents a test HTTP message handler that sucessfully executes but return empty data.
+        /// Represents a test HTTP message handler that sucessfully executes but returns empty data.
         /// </summary>
         private class EmptyResponseDataHttpMessageHandler1 : HttpMessageHandler
         {
@@ -300,7 +301,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
         }
 
         /// <summary>
-        /// Represents a test HTTP message handler that sucessfully executes but return empty data.
+        /// Represents a test HTTP message handler that sucessfully executes but returns empty data.
         /// </summary>
         private class EmptyResponseDataHttpMessageHandler2 : HttpMessageHandler
         {
@@ -312,7 +313,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
         }
 
         /// <summary>
-        /// Represents a test HTTP message handler that sucessfully executes but return empty data.
+        /// Represents a test HTTP message handler that sucessfully executes but returns empty data.
         /// </summary>
         private class EmptyResponseDataHttpMessageHandler3 : HttpMessageHandler
         {
@@ -355,7 +356,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
         private Mock<IConfigurationReader> GetConfigurationReaderMock()
         {
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuery)).Returns(@"{
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiPriceQueryKey)).Returns(@"{
   itemsByType(type: ammo) {
     id,
     name,
@@ -377,7 +378,7 @@ namespace TotovBuilder.AzureFunctions.Test.Utils
     }
   }
 }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://tarkov-tools.com/graphql");
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://test.com/graphql");
 
             return configurationReaderMock;
         }
