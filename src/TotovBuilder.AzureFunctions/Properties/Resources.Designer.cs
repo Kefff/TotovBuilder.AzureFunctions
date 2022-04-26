@@ -10,9 +10,8 @@
 
 namespace TotovBuilder.AzureFunctions.Properties {
     using System;
-    using System.Diagnostics.CodeAnalysis;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,7 +22,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [ExcludeFromCodeCoverage]
     internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
@@ -63,7 +61,8 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while fetching &quot;{0}&quot; blob from Azure Blob storage : {1}.
+        ///   Looks up a localized string similar to Error while fetching &quot;{0}&quot; blob from Azure Blob storage :
+        ///{1}.
         /// </summary>
         internal static string BlobFetchingError {
             get {
@@ -72,43 +71,34 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Market data fetching..
+        ///   Looks up a localized string similar to {0} - End : Fetching..
         /// </summary>
-        internal static string EndMarketDataFetching {
+        internal static string EndFetching {
             get {
-                return ResourceManager.GetString("EndMarketDataFetching", resourceCulture);
+                return ResourceManager.GetString("EndFetching", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Static data fetching..
+        ///   Looks up a localized string similar to {0} - End : Waiting for previous fetching to finish..
         /// </summary>
-        internal static string EndStaticDataFetching {
+        internal static string EndWaitingForPreviousFetching {
             get {
-                return ResourceManager.GetString("EndStaticDataFetching", resourceCulture);
+                return ResourceManager.GetString("EndWaitingForPreviousFetching", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Waiting for previous market data fetching to finish..
+        ///   Looks up a localized string similar to {0} - Fetched from cache..
         /// </summary>
-        internal static string EndWaitingPreviousMarketDataFetching {
+        internal static string FetchedFromCache {
             get {
-                return ResourceManager.GetString("EndWaitingPreviousMarketDataFetching", resourceCulture);
+                return ResourceManager.GetString("FetchedFromCache", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Waiting for previous static data fetching to finish..
-        /// </summary>
-        internal static string EndWaitingPreviousStaticDataFetching {
-            get {
-                return ResourceManager.GetString("EndWaitingPreviousStaticDataFetching", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Fetching delay exceeded..
+        ///   Looks up a localized string similar to {0} Fetching delay exceeded..
         /// </summary>
         internal static string FetchingDelayExceeded {
             get {
@@ -117,11 +107,60 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid &quot;{0}&quot; cache..
+        ///   Looks up a localized string similar to {0} - Error while fetching data from the API :
+        ///{1}..
+        /// </summary>
+        internal static string FetchingError {
+            get {
+                return ResourceManager.GetString("FetchingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Fetching response :
+        ///{1}.
+        /// </summary>
+        internal static string FetchingResponse {
+            get {
+                return ResourceManager.GetString("FetchingResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Fetching response content :
+        ///{1}.
+        /// </summary>
+        internal static string FetchingResponseContent {
+            get {
+                return ResourceManager.GetString("FetchingResponseContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Invalid API response data :
+        ///{1}.
+        /// </summary>
+        internal static string InvalidApiResponseData {
+            get {
+                return ResourceManager.GetString("InvalidApiResponseData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Invalid cache..
         /// </summary>
         internal static string InvalidCache {
             get {
                 return ResourceManager.GetString("InvalidCache", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid configuration..
+        /// </summary>
+        internal static string InvalidConfiguration {
+            get {
+                return ResourceManager.GetString("InvalidConfiguration", resourceCulture);
             }
         }
         
@@ -135,24 +174,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid market API response : {0}.
-        /// </summary>
-        internal static string InvalidMarketApiResponse {
-            get {
-                return ResourceManager.GetString("InvalidMarketApiResponse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid market API response data..
-        /// </summary>
-        internal static string InvalidMarketApiResponseData {
-            get {
-                return ResourceManager.GetString("InvalidMarketApiResponseData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid &quot;{0}&quot; string configuration value..
         /// </summary>
         internal static string InvalidStringConfigurationValue {
@@ -162,85 +183,20 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Market data fetched from cache..
+        ///   Looks up a localized string similar to {0} - Start : Fetching..
         /// </summary>
-        internal static string MarketDataFetchedFromCache {
+        internal static string StartFetching {
             get {
-                return ResourceManager.GetString("MarketDataFetchedFromCache", resourceCulture);
+                return ResourceManager.GetString("StartFetching", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while fetching data from the market API : {0}..
+        ///   Looks up a localized string similar to {0} - Start : Waiting for previous fetching to finish..
         /// </summary>
-        internal static string MarketDataFetchingError {
+        internal static string StartWaitingForPreviousFetching {
             get {
-                return ResourceManager.GetString("MarketDataFetchingError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Market data fetching response :
-        ///{0}.
-        /// </summary>
-        internal static string MarketDataFetchingResponse {
-            get {
-                return ResourceManager.GetString("MarketDataFetchingResponse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Market data fetching response data :
-        ///{0}.
-        /// </summary>
-        internal static string MarketDataFetchingResponseData {
-            get {
-                return ResourceManager.GetString("MarketDataFetchingResponseData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Start : Market data fetching..
-        /// </summary>
-        internal static string StartMarketDataFetching {
-            get {
-                return ResourceManager.GetString("StartMarketDataFetching", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Start : Static data fetching..
-        /// </summary>
-        internal static string StartStaticDataFetching {
-            get {
-                return ResourceManager.GetString("StartStaticDataFetching", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Start : Waiting for previous market data fetching to finish..
-        /// </summary>
-        internal static string StartWaitingPreviousMarketDataFetching {
-            get {
-                return ResourceManager.GetString("StartWaitingPreviousMarketDataFetching", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Start : Waiting for previous static data fetching to finish..
-        /// </summary>
-        internal static string StartWaitingPreviousStaticDataFetching {
-            get {
-                return ResourceManager.GetString("StartWaitingPreviousStaticDataFetching", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Static data fetched from cache..
-        /// </summary>
-        internal static string StaticDataFetchedFromCache {
-            get {
-                return ResourceManager.GetString("StaticDataFetchedFromCache", resourceCulture);
+                return ResourceManager.GetString("StartWaitingForPreviousFetching", resourceCulture);
             }
         }
     }

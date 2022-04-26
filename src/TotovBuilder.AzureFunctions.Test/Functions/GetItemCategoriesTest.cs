@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
@@ -19,10 +19,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            Mock<IDataFetcher> dataFetcherMock = new Mock<IDataFetcher>();
-            dataFetcherMock.Setup(m => m.Fetch(DataType.ItemCategories)).Returns(Task.FromResult(TestData.ItemCategories));
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.ItemCategories));
 
-            GetItemCategories function = new GetItemCategories(dataFetcherMock.Object);
+            GetItemCategories function = new GetItemCategories(itemCategoriesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);

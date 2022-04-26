@@ -6,15 +6,15 @@ using FluentResults;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstraction;
 
-namespace TotovBuilder.AzureFunctions.Utils
+namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
-    /// Represents a blob data fetcher.
+    /// Represents an Azure blob storage fetcher.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class BlobDataFetcher : IBlobDataFetcher
+    public class BlobStorageFetcher : IBlobDataFetcher
     {
         /// <summary>
         /// Azure blob store connection string.
@@ -39,27 +39,27 @@ namespace TotovBuilder.AzureFunctions.Utils
         /// <summary>
         /// Logger.
         /// </summary>
-        private readonly ILogger<BlobDataFetcher> Logger;
+        private readonly ILogger<BlobStorageFetcher> Logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobDataFetcher"/> class.
+        /// Initializes a new instance of the <see cref="BlobStorageFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="configurationReader">Configuration reader.</param>
-        public BlobDataFetcher(ILogger<BlobDataFetcher> logger, IConfigurationReader configurationReader)
+        public BlobStorageFetcher(ILogger<BlobStorageFetcher> logger, IConfigurationReader configurationReader)
         {
             ConfigurationReader = configurationReader;
             Logger = logger;
 
-            AzureBlobStorageConnectionString = ConfigurationReader.ReadString(Utils.ConfigurationReader.AzureBlobStorageConnectionStringKey);
-            AzureBlobStorageContainerName = ConfigurationReader.ReadString(Utils.ConfigurationReader.AzureBlobStorageContainerNameKey);
-            FetchTimeout = ConfigurationReader.ReadInt(Utils.ConfigurationReader.FetchTimeoutKey);
+            AzureBlobStorageConnectionString = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureBlobStorageConnectionStringKey);
+            AzureBlobStorageContainerName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureBlobStorageContainerNameKey);
+            FetchTimeout = ConfigurationReader.ReadInt(TotovBuilder.AzureFunctions.ConfigurationReader.FetchTimeoutKey);
         }
 
         /// <inheritdoc/>
         public Task<Result<string>> Fetch(string blobName)
         {
-            return Task.Run(() => FetchInternal(blobName));
+            return Task.Run(() => ExecuteFetch(blobName));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace TotovBuilder.AzureFunctions.Utils
         /// </summary>
         /// <param name="blobName">Name of the blob.</param>
         /// <returns>Blob value.</returns>
-        private Result<string> FetchInternal(string blobName)
+        private Result<string> ExecuteFetch(string blobName)
         {
             if (string.IsNullOrWhiteSpace(AzureBlobStorageConnectionString)
                 || string.IsNullOrWhiteSpace(AzureBlobStorageContainerName))

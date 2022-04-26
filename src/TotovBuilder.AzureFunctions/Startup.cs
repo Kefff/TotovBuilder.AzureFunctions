@@ -1,8 +1,9 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
-using TotovBuilder.AzureFunctions.Abstractions;
-using TotovBuilder.AzureFunctions.Utils;
+using System.Net.Http;
+using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Fetchers;
 
 [assembly: FunctionsStartup(typeof(TotovBuilder.AzureFunctions.Startup))]
 
@@ -22,12 +23,19 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddApplicationInsightsTelemetry();
 
             builder.Services.AddHttpClient();
-
-            builder.Services.AddSingleton<IMarketDataFetcher, MarketDataFetcher>();
-            builder.Services.AddSingleton<IBlobDataFetcher, BlobDataFetcher>();
+            
+            builder.Services.AddSingleton<IBartersFetcher, BartersFetcher>();
+            builder.Services.AddSingleton<IBlobDataFetcher, BlobStorageFetcher>();
             builder.Services.AddSingleton<ICache, Cache>();
             builder.Services.AddSingleton<IConfigurationReader, ConfigurationReader>();
-            builder.Services.AddSingleton<IDataFetcher, DataFetcher>();
+            builder.Services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
+            builder.Services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
+            builder.Services.AddSingleton<IItemsFetcher, ItemsFetcher>();
+            builder.Services.AddSingleton<IItemsMetadataFetcher, ItemsMetadataFetcher>();
+            builder.Services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
+            builder.Services.AddSingleton<IPricesFetcher, PricesFetcher>();
+            builder.Services.AddSingleton<IQuestsFetcher, QuestsFetcher>();
+            
         }
     }
 }

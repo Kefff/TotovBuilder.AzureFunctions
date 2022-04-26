@@ -3,7 +3,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstraction;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
@@ -13,31 +13,30 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetItems
     {
         /// <summary>
-        /// Data fetcher.
+        /// Items fetcher.
         /// </summary>
-        private readonly IDataFetcher DataFetcher;
+        private readonly IItemsFetcher ItemsFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetItems"/> class.
         /// </summary>
-        /// <param name="dataFetcher">Data fetcher.</param>
-        public GetItems(IDataFetcher dataFetcher)
+        /// <param name="itemsFetcher">Items fetcher.</param>
+        public GetItems(IItemsFetcher itemsFetcher)
         {
-            DataFetcher = dataFetcher;
+            ItemsFetcher = itemsFetcher;
         }
 
         /// <summary>
         /// Gets the items to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <param name="logger">Logger.</param>
         /// <returns>Items.</returns>
         [FunctionName("GetItems")]
 #pragma warning disable IDE0060 // Remove unused parameter
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "items")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            string response = await DataFetcher.Fetch(DataType.Items);
+            string response = await ItemsFetcher.Fetch();
 
             return new OkObjectResult(response);
         }

@@ -11,25 +11,25 @@ using Xunit;
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
     /// <summary>
-    /// Represents tests on the <see cref="GetPresets"/> class.
+    /// Represents tests on the <see cref="GetPrices"/> class.
     /// </summary>
-    public class GetPresetsTest
+    public class GetPricesTest
     {
         [Fact]
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
-            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.Presets));
+            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.Prices));
 
-            GetPresets function = new GetPresets(presetsFetcherMock.Object);
+            GetPrices function = new GetPrices(pricesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().Be(TestData.Presets);
+            ((OkObjectResult)result).Value.Should().Be(TestData.Prices);
         }
     }
 }

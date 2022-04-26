@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace TotovBuilder.AzureFunctions.Abstractions
+﻿namespace TotovBuilder.AzureFunctions.Abstraction
 {
     /// <summary>
     /// Provides the functionalities of a configuration reader.

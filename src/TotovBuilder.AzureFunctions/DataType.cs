@@ -1,10 +1,15 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstractions
+﻿namespace TotovBuilder.AzureFunctions
 {
     /// <summary>
     /// Determines the available data types.
     /// </summary>
     public enum DataType
     {
+        /// <summary>
+        /// Item categories.
+        /// </summary>
+        Barters,
+
         /// <summary>
         /// Item categories.
         /// </summary>
@@ -16,13 +21,23 @@
         Items,
 
         /// <summary>
-        /// Market data.
+        /// Items metadata.
         /// </summary>
-        MarketData,
+        ItemsMetadata,
 
         /// <summary>
         /// Presets.
         /// </summary>
-        Presets
+        Presets,
+
+        /// <summary>
+        /// Prices.
+        /// </summary>
+        Prices,
+
+        /// <summary>
+        /// Quests.
+        /// </summary>
+        Quests
     }
 }

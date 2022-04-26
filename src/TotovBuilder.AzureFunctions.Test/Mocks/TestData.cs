@@ -5,6 +5,24 @@
     /// </summary>
     public static class TestData
     {
+        public const string EmptyMarketData1 = @"{
+  ""data"": {
+    ""itemsByType"": []
+  }
+}";
+
+        public const string EmptyMarketData2 = @"{
+  ""data"": {
+    ""itemsByType"": []
+  }
+}";
+
+        public const string EmptyMarketData3 = @"{
+  ""data"": {
+    ""itemsByType"": """"
+  }
+}";
+
         public const string ItemCategories = @"[
   {
     ""id"": ""ammunition"",
@@ -687,119 +705,28 @@
     }
 }";
 
-        public const string MarketData = @"{
-  ""data"": {
-    ""itemsByType"": [
-      {
-        ""id"": ""57dc2fa62459775949412633"",
-        ""name"": ""AKS-74U 5.45x39 assault rifle"",
-        ""shortName"": ""AKS-74U"",
-        ""iconLink"": ""https://assets.tarkov-tools.com/57dc2fa62459775949412633-icon.jpg"",
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/AKS-74U_5.45x39_assault_rifle"",
-        ""imageLink"": ""https://assets.tarkov-tools.com/57dc2fa62459775949412633-image.jpg"",
-        ""gridImageLink"": ""https://assets.tarkov-tools.com/57dc2fa62459775949412633-grid-image.jpg"",
-        ""link"": ""https://tarkov-tools.com/item/aks-74u-545x39-assault-rifle"",
-        ""buyFor"": [
-          {
-            ""source"": ""prapor"",
-            ""price"": 28823,
-            ""currency"": ""RUB"",
-            ""requirements"": [
-              {
-                ""type"": ""loyaltyLevel"",
-                ""value"": 1
-              },
-              {
-                ""type"": ""questCompleted"",
-                ""value"": 1
-              }
-            ]
-          },
-          {
-            ""source"": ""fleaMarket"",
-            ""price"": 21164,
-            ""currency"": ""RUB"",
-            ""requirements"": [
-              {
-                ""type"": ""playerLevel"",
-                ""value"": 20
-              }
-            ]
-          }
-        ]
-      },
-      {
-        ""id"": ""5447a9cd4bdc2dbd208b4567"",
-        ""name"": ""Colt M4A1 5.56x45 assault rifle"",
-        ""shortName"": ""M4A1"",
-        ""iconLink"": ""https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-icon.jpg"",
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Colt_M4A1_5.56x45_assault_rifle"",
-        ""imageLink"": ""https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-image.jpg"",
-        ""gridImageLink"": ""https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-grid-image.jpg"",
-        ""link"": ""https://tarkov-tools.com/item/colt-m4a1-556x45-assault-rifle"",
-        ""buyFor"": [
-          {
-            ""source"": ""mechanic"",
-            ""price"": 67809,
-            ""currency"": ""RUB"",
-            ""requirements"": [
-              {
-                ""type"": ""loyaltyLevel"",
-                ""value"": 1
-              },
-              {
-                ""type"": ""questCompleted"",
-                ""value"": 1
-              }
-            ]
-          },
-          {
-            ""source"": ""peacekeeper"",
-            ""price"": 554,
-            ""currency"": ""USD"",
-            ""requirements"": [
-              {
-                ""type"": ""loyaltyLevel"",
-                ""value"": 2
-              }
-            ]
-          },
-          {
-            ""source"": ""fleaMarket"",
-            ""price"": 61249,
-            ""currency"": ""RUB"",
-            ""requirements"": [
-              {
-                ""type"": ""playerLevel"",
-                ""value"": 20
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}";
-
-        public const string EmptyMarketData1 = @"{
-  ""data"": {
-    ""itemsByType"": []
-  }
-}";
-
-        public const string EmptyMarketData2 = @"{
-  ""data"": {
-    ""itemsByType"": []
-  }
-}";
-
-        public const string EmptyMarketData3 = @"{
-  ""data"": {
-    ""itemsByType"": """"
-  }
-}";
-
-        public const string MarketDataItemsOnly = "[{\"id\":\"57dc2fa62459775949412633\",\"name\":\"AKS-74U 5.45x39 assault rifle\",\"shortName\":\"AKS-74U\",\"iconLink\":\"https://assets.tarkov-tools.com/57dc2fa62459775949412633-icon.jpg\",\"wikiLink\":\"https://escapefromtarkov.fandom.com/wiki/AKS-74U_5.45x39_assault_rifle\",\"imageLink\":\"https://assets.tarkov-tools.com/57dc2fa62459775949412633-image.jpg\",\"gridImageLink\":\"https://assets.tarkov-tools.com/57dc2fa62459775949412633-grid-image.jpg\",\"link\":\"https://tarkov-tools.com/item/aks-74u-545x39-assault-rifle\",\"buyFor\":[{\"source\":\"prapor\",\"price\":28823,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"loyaltyLevel\",\"value\":1},{\"type\":\"questCompleted\",\"value\":1}]},{\"source\":\"fleaMarket\",\"price\":21164,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"playerLevel\",\"value\":20}]}]},{\"id\":\"5447a9cd4bdc2dbd208b4567\",\"name\":\"Colt M4A1 5.56x45 assault rifle\",\"shortName\":\"M4A1\",\"iconLink\":\"https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-icon.jpg\",\"wikiLink\":\"https://escapefromtarkov.fandom.com/wiki/Colt_M4A1_5.56x45_assault_rifle\",\"imageLink\":\"https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-image.jpg\",\"gridImageLink\":\"https://assets.tarkov-tools.com/5447a9cd4bdc2dbd208b4567-grid-image.jpg\",\"link\":\"https://tarkov-tools.com/item/colt-m4a1-556x45-assault-rifle\",\"buyFor\":[{\"source\":\"mechanic\",\"price\":67809,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"loyaltyLevel\",\"value\":1},{\"type\":\"questCompleted\",\"value\":1}]},{\"source\":\"peacekeeper\",\"price\":554,\"currency\":\"USD\",\"requirements\":[{\"type\":\"loyaltyLevel\",\"value\":2}]},{\"source\":\"fleaMarket\",\"price\":61249,\"currency\":\"RUB\",\"requirements\":[{\"type\":\"playerLevel\",\"value\":20}]}]}]";
+        public const string ItemsMetadata = @"{
+    ""data"": {
+      ""itemsByType"": [
+        {
+          ""id"": ""5447a9cd4bdc2dbd208b4567"",
+          ""name"": ""Colt M4A1 5.56x45 assault rifle"",
+          ""iconLink"": ""https://assets.tarkov.dev/5447a9cd4bdc2dbd208b4567-icon.jpg"",
+          ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Colt_M4A1_5.56x45_assault_rifle"",
+          ""imageLink"": ""https://assets.tarkov.dev/5447a9cd4bdc2dbd208b4567-image.jpg"",
+          ""link"": ""https://tarkov.dev/item/colt-m4a1-556x45-assault-rifle""
+        },
+        {
+          ""id"": ""5447ac644bdc2d6c208b4567"",
+          ""name"": ""5.56x45mm M855 ammo pack (30 pcs)"",
+          ""iconLink"": ""https://assets.tarkov.dev/5447ac644bdc2d6c208b4567-icon.jpg"",
+          ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/5.56x45mm_M855_ammo_pack_(30_pcs)"",
+          ""imageLink"": ""https://assets.tarkov.dev/5447ac644bdc2d6c208b4567-image.jpg"",
+          ""link"": ""https://tarkov.dev/item/556x45mm-m855-ammo-pack-30-pcs""
+        }
+      ]
+    }
+  }";
 
         public const string Presets = @"{
     ""content"": [],
@@ -881,6 +808,92 @@
       }
     ],
     ""quantity"": 1
+  }";
+
+        public const string Prices = @"{
+    ""data"": {
+      ""itemsByType"": [
+        {
+          ""id"": ""5447a9cd4bdc2dbd208b4567"",
+          ""buyFor"": [
+            {
+              ""source"": ""mechanic"",
+              ""price"": 67809,
+              ""currency"": ""RUB"",
+              ""requirements"": [
+                {
+                  ""type"": ""loyaltyLevel"",
+                  ""value"": null
+                },
+                {
+                  ""type"": ""questCompleted"",
+                  ""value"": 91
+                }
+              ]
+            },
+            {
+              ""source"": ""peacekeeper"",
+              ""price"": 776,
+              ""currency"": ""USD"",
+              ""requirements"": [
+                {
+                  ""type"": ""loyaltyLevel"",
+                  ""value"": 2
+                }
+              ]
+            },
+            {
+              ""source"": ""fleaMarket"",
+              ""price"": 79842,
+              ""currency"": ""RUB"",
+              ""requirements"": [
+                {
+                  ""type"": ""playerLevel"",
+                  ""value"": 15
+                }
+              ]
+            }
+          ]
+        },
+        {
+          ""id"": ""5447ac644bdc2d6c208b4567"",
+          ""buyFor"": [
+            {
+              ""source"": ""fleaMarket"",
+              ""price"": 50000,
+              ""currency"": ""RUB"",
+              ""requirements"": [
+                {
+                  ""type"": ""playerLevel"",
+                  ""value"": 15
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }";
+
+        public const string Quests = @"{
+    ""data"": {
+      ""quests"": [
+        {
+          ""id"": ""0"",
+          ""title"": ""Debut"",
+          ""giver"": {
+            ""name"": ""Prapor""
+          }
+        },
+        {
+          ""id"": ""1"",
+          ""title"": ""Checking"",
+          ""giver"": {
+            ""name"": ""Prapor""
+          }
+        }
+      ]
+    }
   }";
     }
 }

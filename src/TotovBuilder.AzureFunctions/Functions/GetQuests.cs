@@ -8,35 +8,35 @@ using TotovBuilder.AzureFunctions.Abstraction;
 namespace TotovBuilder.AzureFunctions.Functions
 {
     /// <summary>
-    /// Represents an Azure function that returns item categories to the caller.
+    /// Represents an Azure function that returns quests to the caller.
     /// </summary>
-    public class GetItemCategories
+    public class GetQuests
     {
         /// <summary>
-        /// Item categories fetcher.
+        /// Data fetcher.
         /// </summary>
-        private readonly IItemCategoriesFetcher ItemCategoriesFetcher;
+        private readonly IQuestsFetcher QuestsFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetItemCategories"/> class.
         /// </summary>
-        /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
-        public GetItemCategories(IItemCategoriesFetcher itemCategoriesFetcher)
+        /// <param name="dataFetcher">Data fetcher.</param>
+        public GetQuests(IQuestsFetcher dataFetcher)
         {
-            ItemCategoriesFetcher = itemCategoriesFetcher;
+            QuestsFetcher = dataFetcher;
         }
 
         /// <summary>
-        /// Gets the item categories to return to the caller.
+        /// Gets the quests to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <returns>Items.</returns>
-        [FunctionName("GetItemCategories")]
+        /// <returns>Prices.</returns>
+        [FunctionName("GetQuests")]
 #pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "itemcategories")] HttpRequest httpRequest)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "quests")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            string response = await ItemCategoriesFetcher.Fetch();
+            string response = await QuestsFetcher.Fetch();
 
             return new OkObjectResult(response);
         }
