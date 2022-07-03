@@ -1,9 +1,9 @@
-﻿using FluentResults;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Net.Http;
+﻿using System;
 using System.Text.Json;
+using FluentResults;
+using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -54,7 +54,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     return Result.Fail(string.Empty);
                 }
 
-                string itemsAsJson = JsonSerializer.Serialize(items);
+                string itemsAsJson = items.GetRawText();
 
                 if (string.IsNullOrWhiteSpace(itemsAsJson) || itemsAsJson == "\"\"" || itemsAsJson == "[]" || itemsAsJson == "{}")
                 {

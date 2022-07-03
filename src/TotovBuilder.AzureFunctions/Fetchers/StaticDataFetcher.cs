@@ -1,8 +1,10 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
+using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 
-namespace TotovBuilder.AzureFunctions.Abstraction
+namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
     /// Represents a static data fetcher.
@@ -27,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Abstraction
         /// <summary>
         /// Blob fetcher.
         /// </summary>
-        private readonly IBlobDataFetcher BlobFetcher;
+        private readonly IBlobFetcher BlobFetcher;
 
         /// <summary>
         /// Cache.
@@ -51,7 +53,7 @@ namespace TotovBuilder.AzureFunctions.Abstraction
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
         /// <param name="configurationReader">Configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public StaticDataFetcher(ILogger logger, IBlobDataFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
+        public StaticDataFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
         {
             BlobFetcher = blobDataFetcher;
             Cache = cache;
@@ -62,13 +64,6 @@ namespace TotovBuilder.AzureFunctions.Abstraction
         /// <inheritdoc/>
         public async Task<string> Fetch()
         {
-            if (Cache.HasValidCache(DataType))
-            {
-                Logger.LogInformation(string.Format(Properties.Resources.FetchedFromCache, DataType.ToString()));
-
-                return Cache.Get(DataType);
-            }
-
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(string.Format(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString()));
@@ -80,22 +75,61 @@ namespace TotovBuilder.AzureFunctions.Abstraction
                 return Cache.Get(DataType);
             }
 
-            Logger.LogInformation(string.Format(Properties.Resources.StartFetching, DataType.ToString()));
-            
-            FetchingTask = new Task(() => { });
-            Result<string> blobFetchResult = await BlobFetcher.Fetch(AzureBlobName);
-
-            if (blobFetchResult.IsSuccess)
+            if (Cache.HasValidCache(DataType))
             {
-                Cache.Store(DataType, blobFetchResult.Value);
+                string cachedValue = Cache.Get(DataType);
+                Logger.LogInformation(string.Format(Properties.Resources.FetchedFromCache, DataType.ToString()));
+
+                return cachedValue;
+            }
+            
+            string result;
+            FetchingTask = new Task(() => { });            
+            Result<string> fetchResult = await ExecuteFetch();
+
+            if (fetchResult.IsSuccess)
+            {
+                result = fetchResult.Value;
+                Cache.Store(DataType, result);
+            }
+            else
+            {
+                result = Cache.Get(DataType);
             }
             
             FetchingTask.Start();
             await FetchingTask;
 
+            return result;
+        }
+
+        /// <summary>
+        /// Gets data from a the content of a fetch response.
+        /// </summary>
+        /// <param name="responseContent">Content of a fetch response.</param>
+        /// <returns>Data.</returns>
+        protected abstract Result<string> GetData(string responseContent);
+
+        /// <summary>
+        /// Executes the fetch operation.
+        /// </summary>
+        /// <returns>Fetched data as a JSON string.</returns>
+        private async Task<Result<string>> ExecuteFetch()
+        {
+            Logger.LogInformation(string.Format(Properties.Resources.StartFetching, DataType.ToString()));      
+            
+            Result<string> blobFetchResult = await BlobFetcher.Fetch(AzureBlobName);
+
+            if (!blobFetchResult.IsSuccess)
+            {
+                return Result.Fail(string.Empty);
+            }
+            
+            Result<string> result = GetData(blobFetchResult.Value);
+
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 
-            return blobFetchResult.Value;
+            return result;
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Threading.Tasks;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
-using TotovBuilder.AzureFunctions.Abstraction;
-using Xunit;
 using TotovBuilder.AzureFunctions.Test.Mocks;
+using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {

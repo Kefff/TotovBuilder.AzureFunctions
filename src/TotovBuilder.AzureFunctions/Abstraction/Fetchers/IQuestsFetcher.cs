@@ -1,4 +1,4 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstraction
+﻿namespace TotovBuilder.AzureFunctions.Abstraction.Fetchers
 {
     /// <summary>
     /// Provides the functionnalities of a quests fetcher.

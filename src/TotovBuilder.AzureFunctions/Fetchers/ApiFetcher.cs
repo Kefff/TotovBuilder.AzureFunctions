@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -107,10 +108,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 return cachedValue;
             }
-
+            
+            string result;
             FetchingTask = new Task(() => { });
             Result<string> fetchResult = await ExecuteFetch();
-            string result;
 
             if (fetchResult.IsSuccess)
             {
@@ -136,7 +137,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected abstract Result<string> GetData(string responseContent);
 
         /// <summary>
-        /// Executes the fetch operation..
+        /// Executes the fetch operation.
         /// </summary>
         /// <returns>Fetched data as a JSON string.</returns>
         private async Task<Result<string>> ExecuteFetch()
@@ -182,11 +183,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(string.Empty);
             }
             
-            Result<string> itemsResult = GetData(responseContent);
+            Result<string> result = GetData(responseContent);
 
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 
-            return itemsResult;
+            return result;
         }
     }
 }

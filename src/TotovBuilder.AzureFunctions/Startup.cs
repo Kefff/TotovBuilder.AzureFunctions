@@ -1,8 +1,8 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
-using System.Net.Http;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
 
 [assembly: FunctionsStartup(typeof(TotovBuilder.AzureFunctions.Startup))]
@@ -25,7 +25,7 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddHttpClient();
             
             builder.Services.AddSingleton<IBartersFetcher, BartersFetcher>();
-            builder.Services.AddSingleton<IBlobDataFetcher, BlobStorageFetcher>();
+            builder.Services.AddSingleton<IBlobFetcher, BlobFetcher>();
             builder.Services.AddSingleton<ICache, Cache>();
             builder.Services.AddSingleton<IConfigurationReader, ConfigurationReader>();
             builder.Services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();

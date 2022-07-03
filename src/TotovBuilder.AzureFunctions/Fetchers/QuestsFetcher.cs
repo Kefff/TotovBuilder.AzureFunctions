@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Net.Http;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace TotovBuilder.AzureFunctions.Abstraction
+namespace TotovBuilder.AzureFunctions.Abstraction.Fetchers
 {
     /// <summary>
     /// Provides the functionalities of a base class for API fetchers.

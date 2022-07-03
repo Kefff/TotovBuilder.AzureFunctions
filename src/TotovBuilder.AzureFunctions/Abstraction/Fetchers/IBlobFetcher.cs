@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
 
-namespace TotovBuilder.AzureFunctions.Abstraction
+namespace TotovBuilder.AzureFunctions.Abstraction.Fetchers
 {
     /// <summary>
-    /// Provides the functionalities of a blob data fetcher.
+    /// Provides the functionalities of a blob fetcher.
     /// </summary>
-    public interface IBlobDataFetcher
+    public interface IBlobFetcher
     {
         /// <summary>
         /// Fetches the value of an Azure Blob storage.

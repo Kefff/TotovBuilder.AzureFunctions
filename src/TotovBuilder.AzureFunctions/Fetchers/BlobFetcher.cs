@@ -7,6 +7,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -14,7 +15,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// Represents an Azure blob storage fetcher.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class BlobStorageFetcher : IBlobDataFetcher
+    public class BlobFetcher : IBlobFetcher
     {
         /// <summary>
         /// Azure blob store connection string.
@@ -39,14 +40,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Logger.
         /// </summary>
-        private readonly ILogger<BlobStorageFetcher> Logger;
+        private readonly ILogger<BlobFetcher> Logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobStorageFetcher"/> class.
+        /// Initializes a new instance of the <see cref="BlobFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="configurationReader">Configuration reader.</param>
-        public BlobStorageFetcher(ILogger<BlobStorageFetcher> logger, IConfigurationReader configurationReader)
+        public BlobFetcher(ILogger<BlobFetcher> logger, IConfigurationReader configurationReader)
         {
             ConfigurationReader = configurationReader;
             Logger = logger;

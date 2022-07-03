@@ -1,4 +1,6 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstraction
+﻿using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+
+namespace TotovBuilder.AzureFunctions.Abstraction
 {
     /// <summary>
     /// Provides the functionnalities of an item categories fetcher.

@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using FluentResults;
+using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -22,10 +25,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
         /// <param name="configurationReader">Configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public PresetsFetcher(ILogger logger, IBlobDataFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
+        public PresetsFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
             : base(logger, blobDataFetcher, configurationReader, cache)
         {
             _azureBlobName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ItemCategoriesAzureBlobNameKey);
+        }
+        
+        /// <inheritdoc/>
+        protected override Result<string> GetData(string responseContent)
+        {
+            throw new NotImplementedException();
         }
     }
 }

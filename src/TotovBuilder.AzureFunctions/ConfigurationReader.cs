@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 
 namespace TotovBuilder.AzureFunctions
