@@ -3,36 +3,38 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Models;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
     /// Represents an items fetcher.
     /// </summary>
-    public class ItemsFetcher : StaticDataFetcher, IItemsFetcher
-    {        
-        /// <inheritdoc/>
-        protected override DataType DataType => DataType.Items;
+    public class ItemsFetcher : ApiFetcher<Item[]>, IItemsFetcher
+    {
+        private readonly string _apiQueryKey = string.Empty;
 
         /// <inheritdoc/>
-        protected override string AzureBlobName => _azureBlobName;
-        private readonly string _azureBlobName;
+        protected override string ApiQueryKey => _apiQueryKey;
+
+        /// <inheritdoc/>
+        protected override DataType DataType => DataType.Items;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemsFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="blobDataFetcher">Blob data fetcher.</param>
+        /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationReader">Configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public ItemsFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
-            : base(logger, blobDataFetcher, configurationReader, cache)
+        public ItemsFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache)
+            : base(logger, httpClientWrapperFactory, configurationReader, cache)
         {
-            _azureBlobName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ItemsAzureBlobNameKey);
+            _apiQueryKey = configurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ApiItemsQueryKey);
         }
         
         /// <inheritdoc/>
-        protected override Result<string> GetData(string responseContent)
+        protected override Result<Item[]> GetData(string responseContent)
         {
             throw new NotImplementedException();
         }

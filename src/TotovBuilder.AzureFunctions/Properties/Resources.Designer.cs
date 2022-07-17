@@ -10,9 +10,8 @@
 
 namespace TotovBuilder.AzureFunctions.Properties {
     using System;
-    using System.Diagnostics.CodeAnalysis;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,7 +22,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [ExcludeFromCodeCoverage]
     internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
@@ -59,6 +57,16 @@ namespace TotovBuilder.AzureFunctions.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing &quot;{0}&quot; blob to type &quot;{1}&quot; :
+        ///{2}.
+        /// </summary>
+        internal static string BlobDeserializationError {
+            get {
+                return ResourceManager.GetString("BlobDeserializationError", resourceCulture);
             }
         }
         

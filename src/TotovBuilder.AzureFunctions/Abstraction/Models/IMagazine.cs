@@ -8,16 +8,16 @@
         /// <summary>
         /// IDs of accepted ammunition.
         /// </summary>
-        public string[] AcceptedAmmunitionIds { get; set; }
+        string[] AcceptedAmmunitionIds { get; set; }
 
         /// <summary>
         /// Modifier added to the check speed in percentage.
         /// </summary>
-        public double CheckSpeedPercentageModifier { get; set; }
+        double CheckSpeedPercentageModifier { get; set; }
 
         /// <summary>
         /// Modifier added to the loading speed in percentage.
         /// </summary>
-        public double LoadSpeedPercentageModifier { get; set; }
+        double LoadSpeedPercentageModifier { get; set; }
     }
 }

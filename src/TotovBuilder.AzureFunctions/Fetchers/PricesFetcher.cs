@@ -3,13 +3,14 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Models;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
     /// Represents a prices fetcher.
     /// </summary>
-    public class PricesFetcher : ApiFetcher, IPricesFetcher
+    public class PricesFetcher : ApiFetcher<Price[]>, IPricesFetcher
     {
         private readonly string _apiQueryKey;
 
@@ -33,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<string> GetData(string responseContent)
+        protected override Result<Price[]> GetData(string responseContent)
         {
             throw new NotImplementedException();
         }

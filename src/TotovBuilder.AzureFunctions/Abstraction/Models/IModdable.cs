@@ -1,4 +1,6 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstraction.Models
+﻿using TotovBuilder.AzureFunctions.Models;
+
+namespace TotovBuilder.AzureFunctions.Abstraction.Models
 {
     /// <summary>
     /// Provides the functionalities of a moddable item.
@@ -8,6 +10,6 @@
         /// <summary>
         /// Mod slots.
         /// </summary>
-        public IModSlot[] ModSlots { get; set; }
+        ModSlot[] ModSlots { get; set; }
     }
 }

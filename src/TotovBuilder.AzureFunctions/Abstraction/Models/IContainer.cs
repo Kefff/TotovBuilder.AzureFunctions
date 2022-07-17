@@ -8,6 +8,6 @@
         /// <summary>
         /// Capacity.
         /// </summary>
-        public double Capacity { get; set; }
+        double Capacity { get; set; }
     }
 }

@@ -13,6 +13,6 @@ namespace TotovBuilder.AzureFunctions.Abstraction
         /// </summary>
         /// <param name="request">The HTTP request message to send.</param>
         /// <returns>The task object representing the asynchronous operation.</returns>
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
+        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
     }
 }

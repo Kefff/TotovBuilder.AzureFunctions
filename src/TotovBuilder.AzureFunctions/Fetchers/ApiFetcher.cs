@@ -14,7 +14,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a base class for API fetchers.
     /// </summary>
-    public abstract class ApiFetcher : IApiFetcher
+    public abstract class ApiFetcher<T> : IApiFetcher<T>
+        where T: class
     {
         /// <summary>
         /// API query key.
@@ -88,7 +89,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Fetches data.
         /// </summary>
         /// <returns>Data fetched as a JSON string.</returns>
-        public async Task<string> Fetch()
+        public async Task<T?> Fetch()
         {
             if (!FetchingTask.IsCompleted)
             {
@@ -98,20 +99,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 Logger.LogInformation(string.Format(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString()));
 
-                return Cache.Get(DataType);
+                return Cache.Get<T>(DataType);
             }
 
             if (Cache.HasValidCache(DataType))
             {
-                string cachedValue = Cache.Get(DataType);
+                T? cachedValue = Cache.Get<T>(DataType);
                 Logger.LogInformation(string.Format(Properties.Resources.FetchedFromCache, DataType.ToString()));
 
                 return cachedValue;
             }
             
-            string result;
+            T? result;
             FetchingTask = new Task(() => { });
-            Result<string> fetchResult = await ExecuteFetch();
+            Result<T> fetchResult = await ExecuteFetch();
 
             if (fetchResult.IsSuccess)
             {
@@ -120,7 +121,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             else
             {
-                result = Cache.Get(DataType);
+                result = Cache.Get<T>(DataType);
             }
                   
             FetchingTask.Start();
@@ -134,13 +135,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="responseContent">Content of a fetch response.</param>
         /// <returns>Data.</returns>
-        protected abstract Result<string> GetData(string responseContent);
+        protected abstract Result<T> GetData(string responseContent);
 
         /// <summary>
         /// Executes the fetch operation.
         /// </summary>
         /// <returns>Fetched data as a JSON string.</returns>
-        private async Task<Result<string>> ExecuteFetch()
+        private async Task<Result<T>> ExecuteFetch()
         {
             if (string.IsNullOrWhiteSpace(ApiUrl)
                 || string.IsNullOrWhiteSpace(ApiQuery))
@@ -183,7 +184,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(string.Empty);
             }
             
-            Result<string> result = GetData(responseContent);
+            Result<T> result = GetData(responseContent);
 
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 

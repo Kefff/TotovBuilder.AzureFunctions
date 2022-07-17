@@ -13,6 +13,6 @@ namespace TotovBuilder.AzureFunctions.Abstraction.Fetchers
         /// </summary>
         /// <param name="blobName">Name of the blob.</param>
         /// <returns>Blob value.</returns>
-        public Task<Result<string>> Fetch(string blobName);
+        Task<Result<string>> Fetch(string blobName);
     }
 }

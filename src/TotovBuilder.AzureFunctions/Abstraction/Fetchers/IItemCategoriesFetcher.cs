@@ -3,9 +3,9 @@
 namespace TotovBuilder.AzureFunctions.Abstraction.Fetchers
 {
     /// <summary>
-    /// Provides the functionnalities of a quests fetcher.
+    /// Provides the functionnalities of an item categories fetcher.
     /// </summary>
-    public interface IQuestsFetcher : IApiFetcher<Quest[]>
+    public interface IItemCategoriesFetcher : IApiFetcher<ItemCategory[]>
     {
     }
 }

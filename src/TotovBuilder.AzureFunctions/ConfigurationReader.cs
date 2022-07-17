@@ -12,19 +12,17 @@ namespace TotovBuilder.AzureFunctions
     public class ConfigurationReader : IConfigurationReader
     {
         public static string ApiBartersQueryKey = "TOTOVBUILDER_ApiBartersQuery";
-        public static string ApiItemsMetadataQueryKey = "TOTOVBUILDER_ApiItemsMetadataQuery";
+        public static string ApiItemsQueryKey = "TOTOVBUILDER_ApiItemsQuery";
         public static string ApiPricesQueryKey = "TOTOVBUILDER_ApiPricesQuery";
-        public static string ApiPresetsQueryKey = "TOTOVBUILDER_ApiQuestsQuery";
         public static string ApiQuestsQueryKey = "TOTOVBUILDER_ApiQuestsQuery";
         public static string ApiUrlKey = "TOTOVBUILDER_ApiUrl";
         public static string AzureBlobStorageConnectionStringKey = "TOTOVBUILDER_AzureBlobStorageConnectionString";
         public static string AzureBlobStorageContainerNameKey = "TOTOVBUILDER_AzureBlobStorageContainerName";
+        public static string AzureItemCategoriesBlobNameKey = "TOTOVBUILDER_AzureItemCategoriesBlobName";
+        public static string AzurePresetsBlobNameKey = "TOTOVBUILDER_AzurePresetsBlobName";
         public static string CacheDurationKey = "TOTOVBUILDER_CacheDuration";
-        public static string PriceCacheDurationKey = "TOTOVBUILDER_PriceCacheDuration";
         public static string FetchTimeoutKey = "TOTOVBUILDER_FetchTimeout";
-        public static string ItemCategoriesAzureBlobNameKey = "TOTOVBUILDER_ItemCategoriesAzureBlobName";
-        public static string ItemsAzureBlobNameKey = "TOTOVBUILDER_ItemsAzureBlobName";
-        public static string PresetsAzureBlobNameKey = "TOTOVBUILDER_PresetsAzureBlobName";
+        public static string PriceCacheDurationKey = "TOTOVBUILDER_PriceCacheDuration";
 
         /// <summary>
         /// Logger.

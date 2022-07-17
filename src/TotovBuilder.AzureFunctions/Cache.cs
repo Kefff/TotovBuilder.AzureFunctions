@@ -48,16 +48,15 @@ namespace TotovBuilder.AzureFunctions
         }
  
         /// <inheritdoc/>
-        public string Get(DataType dataType)
+        public T? Get<T>(DataType dataType)
+            where T : class
         {
-            Instance.TryGetValue(dataType.ToString(), out string? value);
-
-            if (string.IsNullOrEmpty(value))
+            if (!Instance.TryGetValue(dataType.ToString(), out T? value))
             {
                 Logger.LogError(string.Format(Properties.Resources.InvalidCache, dataType));
             }
             
-            return value ?? string.Empty;
+            return value;
         }
         
         /// <inheritdoc/>
@@ -82,7 +81,8 @@ namespace TotovBuilder.AzureFunctions
         }
 
         /// <inheritdoc/>
-        public void Store(DataType dataType, string data)
+        public void Store<T>(DataType dataType, T data)
+            where T : class
         {
             Instance.Set(dataType.ToString(), data, CachingOptions);
             LastStorageDates[dataType] = DateTime.Now;

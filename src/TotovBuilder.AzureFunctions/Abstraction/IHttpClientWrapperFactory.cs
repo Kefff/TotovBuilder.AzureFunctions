@@ -9,6 +9,6 @@
         /// Creates an instance of an HTTP client wrapper.
         /// </summary>
         /// <returns>Instance of an HTTP client wrapper.</returns>
-        public IHttpClientWrapper Create();
+        IHttpClientWrapper Create();
     }
 }

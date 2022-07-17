@@ -3,13 +3,14 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Models;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
     /// Represents an item categories fetcher.
     /// </summary>
-    public class ItemCategoriesFetcher : StaticDataFetcher, IItemCategoriesFetcher
+    public class ItemCategoriesFetcher : StaticDataFetcher<ItemCategory[]>, IItemCategoriesFetcher
     {
         /// <inheritdoc/>
         protected override DataType DataType => DataType.ItemCategories;
@@ -28,11 +29,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public ItemCategoriesFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
             : base(logger, blobDataFetcher, configurationReader, cache)
         {
-            _azureBlobName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ItemCategoriesAzureBlobNameKey);
+            _azureBlobName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureItemCategoriesBlobNameKey);
         }
         
         /// <inheritdoc/>
-        protected override Result<string> GetData(string responseContent)
+        protected override Result<ItemCategory[]> GetData(string responseContent)
         {
             throw new NotImplementedException();
         }

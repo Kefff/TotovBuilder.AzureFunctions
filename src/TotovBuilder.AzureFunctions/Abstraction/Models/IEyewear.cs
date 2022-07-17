@@ -8,6 +8,6 @@
         /// <summary>
         /// Blindness protection percentage.
         /// </summary>
-        public double BlindnessProtectionPercentage { get; set; }
+        double BlindnessProtectionPercentage { get; set; }
     }
 }

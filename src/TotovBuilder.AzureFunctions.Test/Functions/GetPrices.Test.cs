@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
+using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
@@ -20,7 +21,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.Prices));
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Price[]?>(TestData.Prices));
 
             GetPrices function = new GetPrices(pricesFetcherMock.Object);
 

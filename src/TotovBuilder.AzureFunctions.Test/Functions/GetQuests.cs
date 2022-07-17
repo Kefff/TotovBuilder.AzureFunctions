@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
+using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
@@ -20,7 +21,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IQuestsFetcher> questsFetcherMock = new Mock<IQuestsFetcher>();
-            questsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.Quests));
+            questsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Quest[]?>(TestData.Quests));
 
             GetQuests function = new GetQuests(questsFetcherMock.Object);
 

@@ -1,28 +1,38 @@
-﻿using TotovBuilder.AzureFunctions.Abstraction.Models;
-
-namespace TotovBuilder.AzureFunctions.Models
+﻿namespace TotovBuilder.AzureFunctions.Models
 {
     /// <summary>
     /// Represents a price.
     /// </summary>
-    public class Price : IPrice
+    public class Price
     {
-        /// <inheritdoc/>
+        /// <summary>
+        /// Name of the currency.
+        /// </summary>
         public string CurrencyName { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Merchant.
+        /// </summary>
         public string? Merchant { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Merchant level.
+        /// </summary>
         public double MerchantLevel { get; set; }
 
-        /// <inheritdoc/>
-        public bool RequiresQuest { get; set; }
+        /// <summary>
+        /// Requires a quest.
+        /// </summary>
+        public string? QuestId { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Value.
+        /// </summary>
         public double Value { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Value in main currency
+        /// </summary>
         public double ValueInMainCurrency { get; set; }
     }
 }

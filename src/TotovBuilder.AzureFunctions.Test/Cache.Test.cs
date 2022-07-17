@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
@@ -23,10 +24,10 @@ namespace TotovBuilder.AzureFunctions.Test
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
             
             // Act
-            string result = cache.Get(DataType.ItemCategories);
+            ItemCategory[]? result = cache.Get<ItemCategory[]>(DataType.ItemCategories);
 
             // Assert
-            result.Should().BeEmpty();
+            result.Should().BeNull();
         }
 
         [Fact]
@@ -40,10 +41,10 @@ namespace TotovBuilder.AzureFunctions.Test
             cache.Store(DataType.ItemCategories, TestData.ItemCategories);
 
             // Act
-            string result = cache.Get(DataType.ItemCategories);
+            ItemCategory[]? result = cache.Get<ItemCategory[]>(DataType.ItemCategories);
 
             // Assert
-            result.Should().Be(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.ItemCategories);
         }
 
         [Fact]
@@ -93,15 +94,15 @@ namespace TotovBuilder.AzureFunctions.Test
 
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
             cache.Store(DataType.ItemCategories, TestData.ItemCategories);
-            string result1 = cache.Get(DataType.ItemCategories);
+            ItemCategory[]? result1 = cache.Get<ItemCategory[]>(DataType.ItemCategories);
             
             // Act
             cache.Remove(DataType.ItemCategories);
-            string result2 = cache.Get(DataType.ItemCategories);
+            ItemCategory[]? result2 = cache.Get<ItemCategory[]>(DataType.ItemCategories);
 
             // Assert
-            result1.Should().Be(TestData.ItemCategories);
-            result2.Should().Be(string.Empty);
+            result1.Should().BeEquivalentTo(TestData.ItemCategories);
+            result2.Should().BeNull();
         }
 
         [Fact]
@@ -116,10 +117,10 @@ namespace TotovBuilder.AzureFunctions.Test
             cache.Store(DataType.ItemCategories, TestData.ItemCategories);
 
             // Act
-            string result = cache.Get(DataType.ItemCategories);
+            ItemCategory[]? result = cache.Get<ItemCategory[]>(DataType.ItemCategories);
 
             // Assert
-            result.Should().Be(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.ItemCategories);
         }
     }
 }

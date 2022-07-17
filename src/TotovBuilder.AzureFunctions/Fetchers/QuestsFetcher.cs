@@ -3,13 +3,14 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Models;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
     /// Represents a quests fetcher.
     /// </summary>
-    public class QuestsFetcher : ApiFetcher, IQuestsFetcher
+    public class QuestsFetcher : ApiFetcher<Quest[]>, IQuestsFetcher
     {
         private readonly string _apiQueryKey;
 
@@ -33,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<string> GetData(string responseContent)
+        protected override Result<Quest[]> GetData(string responseContent)
         {
             throw new NotImplementedException();
         }

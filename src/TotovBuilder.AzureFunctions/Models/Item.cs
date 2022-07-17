@@ -42,7 +42,7 @@ namespace TotovBuilder.AzureFunctions.Models
         public string Name { get; set; } = string.Empty;
 
         /// <inheritdoc/>
-        public IPrice[] Prices { get; set; } = Array.Empty<IPrice>();
+        public Price[] Prices { get; set; } = Array.Empty<Price>();
 
         /// <inheritdoc/>
         public string ShortName { get; set; } = string.Empty;

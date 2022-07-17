@@ -27,7 +27,7 @@ namespace TotovBuilder.AzureFunctions.Models
         public string Material { get; set; } = string.Empty;
 
         /// <inheritdoc/>
-        public IModSlot[] ModSlots { get; set; } = Array.Empty<IModSlot>();
+        public ModSlot[] ModSlots { get; set; } = Array.Empty<ModSlot>();
 
         /// <inheritdoc/>
         public double MovementSpeedPercentageModifier { get; set; }

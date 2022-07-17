@@ -33,6 +33,6 @@ namespace TotovBuilder.AzureFunctions.Models
         public double TurningSpeedPercentageModifier { get; set; }
 
         /// <inheritdoc/>
-        public IModSlot[] ModSlots { get; set; } = Array.Empty<IModSlot>();
+        public ModSlot[] ModSlots { get; set; } = Array.Empty<ModSlot>();
     }
 }

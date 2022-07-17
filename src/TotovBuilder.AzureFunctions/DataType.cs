@@ -21,11 +21,6 @@
         Items,
 
         /// <summary>
-        /// Items metadata.
-        /// </summary>
-        ItemsMetadata,
-
-        /// <summary>
         /// Presets.
         /// </summary>
         Presets,

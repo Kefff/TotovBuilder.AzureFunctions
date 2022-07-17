@@ -1,32 +1,258 @@
-﻿namespace TotovBuilder.AzureFunctions.Test.Mocks
+﻿using TotovBuilder.AzureFunctions.Models;
+
+namespace TotovBuilder.AzureFunctions.Test.Mocks
 {
     /// <summary>
     /// Represents test data.
     /// </summary>
     public static class TestData
     {
-        public const string EmptyMarketData1 = @"{
+        public const string EmptyApiData1 = @"{
   ""data"": {
-    ""itemsByType"": []
+    ""items"": {}
   }
 }";
 
-        public const string EmptyMarketData2 = @"{
+        public const string EmptyApiData2 = @"{
   ""data"": {
-    ""itemsByType"": []
+    ""items"": []
   }
 }";
 
-        public const string EmptyMarketData3 = @"{
+        public const string EmptyApiData3 = @"{
   ""data"": {
-    ""itemsByType"": """"
+    ""items"": """"
   }
 }";
 
-        public const string ItemCategories = @"[
+        public const string EmptyApiData4 = @"{
+  ""data"": {
+    ""items"": null
+  }
+}";
+
+        public static ItemCategory[] ItemCategories = new ItemCategory[]
+        {
+            new ItemCategory()
+            {
+                Id = "ammunition",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5485a8684bdc2da71d8b4567", Name = "Ammo" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "armband",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5b3f15d486f77432d0509248", Name = "ArmBand" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "armor",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448e54d4bdc2dcc718b4568", Name = "Armor" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "armorMod",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "57bef4c42459772e8d35a53b", Name = "ArmoredEquipment" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "backpack",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448e53e4bdc2d60728b4567", Name = "Backpack" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "compass",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5f4fbaaca5573a5ac31db429", Name = "Compass" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "currency",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "543be5dd4bdc2deb348b4569", Name = "Money" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "eyewear",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448e5724bdc2ddf718b4568", Name = "Visors" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "faceCover",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5a341c4686f77469e155819e", Name = "FaceCover" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "food",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448e8d64bdc2dce718b4568", Name = "Drink" },
+                    new TarkovItemCategory() { Id = "5448e8d04bdc2ddf718b4569", Name = "Food" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "grenade",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "543be6564bdc2df4348b4568", Name = "ThrowWeap" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "headphones",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5645bcb74bdc2ded0b8b4578", Name = "Headphones" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "headwear",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5a341c4086f77401f2541505", Name = "Headwear" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "magazine",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448bc234bdc2d3c308b4569", Name = "Magazine" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "mainWeapon",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5447b5fc4bdc2d87278b4567", Name = "AssaultCarbine" },
+                    new TarkovItemCategory() { Id = "5447b5f14bdc2d61278b4567", Name = "AssaultRifle" },
+                    new TarkovItemCategory() { Id = "5447bedf4bdc2d87278b4568", Name = "GrenadeLauncher" },
+                    new TarkovItemCategory() { Id = "5447bed64bdc2d97278b4568", Name = "MachineGun" },
+                    new TarkovItemCategory() { Id = "5447b6194bdc2d67278b4567", Name = "MarksmanRifle" },
+                    new TarkovItemCategory() { Id = "5447b6094bdc2dc3278b4567", Name = "Shotgun" },
+                    new TarkovItemCategory() { Id = "5447b5e04bdc2d62278b4567", Name = "Smg" },
+                    new TarkovItemCategory() { Id = "5447b6254bdc2dc3278b4568", Name = "SniperRifle" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "medical",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448f3a14bdc2d27728b4569", Name = "Drugs" },
+                    new TarkovItemCategory() { Id = "5448f3ac4bdc2dce718b4569", Name = "Medical" },
+                    new TarkovItemCategory() { Id = "5448f39d4bdc2d0a728b4568", Name = "MedKit" },
+                    new TarkovItemCategory() { Id = "5448f3a64bdc2d60728b456a", Name = "Stimulator" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "meleeWeapon",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5447e1d04bdc2dff2f8b4567", Name = "Knife" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "mod",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5a74651486f7744e73386dd1", Name = "AuxiliaryMod" },
+                    new TarkovItemCategory() { Id = "55818b084bdc2d5b648b4571", Name = "Flashlight" },
+                    new TarkovItemCategory() { Id = "55818b224bdc2dde698b456f", Name = "Mount" },
+                    new TarkovItemCategory() { Id = "5a2c3a9486f774688b05e574", Name = "NightVision" },
+                    new TarkovItemCategory() { Id = "5d21f59b6dbe99052b54ef83", Name = "ThermalVision" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "rangedWeaponMod",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "55818add4bdc2d5b648b456f", Name = "AssaultScope" },
+                    new TarkovItemCategory() { Id = "555ef6e44bdc2de9068b457e", Name = "Barrel" },
+                    new TarkovItemCategory() { Id = "55818afb4bdc2dde698b456d", Name = "Bipod" },
+                    new TarkovItemCategory() { Id = "55818a6f4bdc2db9688b456b", Name = "Charge" },
+                    new TarkovItemCategory() { Id = "55818ad54bdc2ddc698b4569", Name = "Collimator" },
+                    new TarkovItemCategory()
+                    {
+                        Id = "55818acf4bdc2dde698b456b",
+                        Name = "CompactCollimator"
+                    },
+                    new TarkovItemCategory() { Id = "550aa4bf4bdc2dd6348b456b", Name = "FlashHider" },
+                    new TarkovItemCategory() { Id = "55818af64bdc2d5b648b4570", Name = "Foregrip" },
+                    new TarkovItemCategory() { Id = "56ea9461d2720b67698b456f", Name = "Gasblock" },
+                    new TarkovItemCategory() { Id = "55818a104bdc2db9688b4569", Name = "Handguard" },
+                    new TarkovItemCategory() { Id = "55818ac54bdc2d5b648b456e", Name = "IronSight" },
+                    new TarkovItemCategory() { Id = "55818b014bdc2ddc698b456b", Name = "Launcher" },
+                    new TarkovItemCategory() { Id = "550aa4dd4bdc2dc9348b4569", Name = "MuzzleCombo" },
+                    new TarkovItemCategory() { Id = "55818ae44bdc2dde698b456c", Name = "OpticScope" },
+                    new TarkovItemCategory() { Id = "55818a684bdc2ddd698b456d", Name = "PistolGrip" },
+                    new TarkovItemCategory() { Id = "55818a304bdc2db5418b457d", Name = "Receiver" },
+                    new TarkovItemCategory() { Id = "550aa4cd4bdc2dd8348b456c", Name = "Silencer" },
+                    new TarkovItemCategory() { Id = "55818aeb4bdc2ddc698b456a", Name = "SpecialScope" },
+                    new TarkovItemCategory() { Id = "55818a594bdc2db9688b456a", Name = "Stock" },
+                    new TarkovItemCategory() { Id = "55818b164bdc2ddc698b456c", Name = "TacticalCombo" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "secondaryWeapon",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5447b5cf4bdc2d65278b4567", Name = "Pistol" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "securedContainer",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448bf274bdc2dfc2f8b456a", Name = "MobContainer" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "vest",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5448e5284bdc2dcb718b4567", Name = "Vest" }
+                }
+            }
+        };
+
+        public const string ItemCategoriesJson = @"[
   {
     ""id"": ""ammunition"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5485a8684bdc2da71d8b4567"",
         ""name"": ""Ammo""
@@ -35,7 +261,7 @@
   },
   {
     ""id"": ""armband"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5b3f15d486f77432d0509248"",
         ""name"": ""ArmBand""
@@ -44,7 +270,7 @@
   },
   {
     ""id"": ""armor"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448e54d4bdc2dcc718b4568"",
         ""name"": ""Armor""
@@ -62,7 +288,7 @@
   },
   {
     ""id"": ""backpack"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448e53e4bdc2d60728b4567"",
         ""name"": ""Backpack""
@@ -71,7 +297,7 @@
   },
   {
     ""id"": ""compass"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5f4fbaaca5573a5ac31db429"",
         ""name"": ""Compass""
@@ -80,7 +306,7 @@
   },
   {
     ""id"": ""currency"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""543be5dd4bdc2deb348b4569"",
         ""name"": ""Money""
@@ -89,7 +315,7 @@
   },
   {
     ""id"": ""eyewear"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448e5724bdc2ddf718b4568"",
         ""name"": ""Visors""
@@ -98,7 +324,7 @@
   },
   {
     ""id"": ""faceCover"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5a341c4686f77469e155819e"",
         ""name"": ""FaceCover""
@@ -107,7 +333,7 @@
   },
   {
     ""id"": ""food"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448e8d64bdc2dce718b4568"",
         ""name"": ""Drink""
@@ -120,7 +346,7 @@
   },
   {
     ""id"": ""grenade"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""543be6564bdc2df4348b4568"",
         ""name"": ""ThrowWeap""
@@ -129,7 +355,7 @@
   },
   {
     ""id"": ""headphones"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5645bcb74bdc2ded0b8b4578"",
         ""name"": ""Headphones""
@@ -138,7 +364,7 @@
   },
   {
     ""id"": ""headwear"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5a341c4086f77401f2541505"",
         ""name"": ""Headwear""
@@ -147,7 +373,7 @@
   },
   {
     ""id"": ""magazine"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448bc234bdc2d3c308b4569"",
         ""name"": ""Magazine""
@@ -156,7 +382,7 @@
   },
   {
     ""id"": ""mainWeapon"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5447b5fc4bdc2d87278b4567"",
         ""name"": ""AssaultCarbine""
@@ -193,7 +419,7 @@
   },
   {
     ""id"": ""medical"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448f3a14bdc2d27728b4569"",
         ""name"": ""Drugs""
@@ -214,7 +440,7 @@
   },
   {
     ""id"": ""meleeWeapon"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5447e1d04bdc2dff2f8b4567"",
         ""name"": ""Knife""
@@ -223,7 +449,7 @@
   },
   {
     ""id"": ""mod"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5a74651486f7744e73386dd1"",
         ""name"": ""AuxiliaryMod""
@@ -248,7 +474,7 @@
   },
   {
     ""id"": ""rangedWeaponMod"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""55818add4bdc2d5b648b456f"",
         ""name"": ""AssaultScope""
@@ -333,7 +559,7 @@
   },
   {
     ""id"": ""secondaryWeapon"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5447b5cf4bdc2d65278b4567"",
         ""name"": ""Pistol""
@@ -342,7 +568,7 @@
   },
   {
     ""id"": ""securedContainer"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448bf274bdc2dfc2f8b456a"",
         ""name"": ""MobContainer""
@@ -351,7 +577,7 @@
   },
   {
     ""id"": ""vest"",
-    ""types"": [
+    ""tarkovItemCategories"": [
       {
         ""id"": ""5448e5284bdc2dcb718b4567"",
         ""name"": ""Vest""
@@ -705,29 +931,6 @@
     }
 }";
 
-        public const string ItemsMetadata = @"{
-    ""data"": {
-      ""itemsByType"": [
-        {
-          ""id"": ""5447a9cd4bdc2dbd208b4567"",
-          ""name"": ""Colt M4A1 5.56x45 assault rifle"",
-          ""iconLink"": ""https://assets.tarkov.dev/5447a9cd4bdc2dbd208b4567-icon.jpg"",
-          ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Colt_M4A1_5.56x45_assault_rifle"",
-          ""imageLink"": ""https://assets.tarkov.dev/5447a9cd4bdc2dbd208b4567-image.jpg"",
-          ""link"": ""https://tarkov.dev/item/colt-m4a1-556x45-assault-rifle""
-        },
-        {
-          ""id"": ""5447ac644bdc2d6c208b4567"",
-          ""name"": ""5.56x45mm M855 ammo pack (30 pcs)"",
-          ""iconLink"": ""https://assets.tarkov.dev/5447ac644bdc2d6c208b4567-icon.jpg"",
-          ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/5.56x45mm_M855_ammo_pack_(30_pcs)"",
-          ""imageLink"": ""https://assets.tarkov.dev/5447ac644bdc2d6c208b4567-image.jpg"",
-          ""link"": ""https://tarkov.dev/item/556x45mm-m855-ammo-pack-30-pcs""
-        }
-      ]
-    }
-  }";
-
         public const string Presets = @"{
     ""content"": [],
     ""itemId"": ""57dc2fa62459775949412633"",
@@ -810,90 +1013,59 @@
     ""quantity"": 1
   }";
 
-        public const string Prices = @"{
-    ""data"": {
-      ""itemsByType"": [
+        public static Price[] Prices = new Price[]
         {
-          ""id"": ""5447a9cd4bdc2dbd208b4567"",
-          ""buyFor"": [
+            new Price()
             {
-              ""source"": ""mechanic"",
-              ""price"": 67809,
-              ""currency"": ""RUB"",
-              ""requirements"": [
-                {
-                  ""type"": ""loyaltyLevel"",
-                  ""value"": null
-                },
-                {
-                  ""type"": ""questCompleted"",
-                  ""value"": 91
-                }
-              ]
+                CurrencyName = "RUB",
+                Merchant = "Mechanic",
+                MerchantLevel = 3,
+                QuestId = "5ae327c886f7745c7b3f2f3f",
+                Value = 67809,
+                ValueInMainCurrency = 67809
             },
+            new Price()
             {
-              ""source"": ""peacekeeper"",
-              ""price"": 776,
-              ""currency"": ""USD"",
-              ""requirements"": [
-                {
-                  ""type"": ""loyaltyLevel"",
-                  ""value"": 2
-                }
-              ]
+                CurrencyName = "USD",
+                Merchant = "Peacekeeper",
+                MerchantLevel = 2,
+                Value = 900,
+                ValueInMainCurrency = 96300
             },
+            new Price()
             {
-              ""source"": ""fleaMarket"",
-              ""price"": 79842,
-              ""currency"": ""RUB"",
-              ""requirements"": [
-                {
-                  ""type"": ""playerLevel"",
-                  ""value"": 15
-                }
-              ]
-            }
-          ]
-        },
-        {
-          ""id"": ""5447ac644bdc2d6c208b4567"",
-          ""buyFor"": [
+                CurrencyName = "RUB",
+                Merchant = "Flea Market",
+                Value = 88655,
+                ValueInMainCurrency = 88655
+            },
+            new Price()
             {
-              ""source"": ""fleaMarket"",
-              ""price"": 50000,
-              ""currency"": ""RUB"",
-              ""requirements"": [
-                {
-                  ""type"": ""playerLevel"",
-                  ""value"": 15
-                }
-              ]
+                CurrencyName = "RUB",
+                Merchant = "Flea Market",
+                Value = 94324,
+                ValueInMainCurrency = 94324
             }
-          ]
-        }
-      ]
-    }
-  }";
+        };
 
-        public const string Quests = @"{
-    ""data"": {
-      ""quests"": [
+        public static Quest[] Quests = new Quest[]
         {
-          ""id"": ""0"",
-          ""title"": ""Debut"",
-          ""giver"": {
-            ""name"": ""Prapor""
-          }
-        },
-        {
-          ""id"": ""1"",
-          ""title"": ""Checking"",
-          ""giver"": {
-            ""name"": ""Prapor""
-          }
-        }
-      ]
-    }
-  }";
+            new Quest()
+            {
+                Id = "59675d6c86f7740a842fc482",
+                Name = "Debut",
+                Merchant = "Prapor",
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Debut"
+            },
+            new Quest()
+            {
+                Id = "1",
+                Name = "Checking",
+                Merchant = "Prapor",
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Checking"
+            }
+        };
+
+        public const string QuestsJson = @"";
     }
 }

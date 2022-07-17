@@ -8,26 +8,26 @@
         /// <summary>
         /// Delay before explosion in seconds.
         /// </summary>
-        public double ExplosionDelay { get; set; }
+        double ExplosionDelay { get; set; }
 
         /// <summary>
         /// Type of ammunition of the fragments.
         /// </summary>
-        public string FragmentAmmunitionId { get; set; }
+        string FragmentAmmunitionId { get; set; }
 
         /// <summary>
         /// Number of fragments.
         /// </summary>
-        public double FragmentsAmount { get; set; }
+        double FragmentsAmount { get; set; }
 
         /// <summary>
         /// Maximum explosion range in meters.
         /// </summary>
-        public double MaximumExplosionRange { get; set; }
+        double MaximumExplosionRange { get; set; }
 
         /// <summary>
         /// Minimum explosion range in meters.
         /// </summary>
-        public double MinimumExplosionRange { get; set; }
+        double MinimumExplosionRange { get; set; }
     }
 }

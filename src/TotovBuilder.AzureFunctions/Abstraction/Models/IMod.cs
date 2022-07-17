@@ -8,6 +8,6 @@
         /// <summary>
         /// Modifier added to the weapon ergonomics.
         /// </summary>
-        public double ErgonomicsModifier { get; set; }
+        double ErgonomicsModifier { get; set; }
     }
 }

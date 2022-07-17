@@ -1,26 +1,36 @@
 ﻿using System;
-using TotovBuilder.AzureFunctions.Abstraction.Models;
 
 namespace TotovBuilder.AzureFunctions.Models
 {
     /// <summary>
     /// Represents a mod slot.
     /// </summary>
-    public class Modslot : IModSlot
+    public class ModSlot
     {
-        /// <inheritdoc/>
+        /// <summary>
+        /// IDs of compatible items.
+        /// </summary>
         public string[] CompatibleItemIds { get; set; } = Array.Empty<string>();
-        
-        /// <inheritdoc/>
+
+        /// <summary>
+        /// ID.
+        /// </summary>
         public string Id { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
-        public double MaxStackableAmount { get; set; } = 1;
+        /// <summary>
+        /// Maximum number of times the item can be stacked in this mod slot.
+        /// Mainly used to force the ammunition quantity to 1 in the special chamber mod slot.
+        /// </summary>
+        public double MaxStackableAmount { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Name.
+        /// </summary>
         public string Name { get; set; } = string.Empty;
-        
-        /// <inheritdoc/>
+
+        /// <summary>
+        /// Determines whether having an item in the mod slot is required for the parent item to be usable.
+        /// </summary>
         public bool Required { get; set; }
     }
 }

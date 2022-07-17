@@ -3,8 +3,9 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
+using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
@@ -20,7 +21,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<ItemCategory[]?>(TestData.ItemCategories));
 
             GetItemCategories function = new GetItemCategories(itemCategoriesFetcherMock.Object);
 

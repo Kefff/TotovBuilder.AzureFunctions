@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Fetchers;
+using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
@@ -25,7 +26,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiItemsMetadataQueryKey)).Returns("{ itemsByType(type: any) { id name iconLink wikiLink imageLink link } }");
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink } }");
             configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
             configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
             
@@ -35,26 +36,26 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(async () =>
                 {
                     await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.ItemsMetadata) };
+                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.QuestsJson) };
                 });
             
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get(It.IsAny<DataType>())).Returns(TestData.ItemsMetadata);
+            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
             _ = apiFetcher.Fetch();
-            string result = await apiFetcher.Fetch();
+            Quest[]? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().Be(TestData.ItemsMetadata);
+            result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Once);
+            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Once);
         }
 
         [Fact]
@@ -64,7 +65,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiItemsMetadataQueryKey)).Returns("{ itemsByType(type: any) { id name iconLink wikiLink imageLink link } }");
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink } }");
             configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
             configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
             
@@ -74,17 +75,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(true);
-            cacheMock.Setup(m => m.Get(It.IsAny<DataType>())).Returns(TestData.ItemsMetadata);
+            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            string result = await apiFetcher.Fetch();
+            Quest[]? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().Be(TestData.ItemsMetadata);
+            result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
-            cacheMock.Verify(m => m.Get(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -95,14 +96,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiItemsMetadataQueryKey)).Returns("{ itemsByType(type: any) { id name iconLink wikiLink imageLink link } }");
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink } }");
             configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
             configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.ItemsMetadata) }));
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.QuestsJson) }));
             
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
@@ -113,13 +114,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            string result = await apiFetcher.Fetch();
+            Quest[]? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().Be(TestData.ItemsMetadata);
+            result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get(It.IsAny<DataType>()), Times.Never);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Once);
+            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Once);
         }
 
         [Fact]
@@ -132,17 +133,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get(It.IsAny<DataType>())).Returns(TestData.ItemsMetadata);
+            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            string result = await apiFetcher.Fetch();
+            Quest[]? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().Be(TestData.ItemsMetadata);
+            result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
-            cacheMock.Verify(m => m.Get(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -153,7 +154,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiItemsMetadataQueryKey)).Returns("{ itemsByType(type: any) { id name iconLink wikiLink imageLink link } }");
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink } }");
             configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
             configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(1);
 
@@ -170,17 +171,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get(It.IsAny<DataType>())).Returns(TestData.ItemsMetadata);
+            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            string result = await apiFetcher.Fetch();
+            Quest[]? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().Be(TestData.ItemsMetadata);
+            result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -191,7 +192,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiItemsMetadataQueryKey)).Returns("{ itemsByType(type: any) { id name iconLink wikiLink imageLink link } }");
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink } }");
             configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
             configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
 
@@ -204,35 +205,35 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get(It.IsAny<DataType>())).Returns(TestData.ItemsMetadata);
+            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            string result = await apiFetcher.Fetch();
+            Quest[]? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().Be(TestData.ItemsMetadata);
+            result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
-    }
 
-    public class ApiFetcherImplementation : ApiFetcher
-    {
-        protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiItemsMetadataQueryKey;
-
-        protected override DataType DataType => DataType.ItemCategories;
-
-        public ApiFetcherImplementation(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache) 
-           : base(logger, httpClientWrapperFactory, configurationReader, cache)
+        public class ApiFetcherImplementation : ApiFetcher<Quest[]>
         {
-        }
+            protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
 
-        protected override Result<string> GetData(string responseContent)
-        {
-            return Result.Ok(responseContent);
+            protected override DataType DataType => DataType.Prices;
+
+            public ApiFetcherImplementation(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache) 
+               : base(logger, httpClientWrapperFactory, configurationReader, cache)
+            {
+            }
+
+            protected override Result<Quest[]> GetData(string responseContent)
+            {
+                return Result.Ok(TestData.Quests);
+            }
         }
     }
 }
