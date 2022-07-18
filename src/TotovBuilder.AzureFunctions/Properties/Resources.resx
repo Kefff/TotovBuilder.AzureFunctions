@@ -149,6 +149,10 @@
     <value>{0} - Fetching response content :
 {1}</value>
   </data>
+  <data name="InvalidApiQuery" xml:space="preserve">
+    <value>{0} - Invalid API query :
+{1}</value>
+  </data>
   <data name="InvalidApiResponseData" xml:space="preserve">
     <value>{0} - Invalid API response data :
 {1}</value>

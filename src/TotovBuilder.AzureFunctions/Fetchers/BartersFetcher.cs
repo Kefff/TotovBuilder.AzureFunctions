@@ -11,10 +11,9 @@
 //    /// </summary>
 //    public class BartersFetcher : ApiFetcher, IBartersFetcher
 //    {
-//        private readonly string _apiQueryKey;
-
 //        /// <inheritdoc/>
 //        protected override string ApiQueryKey => _apiQueryKey;
+//        private readonly string _apiQueryKey;
         
 //        /// <inheritdoc/>
 //        protected override DataType DataType => throw new NotImplementedException();

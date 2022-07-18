@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,23 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().Be(TestData.Prices);
+        }
+
+        [Fact]
+        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
+        {
+            // Arrange
+            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Price[]?>(null));
+
+            GetPrices function = new GetPrices(pricesFetcherMock.Object);
+
+            // Act
+            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Price[]>());
         }
     }
 }

@@ -11,6 +11,11 @@
         Barters,
 
         /// <summary>
+        /// Changelog.
+        /// </summary>
+        Changelog,
+
+        /// <summary>
         /// Item categories.
         /// </summary>
         ItemCategories,

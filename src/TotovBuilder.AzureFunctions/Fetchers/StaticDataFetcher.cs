@@ -123,7 +123,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (!blobFetchResult.IsSuccess)
             {
-                return Result.Fail(string.Empty);
+                return blobFetchResult.ToResult<T>();
             }
             
             Result<T> result = GetData(blobFetchResult.Value);

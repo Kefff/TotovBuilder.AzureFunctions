@@ -73,7 +73,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (string.IsNullOrWhiteSpace(AzureBlobStorageConnectionString)
                 || string.IsNullOrWhiteSpace(AzureBlobStorageContainerName))
             {
-                return Result.Fail(string.Empty);
+                string error = Properties.Resources.InvalidConfiguration;
+                Logger.LogError(error);
+
+                return Result.Fail(error);
             }
 
             string blobData;
@@ -90,9 +93,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (!fetchTask.Wait(FetchTimeout * 1000))
                 {
-                    Logger.LogError(Properties.Resources.FetchingDelayExceeded);
+                    string error = Properties.Resources.FetchingDelayExceeded;
+                    Logger.LogError(error);
 
-                    return Result.Fail(string.Empty);
+                    return Result.Fail(error);
                 }
 
                 memoryStream.Flush();
@@ -102,9 +106,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                Logger.LogError(Properties.Resources.BlobFetchingError, blobName, e);
+                string error = string.Format(Properties.Resources.BlobFetchingError, blobName, e);
+                Logger.LogError(error);
 
-                return Result.Fail(string.Empty);
+                return Result.Fail(error);
             }
 
             return Result.Ok(blobData);

@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -131,11 +132,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Gets data from a the content of a fetch response.
+        /// Deserializes data from a the content of a fetch response.
         /// </summary>
         /// <param name="responseContent">Content of a fetch response.</param>
-        /// <returns>Data.</returns>
-        protected abstract Result<T> GetData(string responseContent);
+        /// <returns>Deserialized data.</returns>
+        protected abstract Result<T> DeserializeData(string responseContent);
 
         /// <summary>
         /// Executes the fetch operation.
@@ -146,9 +147,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (string.IsNullOrWhiteSpace(ApiUrl)
                 || string.IsNullOrWhiteSpace(ApiQuery))
             {
-                Logger.LogError(string.Format(Properties.Resources.InvalidConfiguration));
+                string error = string.Format(Properties.Resources.InvalidConfiguration);
+                Logger.LogError(error);
 
-                return Result.Fail(string.Empty);
+                return Result.Fail(error);
             }
 
             Logger.LogInformation(string.Format(Properties.Resources.StartFetching, DataType.ToString()));
@@ -167,9 +169,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (!fetchTask.Wait(FetchTimeout * 1000))
                 {
-                    Logger.LogError(string.Format(Properties.Resources.FetchingDelayExceeded, DataType.ToString()));
+                    string error = string.Format(Properties.Resources.FetchingDelayExceeded, DataType.ToString());
+                    Logger.LogError(error);
 
-                    return Result.Fail(string.Empty);
+                    return Result.Fail(error);
                 }
 
                 responseContent = await fetchTask.Result.Content.ReadAsStringAsync();
@@ -179,16 +182,74 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                Logger.LogError(Properties.Resources.FetchingError, DataType.ToString(), e);
+                string error = string.Format(Properties.Resources.FetchingError, DataType.ToString(), e);
+                Logger.LogError(error);
 
-                return Result.Fail(string.Empty);
+                return Result.Fail(error);
             }
-            
-            Result<T> result = GetData(responseContent);
+
+            Result<string> isolatedDataResult = GetData(responseContent);
+
+            if (!isolatedDataResult.IsSuccess)
+            {
+                return isolatedDataResult.ToResult<T>();
+            }
+
+            Result<T> result = DeserializeData(isolatedDataResult.Value);
 
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 
             return result;
+        }
+
+        /// <summary>
+        /// Checks the validity of an API response data and gets its useful content.
+        /// </summary>
+        /// <param name="responseContent">API response content.</param>
+        /// <returns>Useful content of the API response content.</returns>
+        private Result<string> GetData(string responseContent)
+        {
+            try
+            {
+                JsonElement response = JsonDocument.Parse(responseContent).RootElement;
+
+                if (!response.TryGetProperty("data", out JsonElement data))
+                {
+                    string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
+                    Logger.LogError(error);
+
+                    return Result.Fail(error);
+                }
+
+                Match usefulDataKeyMatch = Regex.Match(ApiQuery, "^{ ?([a-zA-Z]+)");
+
+                if (!data.TryGetProperty(usefulDataKeyMatch.Groups[1].Value, out JsonElement isolatedData))
+                {
+                    string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
+                    Logger.LogError(error);
+
+                    return Result.Fail(error);
+                }
+
+                string isolatedDataRawText = isolatedData.GetRawText();
+
+                if (string.IsNullOrWhiteSpace(isolatedDataRawText) || isolatedDataRawText == "\"\"" || isolatedDataRawText == "[]" || isolatedDataRawText == "{}")
+                {
+                    string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
+                    Logger.LogError(error);
+
+                    return Result.Fail(error);
+                }
+
+                return Result.Ok(isolatedDataRawText);
+            }
+            catch (Exception)
+            {
+                string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
+                Logger.LogError(error);
+
+                return Result.Fail(error);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿//using System.Threading.Tasks;
+﻿//using System;
+//using System.Threading.Tasks;
 //using FluentAssertions;
 //using Microsoft.AspNetCore.Http;
 //using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,23 @@
 //            // Assert
 //            result.Should().BeOfType<OkObjectResult>();
 //            ((OkObjectResult)result).Value.Should().Be(TestData.Quests);
+//        }
+
+//        [Fact]
+//        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
+//        {
+//            // Arrange
+//            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+//            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Item[]?>(null));
+
+//            GetItems function = new GetItems(itemsFetcherMock.Object);
+
+//            // Act
+//            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+
+//            // Assert
+//            result.Should().BeOfType<OkObjectResult>();
+//            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Item>());
 //        }
 //    }
 //}

@@ -13,42 +13,42 @@ using Xunit;
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
     /// <summary>
-    /// Represents tests on the <see cref="GetItemCategories"/> class.
+    /// Represents tests on the <see cref="GetChangelog"/> class.
     /// </summary>
-    public class GetItemCategoriesTest
+    public class GetChangelogTest
     {
         [Fact]
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<ItemCategory[]?>(TestData.ItemCategories));
+            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
+            changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<ChangelogEntry[]?>(TestData.Changelog));
 
-            GetItemCategories function = new GetItemCategories(itemCategoriesFetcherMock.Object);
+            GetChangelog function = new GetChangelog(changelogFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().Be(TestData.ItemCategories);
+            ((OkObjectResult)result).Value.Should().Be(TestData.Changelog);
         }
 
         [Fact]
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<ItemCategory[]?>(null));
+            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
+            changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<ChangelogEntry[]?>(null));
 
-            GetItemCategories function = new GetItemCategories(itemCategoriesFetcherMock.Object);
+            GetChangelog function = new GetChangelog(changelogFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<ItemCategory>());
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<ChangelogEntry>());
         }
     }
 }

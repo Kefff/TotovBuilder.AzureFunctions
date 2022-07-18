@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,23 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().Be(TestData.Quests);
+        }
+
+        [Fact]
+        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
+        {
+            // Arrange
+            Mock<IQuestsFetcher> questsFetcherMock = new Mock<IQuestsFetcher>();
+            questsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Quest[]?>(null));
+
+            GetQuests function = new GetQuests(questsFetcherMock.Object);
+
+            // Act
+            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Quest[]>());
         }
     }
 }

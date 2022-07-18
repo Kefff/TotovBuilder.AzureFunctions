@@ -18,6 +18,7 @@ namespace TotovBuilder.AzureFunctions
         public static string ApiUrlKey = "TOTOVBUILDER_ApiUrl";
         public static string AzureBlobStorageConnectionStringKey = "TOTOVBUILDER_AzureBlobStorageConnectionString";
         public static string AzureBlobStorageContainerNameKey = "TOTOVBUILDER_AzureBlobStorageContainerName";
+        public static string AzureChangelogBlobNameKey = "TOTOVBUILDER_AzureChangelogBlobName";
         public static string AzureItemCategoriesBlobNameKey = "TOTOVBUILDER_AzureItemCategoriesBlobName";
         public static string AzurePresetsBlobNameKey = "TOTOVBUILDER_AzurePresetsBlobName";
         public static string CacheDurationKey = "TOTOVBUILDER_CacheDuration";

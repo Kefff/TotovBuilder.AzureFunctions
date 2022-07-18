@@ -12,10 +12,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// </summary>
     public class PricesFetcher : ApiFetcher<Price[]>, IPricesFetcher
     {
-        private readonly string _apiQueryKey;
-
         /// <inheritdoc/>
         protected override string ApiQueryKey => _apiQueryKey;
+        private readonly string _apiQueryKey;
         
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Prices;
@@ -34,7 +33,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<Price[]> GetData(string responseContent)
+        protected override Result<Price[]> DeserializeData(string responseContent)
         {
             throw new NotImplementedException();
         }

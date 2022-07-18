@@ -12,10 +12,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// </summary>
     public class ItemsFetcher : ApiFetcher<Item[]>, IItemsFetcher
     {
-        private readonly string _apiQueryKey = string.Empty;
 
         /// <inheritdoc/>
         protected override string ApiQueryKey => _apiQueryKey;
+        private readonly string _apiQueryKey = string.Empty;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Items;
@@ -34,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<Item[]> GetData(string responseContent)
+        protected override Result<Item[]> DeserializeData(string responseContent)
         {
             throw new NotImplementedException();
         }
