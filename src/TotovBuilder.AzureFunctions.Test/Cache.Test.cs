@@ -24,7 +24,7 @@ namespace TotovBuilder.AzureFunctions.Test
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
             
             // Act
-            ItemCategory[]? result = cache.Get<ItemCategory[]>(DataType.ItemCategories);
+            ChangelogEntry[]? result = cache.Get<ChangelogEntry[]>(DataType.Changelog);
 
             // Assert
             result.Should().BeNull();
@@ -38,13 +38,13 @@ namespace TotovBuilder.AzureFunctions.Test
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
 
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
-            cache.Store(DataType.ItemCategories, TestData.ItemCategories);
+            cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act
-            ItemCategory[]? result = cache.Get<ItemCategory[]>(DataType.ItemCategories);
+            ChangelogEntry[]? result = cache.Get<ChangelogEntry[]>(DataType.Changelog);
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.Changelog);
         }
 
         [Fact]
@@ -57,15 +57,15 @@ namespace TotovBuilder.AzureFunctions.Test
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
             
             // Act
-            bool result = cache.HasValidCache(DataType.ItemCategories);
+            bool result = cache.HasValidCache(DataType.Changelog);
 
             // Assert
             result.Should().BeFalse();
         }
 
         [Theory]
-        [InlineData(DataType.ItemCategories, 3600, true)]
-        [InlineData(DataType.ItemCategories, 1, false)]
+        [InlineData(DataType.Changelog, 3600, true)]
+        [InlineData(DataType.Changelog, 1, false)]
         [InlineData(DataType.Prices, 3600, true)]
         public async void HasValidCache_ShouldIndicatedWhetherTheCacheIsValid(DataType dataType, int cacheDuration, bool expected)
         {
@@ -93,15 +93,15 @@ namespace TotovBuilder.AzureFunctions.Test
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
 
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
-            cache.Store(DataType.ItemCategories, TestData.ItemCategories);
-            ItemCategory[]? result1 = cache.Get<ItemCategory[]>(DataType.ItemCategories);
+            cache.Store(DataType.Changelog, TestData.Changelog);
+            ChangelogEntry[]? result1 = cache.Get<ChangelogEntry[]>(DataType.Changelog);
             
             // Act
-            cache.Remove(DataType.ItemCategories);
-            ItemCategory[]? result2 = cache.Get<ItemCategory[]>(DataType.ItemCategories);
+            cache.Remove(DataType.Changelog);
+            ChangelogEntry[]? result2 = cache.Get<ChangelogEntry[]>(DataType.Changelog);
 
             // Assert
-            result1.Should().BeEquivalentTo(TestData.ItemCategories);
+            result1.Should().BeEquivalentTo(TestData.Changelog);
             result2.Should().BeNull();
         }
 
@@ -114,13 +114,13 @@ namespace TotovBuilder.AzureFunctions.Test
             
             // Act
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
-            cache.Store(DataType.ItemCategories, TestData.ItemCategories);
+            cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act
-            ItemCategory[]? result = cache.Get<ItemCategory[]>(DataType.ItemCategories);
+            ChangelogEntry[]? result = cache.Get<ChangelogEntry[]>(DataType.Changelog);
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.Changelog);
         }
     }
 }

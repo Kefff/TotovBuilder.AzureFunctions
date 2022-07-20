@@ -22,10 +22,10 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetItemCategories"/> class.
         /// </summary>
-        /// <param name="dataFetcher">Data fetcher.</param>
-        public GetQuests(IQuestsFetcher dataFetcher)
+        /// <param name="questsFetcher">Quests fetcher.</param>
+        public GetQuests(IQuestsFetcher questsFetcher)
         {
-            QuestsFetcher = dataFetcher;
+            QuestsFetcher = questsFetcher;
         }
 
         /// <summary>

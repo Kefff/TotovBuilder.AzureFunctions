@@ -15,7 +15,7 @@ namespace TotovBuilder.AzureFunctions.Models
         /// <summary>
         /// Tarkov item categories included in this item category.
         /// </summary>
-        public TarkovItemCategory[] TarkovItemCategories = Array.Empty<TarkovItemCategory>();
+        public TarkovItemCategory[] TarkovItemCategories { get; set; } = Array.Empty<TarkovItemCategory>();
     }
 
     /// <summary>

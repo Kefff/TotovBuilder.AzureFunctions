@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,10 +23,10 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetChangelog"/> class.
         /// </summary>
-        /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
-        public GetChangelog(IChangelogFetcher itemCategoriesFetcher)
+        /// <param name="changelogFetcher">Changelog fetcher.</param>
+        public GetChangelog(IChangelogFetcher changelogFetcher)
         {
-            ChangelogFetcher = itemCategoriesFetcher;
+            ChangelogFetcher = changelogFetcher;
         }
 
         /// <summary>
@@ -35,12 +36,12 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <returns>Items.</returns>
         [FunctionName("GetChangelog")]
 #pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "itemcategories")] HttpRequest httpRequest)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            ChangelogEntry[] response = await ChangelogFetcher.Fetch() ?? Array.Empty<ChangelogEntry>();
+            ChangelogEntry[] changelog = await ChangelogFetcher.Fetch() ?? Array.Empty<ChangelogEntry>();
 
-            return new OkObjectResult(response);
+            return new OkObjectResult(changelog);
         }
     }
 }

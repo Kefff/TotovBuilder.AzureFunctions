@@ -30,23 +30,23 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(async () =>
                 {
                     await Task.Delay(1000);
-                    return Result.Ok(TestData.ItemCategoriesJson);
+                    return Result.Ok(TestData.ChangelogJson);
                 });
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<ItemCategory[]>(It.IsAny<DataType>())).Returns(TestData.ItemCategories);
+            cacheMock.Setup(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>())).Returns(TestData.Changelog);
 
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
             _ = staticDataFetcher.Fetch();
-            ItemCategory[]? result = await staticDataFetcher.Fetch();
+            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
-            cacheMock.Verify(m => m.Get<ItemCategory[]>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<ItemCategory[]>()), Times.Once);
+            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<ChangelogEntry[]>()), Times.Once);
         }
 
         [Fact]
@@ -59,17 +59,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(true);
-            cacheMock.Setup(m => m.Get<ItemCategory[]>(It.IsAny<DataType>())).Returns(TestData.ItemCategories);
+            cacheMock.Setup(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>())).Returns(TestData.Changelog);
 
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
             
             // Act
-            ItemCategory[]? result = await staticDataFetcher.Fetch();
+            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
             
             // Assert
-            result.Should().BeEquivalentTo(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Never);
-            cacheMock.Verify(m => m.Get<ItemCategory[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -80,7 +80,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
 
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ItemCategoriesJson)));
+            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
@@ -88,13 +88,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
             
             // Act
-            ItemCategory[]? result = await staticDataFetcher.Fetch();
+            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
-            cacheMock.Verify(m => m.Get<ItemCategory[]>(It.IsAny<DataType>()), Times.Never);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<ItemCategory[]>()), Times.Once);
+            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<ChangelogEntry[]>()), Times.Once);
         }
         
         [Fact]
@@ -107,34 +107,34 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Fail<string>(string.Empty)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<ItemCategory[]>(It.IsAny<DataType>())).Returns(TestData.ItemCategories);
+            cacheMock.Setup(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>())).Returns(TestData.Changelog);
             
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
             
             // Act
-            ItemCategory[]? result = await staticDataFetcher.Fetch();
+            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.ItemCategories);
+            result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
-            cacheMock.Verify(m => m.Get<ItemCategory[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
     
-        public class StaticDataFetcherImplementation : StaticDataFetcher<ItemCategory[]>
+        public class StaticDataFetcherImplementation : StaticDataFetcher<ChangelogEntry[]>
         {
-            protected override string AzureBlobName => TotovBuilder.AzureFunctions.ConfigurationReader.AzureItemCategoriesBlobNameKey;
+            protected override string AzureBlobName => TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey;
 
-            protected override DataType DataType => DataType.ItemCategories;
+            protected override DataType DataType => DataType.Changelog;
 
             public StaticDataFetcherImplementation(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache) 
                : base(logger, blobFetcher, configurationReader, cache)
             {
             }
 
-            protected override Result<ItemCategory[]> GetData(string responseContent)
+            protected override Result<ChangelogEntry[]> GetData(string responseContent)
             {
-                return Result.Ok(TestData.ItemCategories);
+                return Result.Ok(TestData.Changelog);
             }
         }
     }

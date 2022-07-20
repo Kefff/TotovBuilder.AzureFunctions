@@ -31,7 +31,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().Be(TestData.Changelog);
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(TestData.Changelog);
         }
 
         [Fact]

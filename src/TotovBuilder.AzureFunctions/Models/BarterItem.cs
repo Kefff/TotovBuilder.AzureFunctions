@@ -6,7 +6,7 @@
     public class BarterItem
     {
         /// <inheritdoc/>
-        public string CurrencyName { get; set; } = "RUB";
+        public string CurrencyName { get; set; } = string.Empty;
 
         /// <inheritdoc/>
         public string ItemId { get; set; } = string.Empty;

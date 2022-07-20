@@ -51,12 +51,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="StaticDataFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="blobDataFetcher">Blob data fetcher.</param>
+        /// <param name="blobFetcher">Blob fetcher.</param>
         /// <param name="configurationReader">Configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public StaticDataFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
+        public StaticDataFetcher(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache)
         {
-            BlobFetcher = blobDataFetcher;
+            BlobFetcher = blobFetcher;
             Cache = cache;
             ConfigurationReader = configurationReader;
             Logger = logger;

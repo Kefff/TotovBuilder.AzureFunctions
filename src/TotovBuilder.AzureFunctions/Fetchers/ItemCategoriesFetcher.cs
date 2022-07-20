@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -35,7 +36,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Result<ItemCategory[]> GetData(string responseContent)
         {
-            throw new NotImplementedException();
+            ItemCategory[] itemCategories = JsonSerializer.Deserialize<ItemCategory[]>(responseContent, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return Result.Ok(itemCategories);
         }
     }
 }

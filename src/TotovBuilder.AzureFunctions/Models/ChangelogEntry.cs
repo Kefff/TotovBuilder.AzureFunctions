@@ -10,16 +10,16 @@ namespace TotovBuilder.AzureFunctions.Models
         /// <summary>
         /// Changes.
         /// </summary>
-        public ChangelogChange[] Changes = Array.Empty<ChangelogChange>();
+        public ChangelogChange[] Changes { get; set; } = Array.Empty<ChangelogChange>();
 
         /// <summary>
         /// Date.
         /// </summary>
-        public DateTime Date;
+        public DateTime Date { get; set; }
 
         /// <summary>
         /// Version.
         /// </summary>
-        public string Version = "1.0.0";
+        public string Version { get; set; } = string.Empty;
     }
 }

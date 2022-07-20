@@ -1,4 +1,6 @@
-﻿using FluentResults;
+﻿using System.Linq;
+using System.Text.Json;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -22,11 +24,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="blobDataFetcher">Blob data fetcher.</param>
+        /// <param name="blobFetcher">Blob fetcher.</param>
         /// <param name="configurationReader">Configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public ChangelogFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
-            : base(logger, blobDataFetcher, configurationReader, cache)
+        public ChangelogFetcher(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache)
+            : base(logger, blobFetcher, configurationReader, cache)
         {
             _azureBlobName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey);
         }
@@ -34,7 +36,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Result<ChangelogEntry[]> GetData(string responseContent)
         {
-            throw new System.NotImplementedException();
+            ChangelogEntry[] changelog = JsonSerializer.Deserialize<ChangelogEntry[]>(responseContent, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return Result.Ok(changelog.OrderByDescending(c => c.Date).ToArray());
         }
     }
 }

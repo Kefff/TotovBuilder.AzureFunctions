@@ -27,6 +27,7 @@ namespace TotovBuilder.AzureFunctions
             //builder.Services.AddSingleton<IBartersFetcher, BartersFetcher>();
             builder.Services.AddSingleton<IBlobFetcher, BlobFetcher>();
             builder.Services.AddSingleton<ICache, Cache>();
+            builder.Services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
             builder.Services.AddSingleton<IConfigurationReader, ConfigurationReader>();
             builder.Services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
             builder.Services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();

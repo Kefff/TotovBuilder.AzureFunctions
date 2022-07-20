@@ -8,11 +8,11 @@
         /// <summary>
         /// Language.
         /// </summary>
-        public string Language = string.Empty;
+        public string Language { get; set; } = string.Empty;
 
         /// <summary>
         /// Text.
         /// </summary>
-        public string Text = string.Empty;
+        public string Text { get; set; } = string.Empty;
     }
 }
