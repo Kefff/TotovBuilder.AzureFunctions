@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -14,8 +16,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     {
 
         /// <inheritdoc/>
-        protected override string ApiQueryKey => _apiQueryKey;
-        private readonly string _apiQueryKey = string.Empty;
+        protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiItemsQueryKey;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Items;
@@ -30,7 +31,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public ItemsFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache)
             : base(logger, httpClientWrapperFactory, configurationReader, cache)
         {
-            _apiQueryKey = configurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ApiItemsQueryKey);
         }
         
         /// <inheritdoc/>

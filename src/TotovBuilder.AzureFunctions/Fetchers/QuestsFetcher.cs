@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -13,11 +15,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class QuestsFetcher : ApiFetcher<Quest[]>, IQuestsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQueryKey => _apiQueryKey;
-        private readonly string _apiQueryKey;
+        protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
         
         /// <inheritdoc/>
-        protected override DataType DataType => throw new NotImplementedException();
+        protected override DataType DataType => DataType.Quests;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QuestsFetcher"/> class.
@@ -29,13 +30,26 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public QuestsFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache)
             : base(logger, httpClientWrapperFactory, configurationReader, cache)
         {
-            _apiQueryKey = configurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey);
         }
         
         /// <inheritdoc/>
         protected override Result<Quest[]> DeserializeData(string responseContent)
         {
-            throw new NotImplementedException();
+            List<Quest> quests = new List<Quest>();
+            JsonElement questsJson = JsonDocument.Parse(responseContent).RootElement;
+
+            foreach (JsonElement questJson in questsJson.EnumerateArray())
+            {
+                quests.Add(new Quest()
+                {
+                    Id = questJson.GetProperty("id").GetString(),
+                    Name = questJson.GetProperty("name").GetString(),
+                    Merchant = questJson.GetProperty("trader").GetProperty("normalizedName").GetString(),
+                    WikiLink = questJson.GetProperty("wikiLink").GetString()
+                });
+            }
+
+            return Result.Ok(quests.ToArray());
         }
     }
 }

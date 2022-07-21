@@ -105,11 +105,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Gets data from a the content of a fetch response.
+        /// Deserializes data from a the content of a fetch response.
         /// </summary>
         /// <param name="responseContent">Content of a fetch response.</param>
-        /// <returns>Data.</returns>
-        protected abstract Result<T> GetData(string responseContent);
+        /// <returns>Deserialized data.</returns>
+        protected abstract Result<T> DeserializeData(string responseContent);
 
         /// <summary>
         /// Executes the fetch operation.
@@ -126,7 +126,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return blobFetchResult.ToResult<T>();
             }
             
-            Result<T> result = GetData(blobFetchResult.Value);
+            Result<T> result = DeserializeData(blobFetchResult.Value);
 
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 

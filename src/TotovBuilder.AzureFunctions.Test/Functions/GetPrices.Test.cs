@@ -22,7 +22,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Price[]?>(TestData.Prices));
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Item[]?>(TestData.Prices));
 
             GetPrices function = new GetPrices(pricesFetcherMock.Object);
 
@@ -39,7 +39,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Price[]?>(null));
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Item[]?>(null));
 
             GetPrices function = new GetPrices(pricesFetcherMock.Object);
 

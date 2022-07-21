@@ -34,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<ChangelogEntry[]> GetData(string responseContent)
+        protected override Result<ChangelogEntry[]> DeserializeData(string responseContent)
         {
             ChangelogEntry[] changelog = JsonSerializer.Deserialize<ChangelogEntry[]>(responseContent, new JsonSerializerOptions()
             {

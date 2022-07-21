@@ -195,7 +195,19 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return isolatedDataResult.ToResult<T>();
             }
 
-            Result<T> result = DeserializeData(isolatedDataResult.Value);
+            Result<T> result;
+
+            try
+            {
+                result = DeserializeData(isolatedDataResult.Value);
+            }
+            catch (Exception e)
+            {
+                string error = string.Format(Properties.Resources.ApiResponseDeserializationError, typeof(T).Name, e);
+                Logger.LogError(error);
+
+                return Result.Fail(error);
+            }
 
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 

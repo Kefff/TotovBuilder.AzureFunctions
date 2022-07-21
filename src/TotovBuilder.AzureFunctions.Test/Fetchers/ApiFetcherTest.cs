@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -260,6 +261,41 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Never);
         }
 
+        [Fact]
+        public async Task Fetch_WithDeserializationError_ShouldFail()
+        {
+            // Arrange
+            Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
+
+            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink trader { normalizedName } } }");
+            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
+            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.QuestsJson) }));
+            
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            
+            Mock<ICache> cacheMock = new Mock<ICache>();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(() => null);
+
+            ApiFetcherWithDeserializationErrorImplementation apiFetcher = new ApiFetcherWithDeserializationErrorImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+
+            // Act
+            Quest[]? result = await apiFetcher.Fetch();
+
+            // Assert
+            result.Should().BeNull();
+            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
+            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Never);
+        }
+
         public class ApiFetcherImplementation : ApiFetcher<Quest[]>
         {
             protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
@@ -274,6 +310,23 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             protected override Result<Quest[]> DeserializeData(string responseContent)
             {
                 return Result.Ok(TestData.Quests);
+            }
+        }
+
+        public class ApiFetcherWithDeserializationErrorImplementation : ApiFetcher<Quest[]>
+        {
+            protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
+
+            protected override DataType DataType => DataType.Prices;
+
+            public ApiFetcherWithDeserializationErrorImplementation(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache) 
+               : base(logger, httpClientWrapperFactory, configurationReader, cache)
+            {
+            }
+
+            protected override Result<Quest[]> DeserializeData(string responseContent)
+            {
+                throw new JsonException();
             }
         }
     }

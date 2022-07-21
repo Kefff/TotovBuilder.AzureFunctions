@@ -38,7 +38,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "prices")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            Price[] response = await PricesFetcher.Fetch() ?? Array.Empty<Price>();
+            Item[] response = await PricesFetcher.Fetch() ?? Array.Empty<Item>();
 
             return new OkObjectResult(response);
         }

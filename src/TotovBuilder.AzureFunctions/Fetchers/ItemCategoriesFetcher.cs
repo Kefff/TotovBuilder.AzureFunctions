@@ -34,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<ItemCategory[]> GetData(string responseContent)
+        protected override Result<ItemCategory[]> DeserializeData(string responseContent)
         {
             ItemCategory[] itemCategories = JsonSerializer.Deserialize<ItemCategory[]>(responseContent, new JsonSerializerOptions()
             {

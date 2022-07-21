@@ -132,7 +132,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
             }
 
-            protected override Result<ChangelogEntry[]> GetData(string responseContent)
+            protected override Result<ChangelogEntry[]> DeserializeData(string responseContent)
             {
                 return Result.Ok(TestData.Changelog);
             }

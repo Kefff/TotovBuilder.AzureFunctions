@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -10,11 +12,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a prices fetcher.
     /// </summary>
-    public class PricesFetcher : ApiFetcher<Price[]>, IPricesFetcher
+    public class PricesFetcher : ApiFetcher<Item[]>, IPricesFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQueryKey => _apiQueryKey;
-        private readonly string _apiQueryKey;
+        protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiPricesQueryKey;
         
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Prices;
@@ -29,13 +30,59 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public PricesFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache)
             : base(logger, httpClientWrapperFactory, configurationReader, cache)
         {
-            _apiQueryKey = configurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ApiPricesQueryKey);
         }
         
         /// <inheritdoc/>
-        protected override Result<Price[]> DeserializeData(string responseContent)
+        protected override Result<Item[]> DeserializeData(string responseContent)
         {
-            throw new NotImplementedException();
+            List<Item> items = new List<Item>();
+            JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
+
+            foreach (JsonElement itemJson in itemsJson.EnumerateArray())
+            {
+                Item item = new Item()
+                {
+                    Id = itemJson.GetProperty("id").GetString()
+                };
+
+                List<Price> prices = new List<Price>();
+
+                foreach (JsonElement priceJson in itemJson.GetProperty("buyFor").EnumerateArray())
+                {
+                    Price price = new Price()
+                    {
+                        CurrencyName = priceJson.GetProperty("currency").GetString(),
+                        Value = priceJson.GetProperty("price").GetInt32(),
+                        ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
+                    };
+
+                    if (priceJson.GetProperty("vendor").TryGetProperty("trader", out JsonElement traderJson))
+                    {
+                        price.Merchant = traderJson.GetProperty("normalizedName").GetString();
+                    }
+                    else
+                    {
+                        price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString();
+                    }
+
+                    if (priceJson.GetProperty("vendor").TryGetProperty("minTraderLevel", out JsonElement minTraderLevel))
+                    {
+                        price.MerchantLevel = minTraderLevel.GetInt32();
+                    }
+
+                    if (priceJson.GetProperty("vendor").TryGetProperty("taskUnlock", out JsonElement taskUnlockJson) && taskUnlockJson.ValueKind != JsonValueKind.Null)
+                    {
+                        price.QuestId = taskUnlockJson.GetProperty("id").GetString();
+                    }
+
+                    prices.Add(price);
+                }
+
+                item.Prices = prices.ToArray();
+                items.Add(item);
+            }
+
+            return Result.Ok(items.ToArray());
         }
     }
 }
