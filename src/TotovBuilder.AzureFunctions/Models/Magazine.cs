@@ -16,6 +16,9 @@ namespace TotovBuilder.AzureFunctions.Models
 
         /// <inheritdoc/>
         public double LoadSpeedPercentageModifier { get; set; }
+        
+        /// <inheritdoc/>
+        public double MalfunctionPercentage { get; set; }
 
         /// <inheritdoc/>
         public double Capacity { get; set; }

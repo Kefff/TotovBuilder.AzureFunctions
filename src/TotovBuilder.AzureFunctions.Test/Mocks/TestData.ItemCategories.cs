@@ -51,10 +51,10 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
             },
             new ItemCategory()
             {
-                Id = "compass",
+                Id = "container",
                 TarkovItemCategories = new TarkovItemCategory[]
                 {
-                    new TarkovItemCategory() { Id = "5f4fbaaca5573a5ac31db429", Name = "Compass" }
+                    new TarkovItemCategory() { Id = "5795f317245977243854e041", Name = "SimpleContainer" }
                 }
             },
             new ItemCategory()
@@ -79,15 +79,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 TarkovItemCategories = new TarkovItemCategory[]
                 {
                     new TarkovItemCategory() { Id = "5a341c4686f77469e155819e", Name = "FaceCover" }
-                }
-            },
-            new ItemCategory()
-            {
-                Id = "food",
-                TarkovItemCategories = new TarkovItemCategory[]
-                {
-                    new TarkovItemCategory() { Id = "5448e8d64bdc2dce718b4568", Name = "Drink" },
-                    new TarkovItemCategory() { Id = "5448e8d04bdc2ddf718b4569", Name = "Food" }
                 }
             },
             new ItemCategory()
@@ -119,6 +110,7 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 Id = "magazine",
                 TarkovItemCategories = new TarkovItemCategory[]
                 {
+                    new TarkovItemCategory() { Id = "610720f290b75a49ff2e5e25", Name = "CylinderMagazine" },
                     new TarkovItemCategory() { Id = "5448bc234bdc2d3c308b4569", Name = "Magazine" }
                 }
             },
@@ -132,20 +124,10 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                     new TarkovItemCategory() { Id = "5447bedf4bdc2d87278b4568", Name = "GrenadeLauncher" },
                     new TarkovItemCategory() { Id = "5447bed64bdc2d97278b4568", Name = "MachineGun" },
                     new TarkovItemCategory() { Id = "5447b6194bdc2d67278b4567", Name = "MarksmanRifle" },
+                    new TarkovItemCategory() { Id = "617f1ef5e8b54b0998387733", Name = "Revolver" },
                     new TarkovItemCategory() { Id = "5447b6094bdc2dc3278b4567", Name = "Shotgun" },
                     new TarkovItemCategory() { Id = "5447b5e04bdc2d62278b4567", Name = "Smg" },
                     new TarkovItemCategory() { Id = "5447b6254bdc2dc3278b4568", Name = "SniperRifle" }
-                }
-            },
-            new ItemCategory()
-            {
-                Id = "medical",
-                TarkovItemCategories = new TarkovItemCategory[]
-                {
-                    new TarkovItemCategory() { Id = "5448f3a14bdc2d27728b4569", Name = "Drugs" },
-                    new TarkovItemCategory() { Id = "5448f3ac4bdc2dce718b4569", Name = "Medical" },
-                    new TarkovItemCategory() { Id = "5448f39d4bdc2d0a728b4568", Name = "MedKit" },
-                    new TarkovItemCategory() { Id = "5448f3a64bdc2d60728b456a", Name = "Stimulator" }
                 }
             },
             new ItemCategory()
@@ -161,7 +143,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 Id = "mod",
                 TarkovItemCategories = new TarkovItemCategory[]
                 {
-                    new TarkovItemCategory() { Id = "5a74651486f7744e73386dd1", Name = "AuxiliaryMod" },
                     new TarkovItemCategory() { Id = "55818b084bdc2d5b648b4571", Name = "Flashlight" },
                     new TarkovItemCategory() { Id = "55818b224bdc2dde698b456f", Name = "Mount" },
                     new TarkovItemCategory() { Id = "5a2c3a9486f774688b05e574", Name = "NightVision" },
@@ -170,10 +151,15 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
             },
             new ItemCategory()
             {
+                Id = "other"
+            },
+            new ItemCategory()
+            {
                 Id = "rangedWeaponMod",
                 TarkovItemCategories = new TarkovItemCategory[]
                 {
                     new TarkovItemCategory() { Id = "55818add4bdc2d5b648b456f", Name = "AssaultScope" },
+                    new TarkovItemCategory() { Id = "5a74651486f7744e73386dd1", Name = "AuxiliaryMod" },
                     new TarkovItemCategory() { Id = "555ef6e44bdc2de9068b457e", Name = "Barrel" },
                     new TarkovItemCategory() { Id = "55818afb4bdc2dde698b456d", Name = "Bipod" },
                     new TarkovItemCategory() { Id = "55818a6f4bdc2db9688b456b", Name = "Charge" },
@@ -213,6 +199,15 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 TarkovItemCategories = new TarkovItemCategory[]
                 {
                     new TarkovItemCategory() { Id = "5448bf274bdc2dfc2f8b456a", Name = "MobContainer" }
+                }
+            },
+            new ItemCategory()
+            {
+                Id = "special",
+                TarkovItemCategories = new TarkovItemCategory[]
+                {
+                    new TarkovItemCategory() { Id = "5f4fbaaca5573a5ac31db429", Name = "Compass" },
+                    new TarkovItemCategory() { Id = "5447e0e74bdc2d3c308b4567", Name = "Special item" }
                 }
             },
             new ItemCategory()
@@ -272,11 +267,11 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
     ]
   },
   {
-    ""id"": ""compass"",
+    ""id"": ""container"",
     ""tarkovItemCategories"": [
       {
-        ""id"": ""5f4fbaaca5573a5ac31db429"",
-        ""name"": ""Compass""
+        ""id"": ""5795f317245977243854e041"",
+        ""name"": ""SimpleContainer""
       }
     ]
   },
@@ -304,19 +299,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       {
         ""id"": ""5a341c4686f77469e155819e"",
         ""name"": ""FaceCover""
-      }
-    ]
-  },
-  {
-    ""id"": ""food"",
-    ""tarkovItemCategories"": [
-      {
-        ""id"": ""5448e8d64bdc2dce718b4568"",
-        ""name"": ""Drink""
-      },
-      {
-        ""id"": ""5448e8d04bdc2ddf718b4569"",
-        ""name"": ""Food""
       }
     ]
   },
@@ -351,6 +333,10 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
     ""id"": ""magazine"",
     ""tarkovItemCategories"": [
       {
+        ""id"": ""610720f290b75a49ff2e5e25"",
+        ""name"": ""CylinderMagazine""
+      },
+      {
         ""id"": ""5448bc234bdc2d3c308b4569"",
         ""name"": ""Magazine""
       }
@@ -380,6 +366,10 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
         ""name"": ""MarksmanRifle""
       },
       {
+        ""id"": ""617f1ef5e8b54b0998387733"",
+        ""name"": ""Revolver""
+      },
+      {
         ""id"": ""5447b6094bdc2dc3278b4567"",
         ""name"": ""Shotgun""
       },
@@ -390,27 +380,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       {
         ""id"": ""5447b6254bdc2dc3278b4568"",
         ""name"": ""SniperRifle""
-      }
-    ]
-  },
-  {
-    ""id"": ""medical"",
-    ""tarkovItemCategories"": [
-      {
-        ""id"": ""5448f3a14bdc2d27728b4569"",
-        ""name"": ""Drugs""
-      },
-      {
-        ""id"": ""5448f3ac4bdc2dce718b4569"",
-        ""name"": ""Medical""
-      },
-      {
-        ""id"": ""5448f39d4bdc2d0a728b4568"",
-        ""name"": ""MedKit""
-      },
-      {
-        ""id"": ""5448f3a64bdc2d60728b456a"",
-        ""name"": ""Stimulator""
       }
     ]
   },
@@ -426,10 +395,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
   {
     ""id"": ""mod"",
     ""tarkovItemCategories"": [
-      {
-        ""id"": ""5a74651486f7744e73386dd1"",
-        ""name"": ""AuxiliaryMod""
-      },
       {
         ""id"": ""55818b084bdc2d5b648b4571"",
         ""name"": ""Flashlight""
@@ -449,11 +414,19 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
     ]
   },
   {
+    ""id"": ""other"",
+    ""tarkovItemCategories"": []
+  },
+  {
     ""id"": ""rangedWeaponMod"",
     ""tarkovItemCategories"": [
       {
         ""id"": ""55818add4bdc2d5b648b456f"",
         ""name"": ""AssaultScope""
+      },
+      {
+        ""id"": ""5a74651486f7744e73386dd1"",
+        ""name"": ""AuxiliaryMod""
       },
       {
         ""id"": ""555ef6e44bdc2de9068b457e"",
@@ -548,6 +521,19 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       {
         ""id"": ""5448bf274bdc2dfc2f8b456a"",
         ""name"": ""MobContainer""
+      }
+    ]
+  },
+  {
+    ""id"": ""special"",
+    ""tarkovItemCategories"": [
+      {
+        ""id"": ""5f4fbaaca5573a5ac31db429"",
+        ""name"": ""Compass""
+      },
+      {
+        ""id"": ""5447e0e74bdc2d3c308b4567"",
+        ""name"": ""Special item""
       }
     ]
   },

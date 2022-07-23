@@ -21,5 +21,8 @@ namespace TotovBuilder.AzureFunctions.Models
 
         /// <inheritdoc/>
         public double MinimumExplosionRange { get; set; }
+
+        /// <inheritdoc/>
+        public string Type { get; set; } = string.Empty;
     }
 }

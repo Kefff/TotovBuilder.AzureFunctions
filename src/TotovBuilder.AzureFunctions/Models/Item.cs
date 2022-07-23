@@ -9,19 +9,10 @@ namespace TotovBuilder.AzureFunctions.Models
     public class Item : IItem
     {
         /// <inheritdoc/>
-        public string Caption { get; set; } = string.Empty;
-
-        /// <inheritdoc/>
         public string CategoryId { get; set; } = string.Empty;
 
         /// <inheritdoc/>
         public string[] ConflictingItemIds { get; set; } = Array.Empty<string>();
-
-        /// <inheritdoc/>
-        public string Description { get; set; } = string.Empty;
-
-        /// <inheritdoc/>
-        public bool HasMarketData { get; set; }
 
         /// <inheritdoc/>
         public string IconLink { get; set; } = string.Empty;
@@ -33,7 +24,7 @@ namespace TotovBuilder.AzureFunctions.Models
         public string ImageLink { get; set; } = string.Empty;
 
         /// <inheritdoc/>
-        public double MaxStackableAmount { get; set; }
+        public double MaxStackableAmount { get; set; } = 1;
 
         /// <inheritdoc/>
         public string MarketLink { get; set; } = string.Empty;

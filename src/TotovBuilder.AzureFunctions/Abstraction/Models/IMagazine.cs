@@ -19,5 +19,10 @@
         /// Modifier added to the loading speed in percentage.
         /// </summary>
         double LoadSpeedPercentageModifier { get; set; }
+
+        /// <summary>
+        /// Malfunction chance in percentage.
+        /// </summary>
+        double MalfunctionPercentage { get; set; }
     }
 }

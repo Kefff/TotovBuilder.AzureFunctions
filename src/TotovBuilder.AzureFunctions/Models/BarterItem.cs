@@ -15,6 +15,6 @@
         public Price Price { get; set; } = new Price();
 
         /// <inheritdoc/>
-        public int Quantity { get; set; }
+        public double Quantity { get; set; }
     }
 }

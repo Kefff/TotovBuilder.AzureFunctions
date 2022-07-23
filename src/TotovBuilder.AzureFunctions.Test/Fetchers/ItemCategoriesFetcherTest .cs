@@ -18,7 +18,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     public class ItemCategoriesFetcherTest
     {
         [Fact]
-        public async Task Fetch_ShouldReturnChangelog()
+        public async Task Fetch_ShouldReturnItemCategories()
         {
             // Arrange
             Mock<ILogger<ItemCategoriesFetcher>> loggerMock = new Mock<ILogger<ItemCategoriesFetcher>>();

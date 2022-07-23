@@ -8,11 +8,6 @@ namespace TotovBuilder.AzureFunctions.Abstraction.Models
     public interface IItem
     {
         /// <summary>
-        /// Caption.
-        /// </summary>
-        string Caption { get; set; }
-
-        /// <summary>
         /// ID of the category of the item.
         /// </summary>
         string CategoryId { get; set; }
@@ -21,16 +16,6 @@ namespace TotovBuilder.AzureFunctions.Abstraction.Models
         /// IDs of conflicting items.
         /// </summary>
         string[] ConflictingItemIds { get; set; }
-
-        /// <summary>
-        /// Description.
-        /// </summary>
-        string Description { get; set; }
-
-        /// <summary>
-        /// Indicates whether the item has market data or not.
-        /// </summary>
-        bool HasMarketData { get; set; }
 
         /// <summary>
         /// Link to the icon.

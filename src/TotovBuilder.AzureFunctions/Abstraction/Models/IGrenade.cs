@@ -29,5 +29,10 @@
         /// Minimum explosion range in meters.
         /// </summary>
         double MinimumExplosionRange { get; set; }
+
+        /// <summary>
+        /// Type of grenade.
+        /// </summary>
+        string Type { get; set; }
     }
 }
