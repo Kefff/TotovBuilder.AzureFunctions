@@ -205,6 +205,15 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item category &quot;{0}&quot; is not implemented..
+        /// </summary>
+        internal static string NotImplementedItemCategory {
+            get {
+                return ResourceManager.GetString("NotImplementedItemCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} - Start : Fetching..
         /// </summary>
         internal static string StartFetching {

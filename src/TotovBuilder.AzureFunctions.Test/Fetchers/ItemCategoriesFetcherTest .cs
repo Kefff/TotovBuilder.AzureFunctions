@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ItemCategoriesFetcher fetcher = new ItemCategoriesFetcher(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            ItemCategory[]? result = await fetcher.Fetch();
+            IEnumerable<ItemCategory>? result = await fetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.ItemCategories);

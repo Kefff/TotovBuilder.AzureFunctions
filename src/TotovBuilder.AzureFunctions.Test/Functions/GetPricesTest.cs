@@ -14,42 +14,42 @@ using Xunit;
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
     /// <summary>
-    /// Represents tests on the <see cref="GetChangelog"/> class.
+    /// Represents tests on the <see cref="GetPrices"/> class.
     /// </summary>
-    public class GetChangelogTest
+    public class GetPricesTest
     {
         [Fact]
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
-            changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ChangelogEntry>?>(TestData.Changelog));
+            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Prices));
 
-            GetChangelog function = new GetChangelog(changelogFetcherMock.Object);
+            GetPrices function = new GetPrices(pricesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(TestData.Changelog);
+            ((OkObjectResult)result).Value.Should().Be(TestData.Prices);
         }
 
         [Fact]
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
-            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
-            changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ChangelogEntry>?>(null));
+            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
 
-            GetChangelog function = new GetChangelog(changelogFetcherMock.Object);
+            GetPrices function = new GetPrices(pricesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<ChangelogEntry>());
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Item>());
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -24,7 +25,7 @@ namespace TotovBuilder.AzureFunctions.Test
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
             
             // Act
-            ChangelogEntry[]? result = cache.Get<ChangelogEntry[]>(DataType.Changelog);
+            IEnumerable<ChangelogEntry>? result = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
 
             // Assert
             result.Should().BeNull();
@@ -41,7 +42,7 @@ namespace TotovBuilder.AzureFunctions.Test
             cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act
-            ChangelogEntry[]? result = cache.Get<ChangelogEntry[]>(DataType.Changelog);
+            IEnumerable<ChangelogEntry>? result = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);
@@ -94,11 +95,11 @@ namespace TotovBuilder.AzureFunctions.Test
 
             Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
             cache.Store(DataType.Changelog, TestData.Changelog);
-            ChangelogEntry[]? result1 = cache.Get<ChangelogEntry[]>(DataType.Changelog);
+            IEnumerable<ChangelogEntry>? result1 = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
             
             // Act
             cache.Remove(DataType.Changelog);
-            ChangelogEntry[]? result2 = cache.Get<ChangelogEntry[]>(DataType.Changelog);
+            IEnumerable<ChangelogEntry>? result2 = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
 
             // Assert
             result1.Should().BeEquivalentTo(TestData.Changelog);
@@ -117,7 +118,7 @@ namespace TotovBuilder.AzureFunctions.Test
             cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act
-            ChangelogEntry[]? result = cache.Get<ChangelogEntry[]>(DataType.Changelog);
+            IEnumerable<ChangelogEntry>? result = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -34,19 +35,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 });
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>())).Returns(TestData.Changelog);
+            cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(TestData.Changelog);
 
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
             _ = staticDataFetcher.Fetch();
-            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
+            IEnumerable<ChangelogEntry>? result = await staticDataFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
-            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<ChangelogEntry[]>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<ChangelogEntry>>()), Times.Once);
         }
 
         [Fact]
@@ -59,17 +60,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(true);
-            cacheMock.Setup(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>())).Returns(TestData.Changelog);
+            cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(TestData.Changelog);
 
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
             
             // Act
-            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
+            IEnumerable<ChangelogEntry>? result = await staticDataFetcher.Fetch();
             
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Never);
-            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -88,13 +89,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
             
             // Act
-            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
+            IEnumerable<ChangelogEntry>? result = await staticDataFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
-            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Never);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<ChangelogEntry[]>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<ChangelogEntry>>()), Times.Once);
         }
         
         [Fact]
@@ -107,21 +108,21 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Fail<string>(string.Empty)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>())).Returns(TestData.Changelog);
+            cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(TestData.Changelog);
             
             StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
             
             // Act
-            ChangelogEntry[]? result = await staticDataFetcher.Fetch();
+            IEnumerable<ChangelogEntry>? result = await staticDataFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
-            cacheMock.Verify(m => m.Get<ChangelogEntry[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
     
-        public class StaticDataFetcherImplementation : StaticDataFetcher<ChangelogEntry[]>
+        public class StaticDataFetcherImplementation : StaticDataFetcher<IEnumerable<ChangelogEntry>>
         {
             protected override string AzureBlobName => TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey;
 
@@ -132,9 +133,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
             }
 
-            protected override Result<ChangelogEntry[]> DeserializeData(string responseContent)
+            protected override Task<Result<IEnumerable<ChangelogEntry>>> DeserializeData(string responseContent)
             {
-                return Result.Ok(TestData.Changelog);
+                return Task.FromResult(Result.Ok<IEnumerable<ChangelogEntry>>(TestData.Changelog));
             }
         }
     }

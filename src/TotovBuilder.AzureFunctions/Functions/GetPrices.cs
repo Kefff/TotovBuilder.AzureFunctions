@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "prices")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            Item[] response = await PricesFetcher.Fetch() ?? Array.Empty<Item>();
+            IEnumerable<Item> response = await PricesFetcher.Fetch() ?? Array.Empty<Item>();
 
             return new OkObjectResult(response);
         }

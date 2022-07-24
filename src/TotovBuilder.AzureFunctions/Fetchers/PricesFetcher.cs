@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -11,7 +12,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a prices fetcher.
     /// </summary>
-    public class PricesFetcher : ApiFetcher<Item[]>, IPricesFetcher
+    public class PricesFetcher : ApiFetcher<IEnumerable<Item>>, IPricesFetcher
     {
         /// <inheritdoc/>
         protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiPricesQueryKey;
@@ -32,7 +33,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<Item[]> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
             List<Item> items = new List<Item>();
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
@@ -81,7 +82,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 items.Add(item);
             }
 
-            return Result.Ok(items.ToArray());
+            return Task.FromResult(Result.Ok<IEnumerable<Item>>(items));
         }
     }
 }

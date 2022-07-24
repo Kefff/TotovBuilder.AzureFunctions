@@ -136,7 +136,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="responseContent">Content of a fetch response.</param>
         /// <returns>Deserialized data.</returns>
-        protected abstract Result<T> DeserializeData(string responseContent);
+        protected abstract Task<Result<T>> DeserializeData(string responseContent);
 
         /// <summary>
         /// Executes the fetch operation.
@@ -147,7 +147,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (string.IsNullOrWhiteSpace(ApiUrl)
                 || string.IsNullOrWhiteSpace(ApiQuery))
             {
-                string error = string.Format(Properties.Resources.InvalidConfiguration);
+                string error = Properties.Resources.InvalidConfiguration;
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -199,7 +199,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                result = DeserializeData(isolatedDataResult.Value);
+                result = await DeserializeData(isolatedDataResult.Value);
             }
             catch (Exception e)
             {

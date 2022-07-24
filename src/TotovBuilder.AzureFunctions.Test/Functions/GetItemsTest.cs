@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -13,42 +14,42 @@ using Xunit;
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
     /// <summary>
-    /// Represents tests on the <see cref="GetPrices"/> class.
+    /// Represents tests on the <see cref="GetItems"/> class.
     /// </summary>
-    public class GetPricesTest
+    public class GetItemsTest
     {
         [Fact]
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Item[]?>(TestData.Prices));
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Items));
 
-            GetPrices function = new GetPrices(pricesFetcherMock.Object);
+            GetItems function = new GetItems(itemsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().Be(TestData.Prices);
+            ((OkObjectResult)result).Value.Should().Be(TestData.Items);
         }
 
         [Fact]
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
-            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Item[]?>(null));
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
 
-            GetPrices function = new GetPrices(pricesFetcherMock.Object);
+            GetItems function = new GetItems(itemsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Price[]>());
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Item>());
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +23,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IQuestsFetcher> questsFetcherMock = new Mock<IQuestsFetcher>();
-            questsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Quest[]?>(TestData.Quests));
+            questsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Quest>?>(TestData.Quests));
 
             GetQuests function = new GetQuests(questsFetcherMock.Object);
 
@@ -39,7 +40,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IQuestsFetcher> questsFetcherMock = new Mock<IQuestsFetcher>();
-            questsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Quest[]?>(null));
+            questsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Quest>?>(null));
 
             GetQuests function = new GetQuests(questsFetcherMock.Object);
 
@@ -48,7 +49,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Quest[]>());
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Quest>());
         }
     }
 }

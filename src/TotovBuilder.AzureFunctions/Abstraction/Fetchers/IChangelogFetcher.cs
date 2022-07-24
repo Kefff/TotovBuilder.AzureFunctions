@@ -1,11 +1,12 @@
-﻿using TotovBuilder.AzureFunctions.Models;
+﻿using System.Collections.Generic;
+using TotovBuilder.AzureFunctions.Models;
 
 namespace TotovBuilder.AzureFunctions.Abstraction.Fetchers
 {
     /// <summary>
     /// Provides the functionalities of a changelog fetcher.
     /// </summary>
-    public interface IChangelogFetcher :IApiFetcher<ChangelogEntry[]>
+    public interface IChangelogFetcher :IApiFetcher<IEnumerable<ChangelogEntry>>
     {
     }
 }

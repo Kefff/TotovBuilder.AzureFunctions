@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -11,7 +12,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents an item categories fetcher.
     /// </summary>
-    public class ItemCategoriesFetcher : StaticDataFetcher<ItemCategory[]>, IItemCategoriesFetcher
+    public class ItemCategoriesFetcher : StaticDataFetcher<IEnumerable<ItemCategory>>, IItemCategoriesFetcher
     {
         /// <inheritdoc/>
         protected override DataType DataType => DataType.ItemCategories;
@@ -34,14 +35,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<ItemCategory[]> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<ItemCategory>>> DeserializeData(string responseContent)
         {
-            ItemCategory[] itemCategories = JsonSerializer.Deserialize<ItemCategory[]>(responseContent, new JsonSerializerOptions()
+            IEnumerable<ItemCategory> itemCategories = JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            return Result.Ok(itemCategories);
+            return Task.FromResult(Result.Ok(itemCategories));
         }
     }
 }

@@ -6,49 +6,48 @@
 //using Moq;
 //using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 //using TotovBuilder.AzureFunctions.Functions;
-//using TotovBuilder.AzureFunctions.Models;
 //using TotovBuilder.AzureFunctions.Test.Mocks;
 //using Xunit;
 
 //namespace TotovBuilder.AzureFunctions.Test.Functions
 //{
 //    /// <summary>
-//    /// Represents tests on the <see cref="GetItems"/> class.
+//    /// Represents tests on the <see cref="GetPresets"/> class.
 //    /// </summary>
-//    public class GetItemsTest
+//    public class GetPresetsTest
 //    {
 //        [Fact]
 //        public async Task Run_ShouldFetchData()
 //        {
 //            // Arrange
-//            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
-//            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Item[]>(TestData.Items));
+//            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+//            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.Presets));
 
-//            GetItems function = new GetItems(itemsFetcherMock.Object);
+//            GetPresets function = new GetPresets(presetsFetcherMock.Object);
 
 //            // Act
 //            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
 //            // Assert
 //            result.Should().BeOfType<OkObjectResult>();
-//            ((OkObjectResult)result).Value.Should().Be(TestData.Quests);
+//            ((OkObjectResult)result).Value.Should().Be(TestData.Presets);
 //        }
 
 //        [Fact]
 //        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
 //        {
 //            // Arrange
-//            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
-//            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<Item[]?>(null));
+//            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+//            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Preset>?>(null));
 
-//            GetItems function = new GetItems(itemsFetcherMock.Object);
+//            GetPresets function = new GetPresets(presetsFetcherMock.Object);
 
 //            // Act
 //            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
 //            // Assert
 //            result.Should().BeOfType<OkObjectResult>();
-//            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Item>());
+//            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Preset>());
 //        }
 //    }
 //}

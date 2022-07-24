@@ -3,7 +3,7 @@
 //    /// <summary>
 //    /// Provides the functionnalities of a presets fetcher.
 //    /// </summary>
-//    public interface IPresetsFetcher : IApiFetcher<InventoryItem[]>
+//    public interface IPresetsFetcher : IApiFetcher<IEnumerable<IPreset>>
 //    {
 //    }
 //}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -44,19 +45,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
             _ = apiFetcher.Fetch();
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Once);
         }
 
         [Fact]
@@ -76,17 +77,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(true);
-            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -115,13 +116,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Never);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Once);
         }
 
         [Fact]
@@ -134,17 +135,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -172,17 +173,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -206,17 +207,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Quests);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -247,18 +248,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(() => null);
+            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(() => null);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeNull();
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Never);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Never);
         }
 
         [Fact]
@@ -282,21 +283,21 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<Quest[]>(It.IsAny<DataType>())).Returns(() => null);
+            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(() => null);
 
             ApiFetcherWithDeserializationErrorImplementation apiFetcher = new ApiFetcherWithDeserializationErrorImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Quest[]? result = await apiFetcher.Fetch();
+            IEnumerable<Quest>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeNull();
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<Quest[]>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<Quest[]>()), Times.Never);
+            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Never);
         }
 
-        public class ApiFetcherImplementation : ApiFetcher<Quest[]>
+        public class ApiFetcherImplementation : ApiFetcher<IEnumerable<Quest>>
         {
             protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
 
@@ -307,13 +308,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
             }
 
-            protected override Result<Quest[]> DeserializeData(string responseContent)
+            protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)
             {
-                return Result.Ok(TestData.Quests);
+                return Task.FromResult(Result.Ok<IEnumerable<Quest>>(TestData.Quests));
             }
         }
 
-        public class ApiFetcherWithDeserializationErrorImplementation : ApiFetcher<Quest[]>
+        public class ApiFetcherWithDeserializationErrorImplementation : ApiFetcher<IEnumerable<Quest>>
         {
             protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
 
@@ -324,7 +325,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
             }
 
-            protected override Result<Quest[]> DeserializeData(string responseContent)
+            protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)
             {
                 throw new JsonException();
             }

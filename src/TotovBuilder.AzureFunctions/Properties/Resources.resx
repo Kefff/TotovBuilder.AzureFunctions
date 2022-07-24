@@ -169,6 +169,9 @@
   <data name="InvalidStringConfigurationValue" xml:space="preserve">
     <value>Invalid "{0}" string configuration value.</value>
   </data>
+  <data name="NotImplementedItemCategory" xml:space="preserve">
+    <value>Item category "{0}" is not implemented.</value>
+  </data>
   <data name="StartFetching" xml:space="preserve">
     <value>{0} - Start : Fetching.</value>
   </data>

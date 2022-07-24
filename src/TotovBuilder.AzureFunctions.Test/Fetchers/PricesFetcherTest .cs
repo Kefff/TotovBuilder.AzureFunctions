@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -42,7 +43,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             PricesFetcher fetcher = new PricesFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            Item[]? result = await fetcher.Fetch();
+            IEnumerable<Item>? result = await fetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Prices);

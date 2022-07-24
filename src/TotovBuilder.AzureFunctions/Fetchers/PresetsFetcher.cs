@@ -9,7 +9,7 @@
 //    /// <summary>
 //    /// Represents a presets fetcher.
 //    /// </summary>
-//    public class PresetsFetcher : StaticDataFetcher<InventoryItem[]>, IPresetsFetcher
+//    public class PresetsFetcher : StaticDataFetcher<IEnumerable<InventoryItem>>, IPresetsFetcher
 //    {
 //        /// <inheritdoc/>
 //        protected override DataType DataType => DataType.Presets;
@@ -32,7 +32,7 @@
 //        }
 
 //        /// <inheritdoc/>
-//        protected override Result<InventoryItem[]> GetData(string responseContent)
+//        protected override Result<IEnumerable<InventoryItem>> GetData(string responseContent)
 //        {
 //            throw new NotImplementedException();
 //        }

@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -11,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a changelog fetcher.
     /// </summary>
-    public class ChangelogFetcher : StaticDataFetcher<ChangelogEntry[]>, IChangelogFetcher
+    public class ChangelogFetcher : StaticDataFetcher<IEnumerable<ChangelogEntry>>, IChangelogFetcher
     {
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Changelog;
@@ -34,14 +36,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<ChangelogEntry[]> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<ChangelogEntry>>> DeserializeData(string responseContent)
         {
-            ChangelogEntry[] changelog = JsonSerializer.Deserialize<ChangelogEntry[]>(responseContent, new JsonSerializerOptions()
+            IEnumerable<ChangelogEntry> changelog = JsonSerializer.Deserialize<IEnumerable<ChangelogEntry>>(responseContent, new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            return Result.Ok(changelog.OrderByDescending(c => c.Date).ToArray());
+            return Task.FromResult(Result.Ok<IEnumerable<ChangelogEntry>>(changelog.OrderByDescending(c => c.Date)));
         }
     }
 }

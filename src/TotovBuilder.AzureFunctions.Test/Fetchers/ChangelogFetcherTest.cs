@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ChangelogFetcher fetcher = new ChangelogFetcher(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            ChangelogEntry[]? result = await fetcher.Fetch();
+            IEnumerable<ChangelogEntry>? result = await fetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);

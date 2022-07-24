@@ -1,10 +1,12 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Test.Mocks;
@@ -39,10 +41,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            ItemsFetcher fetcher = new ItemsFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+
+            ItemsFetcher fetcher = new ItemsFetcher(
+                loggerMock.Object,
+                httpClientWrapperFactoryMock.Object,
+                configurationReaderMock.Object,
+                cacheMock.Object,
+                new ItemCategoryFinder(itemCategoriesFetcherMock.Object));
 
             // Act
-            Item[]? result = await fetcher.Fetch();
+            IEnumerable<Item>? result = await fetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Items);

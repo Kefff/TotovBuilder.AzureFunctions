@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -12,7 +12,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a quests fetcher.
     /// </summary>
-    public class QuestsFetcher : ApiFetcher<Quest[]>, IQuestsFetcher
+    public class QuestsFetcher : ApiFetcher<IEnumerable<Quest>>, IQuestsFetcher
     {
         /// <inheritdoc/>
         protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
@@ -33,7 +33,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Result<Quest[]> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)
         {
             List<Quest> quests = new List<Quest>();
             JsonElement questsJson = JsonDocument.Parse(responseContent).RootElement;
@@ -49,7 +49,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 });
             }
 
-            return Result.Ok(quests.ToArray());
+            return Task.FromResult(Result.Ok<IEnumerable<Quest>>(quests));
         }
     }
 }
