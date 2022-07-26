@@ -55,7 +55,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             IEnumerable<Item>? result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Items);
+            result.Should().BeEquivalentTo(TestData.Items, options => options.RespectingRuntimeTypes());
         }
     }
 }

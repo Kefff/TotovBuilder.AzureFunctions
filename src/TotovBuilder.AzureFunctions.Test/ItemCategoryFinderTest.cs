@@ -16,9 +16,9 @@ namespace TotovBuilder.AzureFunctions.Test
     public class ItemCategoryFinderTest
     {
         [Theory]
-        [InlineData("ammunition", "5485a8684bdc2da71d8b4567")]
-        [InlineData("other", "5c164d2286f774194c5e69fa", "543be5e94bdc2df1348b4568")]
-        public async Task FindFromTarkovCategoryIds_ShouldGetItemCategory(string expected, params string[] tarkovItemCategoryIds)
+        [InlineData("5485a8684bdc2da71d8b4567", "ammunition")]
+        [InlineData("5c164d2286f774194c5e69fa", "other")]
+        public async Task FindFromTarkovCategoryIds_ShouldGetItemCategory(string tarkovItemCategoryId, string expected)
         {
             // Arrange
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
@@ -27,7 +27,7 @@ namespace TotovBuilder.AzureFunctions.Test
             ItemCategoryFinder itemCategoryFinder = new ItemCategoryFinder(itemCategoriesFetcherMock.Object);
 
             // Act
-            ItemCategory itemCategory = await itemCategoryFinder.FindFromTarkovCategoryIds(tarkovItemCategoryIds);
+            ItemCategory itemCategory = await itemCategoryFinder.FindFromTarkovCategoryId(tarkovItemCategoryId);
 
             // Assert
             itemCategory.Id.Should().Be(expected);

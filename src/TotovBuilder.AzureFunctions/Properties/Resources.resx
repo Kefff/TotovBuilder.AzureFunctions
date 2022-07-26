@@ -125,6 +125,10 @@
     <value>Error while fetching "{0}" blob from Azure Blob storage :
 {1}</value>
   </data>
+  <data name="DeserializationError" xml:space="preserve">
+    <value>Error while deserializing item of type "{0}" :
+{1}</value>
+  </data>
   <data name="EndFetching" xml:space="preserve">
     <value>{0} - End : Fetching.</value>
   </data>

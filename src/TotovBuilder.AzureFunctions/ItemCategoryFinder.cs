@@ -21,15 +21,15 @@ namespace TotovBuilder.AzureFunctions
         }
 
         /// <summary>
-        /// Finds an item category from a a list of category IDs.
+        /// Finds an item category from a tarkov item category ID.
         /// When no matching item category is found, return the "other" item category.
         /// </summary>
         /// <param name="tarkovCategoryIds">Tarkov item category IDs.</param>
         /// <returns>Item category.</returns>
-        public async Task<ItemCategory> FindFromTarkovCategoryIds(IEnumerable<string> tarkovCategoryIds)
+        public async Task<ItemCategory> FindFromTarkovCategoryId(string tarkovCategoryId)
         {
             IEnumerable<ItemCategory> itemCategories = await _itemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
-            ItemCategory? result = itemCategories.FirstOrDefault(ic => ic.TarkovItemCategories.Any(tic => tarkovCategoryIds.Contains(tic.Id)));
+            ItemCategory? result = itemCategories.FirstOrDefault(ic => ic.TarkovItemCategories.Any(tic => tic.Id == tarkovCategoryId));
 
             if (result == null)
             {

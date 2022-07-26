@@ -156,6 +156,7 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 },
                 CategoryId = "headwear",
                 //ConflictingItemIds = , // TODO : MISSING
+                Deafening = "None",
                 Durability = 30,
                 ErgonomicsPercentageModifier = -0.06,
                 IconLink = "https://assets.tarkov.dev/5e4bfc1586f774264f7582d3-icon.jpg",
@@ -233,6 +234,7 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 CategoryId = "mainWeapon",
                 //ConflictingItemIds = , // TODO : MISSING
                 Ergonomics = 44,
+                FireModes = new string[] { "Single fire", "Full auto" },
                 FireRate = 650,
                 HorizontalRecoil = 445,
                 IconLink = "https://assets.tarkov.dev/57dc2fa62459775949412633-icon.jpg",
@@ -265,13 +267,31 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 Weight = 0.237,
                 WikiLink = "https://escapefromtarkov.fandom.com/wiki/AK_AKademia_Bastion_dust_cover"
             },
+            new RangedWeaponMod()
+            {
+                //AccuracyPercentageModifier = , // TODO : MISSING
+                CategoryId = "rangedWeaponMod",
+                //ConflictingItemIds = , // TODO : MISSING
+                ErgonomicsModifier = -6,
+                IconLink = "https://assets.tarkov.dev/61714eec290d254f5e6b2ffc-icon.jpg",
+                Id = "61714eec290d254f5e6b2ffc",
+                ImageLink = "https://assets.tarkov.dev/61714eec290d254f5e6b2ffc-image.jpg",
+                MarketLink = "https://tarkov.dev/item/schmidt-bender-pm-ii-3-12x50-scope",
+                MaxStackableAmount = 1,
+                //ModSlots = , // TODO : MISSING
+                Name = "Schmidt & Bender PM II 3-12x50 scope",
+                RecoilPercentageModifier = 0,
+                ShortName = "PM II 3-12x50",
+                Weight = 0.9,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Schmidt_%26_Bender_PM_II_3-12x50_scope"
+            },
             new Vest()
             {
                 ArmorClass = 4,
                 ArmoredAreas = new string[]
                 {
                     "Thorax",
-                    "Stomac"
+                    "Stomach"
                 },
                 Capacity = 12,
                 CategoryId = "vest",
@@ -314,7 +334,7 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
     {
         ""categories"": [
             {
-            ""id"": ""5485a8684bdc2da71d8b4567""
+                ""id"": ""5485a8684bdc2da71d8b4567""
             }
         ],
         ""iconLink"": ""https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg"",
@@ -561,36 +581,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       {
         ""categories"": [
           {
-            ""id"": ""55818ae44bdc2dde698b456c""
-          },
-          {
-            ""id"": ""5448fe7a4bdc2d6f028b456b""
-          },
-          {
-            ""id"": ""550aa4154bdc2dd8348b456b""
-          },
-          {
-            ""id"": ""5448fe124bdc2da5018b4567""
-          }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/61714eec290d254f5e6b2ffc-icon.jpg"",
-        ""id"": ""61714eec290d254f5e6b2ffc"",
-        ""imageLink"": ""https://assets.tarkov.dev/61714eec290d254f5e6b2ffc-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/schmidt-bender-pm-ii-3-12x50-scope"",
-        ""name"": ""Schmidt & Bender PM II 3-12x50 scope"",
-        ""properties"": {
-          ""__typename"": ""ItemPropertiesScope"",
-          ""ergonomics"": -6,
-          ""recoil"": 0,
-          ""zoomLevels"": [[12, 3]]
-        },
-        ""shortName"": ""PM II 3-12x50"",
-        ""weight"": 0.9,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Schmidt_%26_Bender_PM_II_3-12x50_scope""
-      },
-      {
-        ""categories"": [
-          {
             ""id"": ""55818b084bdc2d5b648b4571""
           },
           {
@@ -666,6 +656,36 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
         ""shortName"": ""Bastion"",
         ""weight"": 0.237,
         ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/AK_AKademia_Bastion_dust_cover""
+      },
+      {
+        ""categories"": [
+          {
+            ""id"": ""55818ae44bdc2dde698b456c""
+          },
+          {
+            ""id"": ""5448fe7a4bdc2d6f028b456b""
+          },
+          {
+            ""id"": ""550aa4154bdc2dd8348b456b""
+          },
+          {
+            ""id"": ""5448fe124bdc2da5018b4567""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/61714eec290d254f5e6b2ffc-icon.jpg"",
+        ""id"": ""61714eec290d254f5e6b2ffc"",
+        ""imageLink"": ""https://assets.tarkov.dev/61714eec290d254f5e6b2ffc-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/schmidt-bender-pm-ii-3-12x50-scope"",
+        ""name"": ""Schmidt & Bender PM II 3-12x50 scope"",
+        ""properties"": {
+          ""__typename"": ""ItemPropertiesScope"",
+          ""ergonomics"": -6,
+          ""recoil"": 0,
+          ""zoomLevels"": [[12, 3]]
+        },
+        ""shortName"": ""PM II 3-12x50"",
+        ""weight"": 0.9,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Schmidt_%26_Bender_PM_II_3-12x50_scope""
       },
       {
         ""categories"": [

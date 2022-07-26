@@ -83,6 +83,16 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing item of type &quot;{0}&quot; :
+        ///{1}.
+        /// </summary>
+        internal static string DeserializationError {
+            get {
+                return ResourceManager.GetString("DeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} - End : Fetching..
         /// </summary>
         internal static string EndFetching {

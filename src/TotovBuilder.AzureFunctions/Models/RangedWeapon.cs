@@ -13,6 +13,9 @@ namespace TotovBuilder.AzureFunctions.Models
         
         /// <inheritdoc/>
         public double Ergonomics { get; set; }
+
+        /// <inheritdoc/>
+        public string[] FireModes { get; set; } = Array.Empty<string>();
         
         /// <inheritdoc/>
         public double FireRate { get; set; }

@@ -18,6 +18,11 @@
         double Ergonomics { get; set; }
 
         /// <summary>
+        /// Fire modes.
+        /// </summary>
+        string[] FireModes { get; set; }
+
+        /// <summary>
         /// Fire rate in bullets per second.
         /// <summary>
         double FireRate { get; set; }
