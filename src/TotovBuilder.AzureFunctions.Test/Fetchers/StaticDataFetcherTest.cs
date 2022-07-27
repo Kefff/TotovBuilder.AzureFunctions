@@ -124,7 +124,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     
         public class StaticDataFetcherImplementation : StaticDataFetcher<IEnumerable<ChangelogEntry>>
         {
-            protected override string AzureBlobName => TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey;
+            protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey;
 
             protected override DataType DataType => DataType.Changelog;
 

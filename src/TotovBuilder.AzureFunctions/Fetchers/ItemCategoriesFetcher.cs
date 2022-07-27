@@ -18,8 +18,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override DataType DataType => DataType.ItemCategories;
 
         /// <inheritdoc/>
-        protected override string AzureBlobName => _azureBlobName;
-        private readonly string _azureBlobName;
+        protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzureItemCategoriesBlobNameKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
@@ -31,7 +30,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public ItemCategoriesFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IConfigurationReader configurationReader, ICache cache)
             : base(logger, blobDataFetcher, configurationReader, cache)
         {
-            _azureBlobName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureItemCategoriesBlobNameKey);
         }
         
         /// <inheritdoc/>

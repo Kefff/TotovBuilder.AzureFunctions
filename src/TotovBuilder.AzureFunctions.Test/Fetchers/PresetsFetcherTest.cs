@@ -39,5 +39,72 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEquivalentTo(TestData.Presets);
         }
+
+        [Theory]
+        [InlineData("invalid")]
+        [InlineData(@"[
+  {
+  }
+]")]
+        [InlineData(@"[
+  {
+    ""content"": [],
+    ""ignorePrice"": false,
+    ""itemId"": ""57dc2fa62459775949412633"",
+    ""modSlots"": [
+      {
+      }
+    ],
+    ""quantity"": 1
+  }
+]")]
+        [InlineData(@"[
+  {
+    ""content"": [],
+    ""ignorePrice"": false,
+    ""itemId"": ""57dc2fa62459775949412633"",
+    ""modSlots"": [
+      {
+        ""item"": {
+        },
+        ""modSlotName"": ""mod_stock""
+      }
+    ],
+    ""quantity"": 1
+  }
+]")]
+        [InlineData(@"[
+  {
+    ""content"": [
+      {
+      }
+    ],
+    ""ignorePrice"": false,
+    ""itemId"": ""57dc2fa62459775949412633"",
+    ""modSlots"": [],
+    ""quantity"": 1
+  }
+]")]
+        public async Task Fetch_WithError_ShouldReturnNull(string presetsJson)
+        {
+            // Arrange
+            Mock<ILogger<PresetsFetcher>> loggerMock = new Mock<ILogger<PresetsFetcher>>();
+            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+
+            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
+            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(presetsJson)));
+
+            Mock<ICache> cacheMock = new Mock<ICache>();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            cacheMock.Setup(m => m.Get<IEnumerable<InventoryItem>>(It.IsAny<DataType>())).Returns(value: null);
+
+            PresetsFetcher fetcher = new PresetsFetcher(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
+
+            // Act
+            IEnumerable<InventoryItem>? result = await fetcher.Fetch();
+
+            // Assert
+            result.Should().BeNull();
+        }
     }
 }

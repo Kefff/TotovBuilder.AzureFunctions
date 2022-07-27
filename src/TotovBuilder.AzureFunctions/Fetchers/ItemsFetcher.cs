@@ -99,7 +99,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Ammunition), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Ammunition), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -139,7 +139,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Armor), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Armor), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -180,7 +180,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(ArmorMod), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(ArmorMod), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -218,7 +218,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(T), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(T), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -251,7 +251,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Container), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Container), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -265,8 +265,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized item.</returns>
         private async Task<Result<Item>> DeserializeData(JsonElement itemJson)
         {
-            JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
             List<string> tarkovItemCategories = new List<string>();
+            JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
 
             foreach (JsonElement tarkovItemCategoryJson in tarkovItemCategoriesJson.EnumerateArray())
             {
@@ -347,7 +347,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Eyewear), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Eyewear), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -395,7 +395,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Grenade), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Grenade), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -437,7 +437,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Headwear), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Headwear), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -487,7 +487,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Magazine), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Magazine), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -522,7 +522,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(MeleeWeapon), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(MeleeWeapon), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -556,7 +556,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Mod), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Mod), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -595,7 +595,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(RangedWeapon), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(RangedWeapon), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -631,7 +631,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(RangedWeaponMod), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(RangedWeaponMod), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -672,7 +672,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.DeserializationError, typeof(Vest), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Vest), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);

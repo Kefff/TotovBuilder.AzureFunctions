@@ -34,6 +34,14 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                     {
                         Item = new InventoryItem()
                         {
+                            Content = new InventoryItem[]
+                            {
+                                new InventoryItem()
+                                {
+                                    ItemId = "56dfef82d2720bbd668b4567",
+                                    Quantity = 30
+                                }
+                            },
                             ItemId = "564ca99c4bdc2d16268b4589",
                         },
                         ModSlotName = "mod_magazine"
@@ -58,7 +66,7 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                     {
                         Item = new InventoryItem()
                         {
-                            ItemId = "57dc32dc245977596d4ef3d3",
+                            ItemId = "59d36a0086f7747e673f3946",
                             ModSlots = new InventoryModSlot[]
                             {
                                 new InventoryModSlot()
@@ -193,7 +201,15 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       },
       {
         ""item"": {
-          ""content"": [],
+          ""content"": [
+            {
+              ""content"": [],
+              ""ignorePrice"": false,
+              ""itemId"": ""56dfef82d2720bbd668b4567"",
+              ""modSlots"": [],
+              ""quantity"": 30
+            }
+],
           ""ignorePrice"": false,
           ""itemId"": ""564ca99c4bdc2d16268b4589"",
           ""modSlots"": [],

@@ -21,11 +21,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Type of data handled.
         /// </summary>
         protected abstract DataType DataType { get; }
+        
+        /// <summary>
+        /// Key for getting the blob name in the configuration.
+        /// </summary>
+        protected abstract string AzureBlobNameKey { get; }
+
+        /// <summary>
+        /// Logger.
+        /// </summary>
+        protected readonly ILogger Logger;
 
         /// <summary>
         /// Name of the Azure Blob that stores the data.
         /// </summary>
-        protected abstract string AzureBlobName { get; }
+        private string AzureBlobName;
 
         /// <summary>
         /// Blob fetcher.
@@ -43,23 +53,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private Task FetchingTask = Task.CompletedTask;
 
         /// <summary>
-        /// Logger.
-        /// </summary>
-        private readonly ILogger Logger;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="StaticDataFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
         /// <param name="configurationReader">Configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public StaticDataFetcher(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache)
+        protected StaticDataFetcher(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache)
         {
             BlobFetcher = blobFetcher;
             Cache = cache;
             ConfigurationReader = configurationReader;
             Logger = logger;
+
+            AzureBlobName = ConfigurationReader.ReadString(AzureBlobNameKey);
         }
 
         /// <inheritdoc/>

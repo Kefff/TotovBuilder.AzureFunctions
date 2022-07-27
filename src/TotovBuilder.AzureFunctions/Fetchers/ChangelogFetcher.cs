@@ -19,8 +19,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override DataType DataType => DataType.Changelog;
         
         /// <inheritdoc/>
-        protected override string AzureBlobName => _azureBlobName;
-        private readonly string _azureBlobName;
+        protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
@@ -32,7 +31,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public ChangelogFetcher(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache)
             : base(logger, blobFetcher, configurationReader, cache)
         {
-            _azureBlobName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey);
         }
         
         /// <inheritdoc/>

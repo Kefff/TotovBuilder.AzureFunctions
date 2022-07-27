@@ -83,16 +83,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while deserializing item of type &quot;{0}&quot; :
-        ///{1}.
-        /// </summary>
-        internal static string DeserializationError {
-            get {
-                return ResourceManager.GetString("DeserializationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} - End : Fetching..
         /// </summary>
         internal static string EndFetching {
@@ -215,11 +205,31 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing item of type &quot;{0}&quot; :
+        ///{1}.
+        /// </summary>
+        internal static string ItemDeserializationError {
+            get {
+                return ResourceManager.GetString("ItemDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item category &quot;{0}&quot; is not implemented..
         /// </summary>
         internal static string NotImplementedItemCategory {
             get {
                 return ResourceManager.GetString("NotImplementedItemCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing preset :
+        ///{0}.
+        /// </summary>
+        internal static string PresetDeserializationError {
+            get {
+                return ResourceManager.GetString("PresetDeserializationError", resourceCulture);
             }
         }
         

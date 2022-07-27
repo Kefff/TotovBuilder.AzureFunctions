@@ -19,7 +19,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         where T: class
     {
         /// <summary>
-        /// API query key.
+        /// Key for getting the API query in the configuration.
         /// </summary>
         protected abstract string ApiQueryKey { get; }
 

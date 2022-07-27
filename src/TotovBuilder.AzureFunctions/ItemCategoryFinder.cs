@@ -33,7 +33,7 @@ namespace TotovBuilder.AzureFunctions
 
             if (result == null)
             {
-                result = itemCategories.Single(ic => ic.Id == "other");
+                result = new ItemCategory() { Id = "other" };
             }
 
             return result;
