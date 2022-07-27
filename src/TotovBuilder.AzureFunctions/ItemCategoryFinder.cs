@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions
         public async Task<ItemCategory> FindFromTarkovCategoryId(string tarkovCategoryId)
         {
             IEnumerable<ItemCategory> itemCategories = await _itemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
-            ItemCategory? result = itemCategories.FirstOrDefault(ic => ic.TarkovItemCategories.Any(tic => tic.Id == tarkovCategoryId));
+            ItemCategory? result = itemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovCategoryId));
 
             if (result == null)
             {
