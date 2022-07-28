@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -16,10 +16,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PresetsFetcher : StaticDataFetcher<IEnumerable<InventoryItem>>, IPresetsFetcher
     {
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Presets;
+        protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzurePresetsBlobNameKey;
 
         /// <inheritdoc/>
-        protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzurePresetsBlobNameKey;
+        protected override DataType DataType => DataType.Presets;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PresetsFetcher"/> class.
@@ -34,27 +34,25 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
+        protected override Task<IEnumerable<InventoryItem>> DeserializeData(string responseContent)
         {
-            try
-            {
-                List<Result<InventoryItem>> presetsResults = new List<Result<InventoryItem>>();
-                JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
+            List<InventoryItem> presetsResults = new List<InventoryItem>();
+            JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
-                foreach (JsonElement inventoryItemJson in presetsJson.EnumerateArray())
+            foreach (JsonElement inventoryItemJson in presetsJson.EnumerateArray())
+            {
+                try
                 {
                     presetsResults.Add(DeserializeInventoryItem(inventoryItemJson));
                 }
-
-                return Task.FromResult(Result.Merge(presetsResults.ToArray()));
+                catch (Exception e)
+                {
+                    string error = string.Format(Properties.Resources.PresetDeserializationError, e);
+                    Logger.LogError(error);
+                }
             }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.PresetDeserializationError, e);
-                Logger.LogError(error);
 
-                return Task.FromResult(Result.Fail<IEnumerable<InventoryItem>>(error));
-            }
+            return Task.FromResult(presetsResults.AsEnumerable());
         }
 
         /// <summary>
@@ -62,58 +60,34 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="inventoryItemJson">Json element representing the inventory item to deserialize.</param>
         /// <returns>Deserialized <see cref="InventoryItem"/>.</returns>
-        private Result<InventoryItem> DeserializeInventoryItem(JsonElement inventoryItemJson)
+        private InventoryItem DeserializeInventoryItem(JsonElement inventoryItemJson)
         {
-            try
+            InventoryItem inventoryItem = new InventoryItem()
             {
-                InventoryItem inventoryItem = new InventoryItem()
-                {
-                    IgnorePrice = inventoryItemJson.GetProperty("ignorePrice").GetBoolean(),
-                    ItemId = inventoryItemJson.GetProperty("itemId").GetString(),
-                    Quantity = inventoryItemJson.GetProperty("quantity").GetDouble()
-                };
+                IgnorePrice = inventoryItemJson.GetProperty("ignorePrice").GetBoolean(),
+                ItemId = inventoryItemJson.GetProperty("itemId").GetString(),
+                Quantity = inventoryItemJson.GetProperty("quantity").GetDouble()
+            };
 
-                List<InventoryItem> content = new List<InventoryItem>();
+            List<InventoryItem> content = new List<InventoryItem>();
 
-                foreach (JsonElement contentInventoryItemJson in inventoryItemJson.GetProperty("content").EnumerateArray())
-                {
-                    Result<InventoryItem> contentInventoryItemResult = DeserializeInventoryItem(contentInventoryItemJson);
-
-                    if (!contentInventoryItemResult.IsSuccess)
-                    {
-                        return contentInventoryItemResult;
-                    }
-
-                    content.Add(contentInventoryItemResult.Value);
-                }
-
-                inventoryItem.Content = content.ToArray();
-
-                List<InventoryModSlot> modSlots = new List<InventoryModSlot>();
-
-                foreach (JsonElement modSlotJson in inventoryItemJson.GetProperty("modSlots").EnumerateArray())
-                {
-                    Result<InventoryModSlot> modSlotResult = DeserializeInventoryModSlot(modSlotJson);
-
-                    if (!modSlotResult.IsSuccess)
-                    {
-                        return modSlotResult.ToResult<InventoryItem>();
-                    }
-
-                    modSlots.Add(modSlotResult.Value);
-                }
-
-                inventoryItem.ModSlots = modSlots.ToArray();
-
-                return Result.Ok(inventoryItem);
-            }
-            catch (Exception e)
+            foreach (JsonElement contentInventoryItemJson in inventoryItemJson.GetProperty("content").EnumerateArray())
             {
-                string error = string.Format(Properties.Resources.PresetDeserializationError, e);
-                Logger.LogError(error);
-
-                return Result.Fail<InventoryItem>(error);
+                content.Add(DeserializeInventoryItem(contentInventoryItemJson));
             }
+
+            inventoryItem.Content = content.ToArray();
+
+            List<InventoryModSlot> modSlots = new List<InventoryModSlot>();
+
+            foreach (JsonElement modSlotJson in inventoryItemJson.GetProperty("modSlots").EnumerateArray())
+            {
+                modSlots.Add(DeserializeInventoryModSlot(modSlotJson));
+            }
+
+            inventoryItem.ModSlots = modSlots.ToArray();
+
+            return inventoryItem;
         }
 
         /// <summary>
@@ -121,33 +95,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="inventoryModSlotJson">Json element representing the inventory mod slot to deserialize.</param>
         /// <returns>Deserilized <see cref="InventoryModSlot"/>.</returns>
-        private Result<InventoryModSlot> DeserializeInventoryModSlot(JsonElement inventoryModSlotJson)
+        private InventoryModSlot DeserializeInventoryModSlot(JsonElement inventoryModSlotJson)
         {
-            try
+            InventoryModSlot inventoryModSlot = new InventoryModSlot()
             {
-                InventoryModSlot inventoryModSlot = new InventoryModSlot()
-                {
-                    ModSlotName = inventoryModSlotJson.GetProperty("modSlotName").GetString()
-                };
+                Item = DeserializeInventoryItem(inventoryModSlotJson.GetProperty("item")),
+                ModSlotName = inventoryModSlotJson.GetProperty("modSlotName").GetString()
+            };
 
-                Result<InventoryItem> inventoryItemResult = DeserializeInventoryItem(inventoryModSlotJson.GetProperty("item"));
-
-                if (!inventoryItemResult.IsSuccess)
-                {
-                    return inventoryItemResult.ToResult<InventoryModSlot>();
-                }
-
-                inventoryModSlot.Item = inventoryItemResult.Value;
-
-                return Result.Ok(inventoryModSlot);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.PresetDeserializationError, e);
-                Logger.LogError(error);
-
-                return Result.Fail<InventoryModSlot>(error);
-            }
+            return inventoryModSlot;
         }
     }
 }

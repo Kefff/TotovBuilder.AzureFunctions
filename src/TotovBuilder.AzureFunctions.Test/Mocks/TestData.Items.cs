@@ -111,6 +111,36 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 Weight = 6.12,
                 WikiLink = "https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack"
             },
+            new Container()
+            {
+                Capacity = 4,
+                CategoryId = "container",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/5783c43d2459774bbe137486-icon.jpg",
+                Id = "5783c43d2459774bbe137486",
+                ImageLink = "https://assets.tarkov.dev/5783c43d2459774bbe137486-image.jpg",
+                MarketLink = "https://tarkov.dev/item/simple-wallet",
+                MaxStackableAmount = 1,
+                Name = "Simple wallet",
+                ShortName = "Wallet",
+                Weight = 0.23,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Simple_wallet"
+            },
+            new Container()
+            {
+                //Capacity = , // TODO : MISSING
+                CategoryId = "securedContainer",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/5c093ca986f7740a1867ab12-icon.jpg",
+                Id = "5c093ca986f7740a1867ab12",
+                ImageLink = "https://assets.tarkov.dev/5c093ca986f7740a1867ab12-image.jpg",
+                MarketLink = "https://tarkov.dev/item/secure-container-kappa",
+                MaxStackableAmount = 1,
+                Name = "Secure container Kappa",
+                ShortName = "Kappa",
+                Weight = 2,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Secure_container_Kappa"
+            },
             new Eyewear()
             {
                 BlindnessProtectionPercentage = 0.1,
@@ -146,6 +176,26 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 Weight = 0.28,
                 WikiLink = "https://escapefromtarkov.fandom.com/wiki/VOG-17_Khattabka_improvised_hand_grenade"
             },
+            new Grenade()
+            {
+                CategoryId = "grenade",
+                //ConflictingItemIds = , // TODO : MISSING
+                ExplosionDelay = 2,
+                //FragmentAmmunitionId = , // TODO : MISSING
+                FragmentsAmount = 0,
+                MaximumExplosionRange = 10,
+                MinimumExplosionRange = 10,
+                IconLink = "https://assets.tarkov.dev/5a0c27731526d80618476ac4-icon.jpg",
+                Id = "5a0c27731526d80618476ac4",
+                ImageLink = "https://assets.tarkov.dev/5a0c27731526d80618476ac4-image.jpg",
+                MarketLink = "https://tarkov.dev/item/zarya-stun-grenade",
+                MaxStackableAmount = 1,
+                Name = "\"Zarya\" stun grenade",
+                ShortName = "Zarya",
+                Type = "Flashbang",
+                Weight = 0.175,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/%22Zarya%22_stun_grenade"
+            },
             new Headwear()
             {
                 ArmorClass = 4,
@@ -173,6 +223,90 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 TurningSpeedPercentageModifier = -0.08,
                 Weight = 1.17,
                 WikiLink = "https://escapefromtarkov.fandom.com/wiki/MSA_Gallet_TC_800_High_Cut_combat_helmet"
+            },
+            new Item()
+            {
+                CategoryId = "armband",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/5f9949d869e2777a0e779ba5-icon.jpg",
+                Id = "5f9949d869e2777a0e779ba5",
+                ImageLink = "https://assets.tarkov.dev/5f9949d869e2777a0e779ba5-image.jpg",
+                MarketLink = "https://tarkov.dev/item/rivals-2020-armband",
+                MaxStackableAmount = 1,
+                Name = "Rivals 2020 armband",
+                ShortName = "Rivals",
+                Weight = 0.05,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Rivals_2020_armband"
+            },
+            new Item()
+            {
+                CategoryId = "currency",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/569668774bdc2da2298b4568-icon.jpg",
+                Id = "569668774bdc2da2298b4568",
+                ImageLink = "https://assets.tarkov.dev/569668774bdc2da2298b4568-image.jpg",
+                MarketLink = "https://tarkov.dev/item/euros",
+                MaxStackableAmount = 1, // TODO : MISSING
+                Name = "Euros",
+                ShortName = "EUR",
+                Weight = 0,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Euros"
+            },
+            new Item()
+            {
+                CategoryId = "faceCover",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/5e54f76986f7740366043752-icon.jpg",
+                Id = "5e54f76986f7740366043752",
+                ImageLink = "https://assets.tarkov.dev/5e54f76986f7740366043752-image.jpg",
+                MarketLink = "https://tarkov.dev/item/shroud-half-mask",
+                MaxStackableAmount = 1,
+                Name = "Shroud half-mask",
+                ShortName = "Shroud",
+                Weight = 0.1,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Shroud_half-mask"
+            },
+            new Item()
+            {
+                CategoryId = "headphones",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/628e4e576d783146b124c64d-icon.jpg",
+                Id = "628e4e576d783146b124c64d",
+                ImageLink = "https://assets.tarkov.dev/628e4e576d783146b124c64d-image.jpg",
+                MarketLink = "https://tarkov.dev/item/peltor-comtac-4-hybrid-headset",
+                MaxStackableAmount = 1,
+                Name = "Peltor ComTac 4 Hybrid headset",
+                ShortName = "ComTac 4",
+                Weight = 0.6,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Peltor_ComTac_4_Hybrid_headset"
+            },
+            new Item()
+            {
+                CategoryId = "other",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg",
+                Id = "5c1d0c5f86f7744bb2683cf0",
+                ImageLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg",
+                MarketLink = "https://tarkov.dev/item/terragroup-labs-keycard-blue",
+                MaxStackableAmount = 1,
+                Name = "TerraGroup Labs keycard (Blue)",
+                ShortName = "Blue",
+                Weight = 0.01,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
+            },
+            new Item()
+            {
+                CategoryId = "special",
+                //ConflictingItemIds = , // TODO : MISSING
+                IconLink = "https://assets.tarkov.dev/5991b51486f77447b112d44f-icon.jpg",
+                Id = "5991b51486f77447b112d44f",
+                ImageLink = "https://assets.tarkov.dev/5991b51486f77447b112d44f-image.jpg",
+                MarketLink = "https://tarkov.dev/item/ms2000-marker",
+                MaxStackableAmount = 1,
+                Name = "MS2000 Marker",
+                ShortName = "MS2000",
+                Weight = 0.5,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/MS2000_Marker"
             },
             new Magazine()
             {
@@ -249,6 +383,27 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 Weight = 1.809,
                 WikiLink = "https://escapefromtarkov.fandom.com/wiki/Kalashnikov_AKS-74U_5.45x39_assault_rifle"
             },
+            new RangedWeapon()
+            {
+                Caliber = "Caliber1143x23ACP",
+                CategoryId = "secondaryWeapon",
+                //ConflictingItemIds = , // TODO : MISSING
+                Ergonomics = 75,
+                FireModes = new string[] { "Single fire" },
+                FireRate = 30,
+                HorizontalRecoil = 355,
+                IconLink = "https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-icon.jpg",
+                Id = "5e81c3cbac2bb513793cdc75",
+                ImageLink = "https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-image.jpg",
+                MarketLink = "https://tarkov.dev/item/colt-m1911a1-45-acp-pistol",
+                MaxStackableAmount = 1,
+                //ModSlots = , // TODO : MISSING
+                Name = "Colt M1911A1 .45 ACP pistol",
+                ShortName = "M1911A1",
+                VerticalRecoil = 530,
+                Weight = 0.231,
+                WikiLink = "https://escapefromtarkov.fandom.com/wiki/Colt_M1911A1_.45_ACP_pistol"
+            },
             new RangedWeaponMod()
             {
                 //AccuracyPercentageModifier = , // TODO : MISSING
@@ -311,20 +466,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
                 TurningSpeedPercentageModifier = -0.05,
                 Weight = 9.2,
                 WikiLink = "https://escapefromtarkov.fandom.com/wiki/6B3TM-01M_armored_rig"
-            },
-            new Item()
-            {
-                CategoryId = "other",
-                //ConflictingItemIds = , // TODO : MISSING
-                IconLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg",
-                Id = "5c1d0c5f86f7744bb2683cf0",
-                ImageLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg",
-                MarketLink = "https://tarkov.dev/item/terragroup-labs-keycard-blue",
-                MaxStackableAmount = 1,
-                Name = "TerraGroup Labs keycard (Blue)",
-                ShortName = "Blue",
-                Weight = 0.01,
-                WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
             }
         };
 
@@ -450,6 +591,41 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       {
         ""categories"": [
           {
+            ""id"": ""5795f317245977243854e041""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5783c43d2459774bbe137486-icon.jpg"",
+        ""id"": ""5783c43d2459774bbe137486"",
+        ""imageLink"": ""https://assets.tarkov.dev/5783c43d2459774bbe137486-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/simple-wallet"",
+        ""name"": ""Simple wallet"",
+        ""properties"": {
+          ""__typename"": ""ItemPropertiesContainer"",
+          ""capacity"": 4
+        },
+        ""shortName"": ""Wallet"",
+        ""weight"": 0.23,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Simple_wallet""
+      },
+      {
+        ""categories"": [
+          {
+            ""id"": ""5448bf274bdc2dfc2f8b456a""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5c093ca986f7740a1867ab12-icon.jpg"",
+        ""id"": ""5c093ca986f7740a1867ab12"",
+        ""imageLink"": ""https://assets.tarkov.dev/5c093ca986f7740a1867ab12-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/secure-container-kappa"",
+        ""name"": ""Secure container Kappa"",
+        ""properties"": null,
+        ""shortName"": ""Kappa"",
+        ""weight"": 2,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Secure_container_Kappa""
+      },
+      {
+        ""categories"": [
+          {
             ""id"": ""5448e5724bdc2ddf718b4568""
           },
           {
@@ -502,6 +678,30 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       {
         ""categories"": [
           {
+            ""id"": ""543be6564bdc2df4348b4568""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5a0c27731526d80618476ac4-icon.jpg"",
+        ""id"": ""5a0c27731526d80618476ac4"",
+        ""imageLink"": ""https://assets.tarkov.dev/5a0c27731526d80618476ac4-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/zarya-stun-grenade"",
+        ""name"": ""\""Zarya\"" stun grenade"",
+        ""properties"": {
+          ""__typename"": ""ItemPropertiesGrenade"",
+          ""contusionRadius"": 10,
+          ""fragments"": 0,
+          ""fuse"": 2,
+          ""maxExplosionDistance"": 0,
+          ""minExplosionDistance"": 0,
+          ""type"": ""Flashbang""
+        },
+        ""shortName"": ""Zarya"",
+        ""weight"": 0.175,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/%22Zarya%22_stun_grenade""
+      },
+      {
+        ""categories"": [
+          {
             ""id"": ""5a341c4086f77401f2541505""
           },
           {
@@ -532,6 +732,119 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
         ""shortName"": ""TC 800"",
         ""weight"": 1.17,
         ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/MSA_Gallet_TC_800_High_Cut_combat_helmet""
+      },
+      {
+        ""categories"": [
+          {
+            ""id"": ""5b3f15d486f77432d0509248""
+          },
+          {
+            ""id"": ""543be5f84bdc2dd4348b456a""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5f9949d869e2777a0e779ba5-icon.jpg"",
+        ""id"": ""5f9949d869e2777a0e779ba5"",
+        ""imageLink"": ""https://assets.tarkov.dev/5f9949d869e2777a0e779ba5-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/rivals-2020-armband"",
+        ""name"": ""Rivals 2020 armband"",
+        ""properties"": null,
+        ""shortName"": ""Rivals"",
+        ""weight"": 0.05,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Rivals_2020_armband""
+      },
+      {
+        ""categories"": [
+          {
+            ""id"": ""543be5dd4bdc2deb348b4569""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/569668774bdc2da2298b4568-icon.jpg"",
+        ""id"": ""569668774bdc2da2298b4568"",
+        ""imageLink"": ""https://assets.tarkov.dev/569668774bdc2da2298b4568-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/euros"",
+        ""name"": ""Euros"",
+        ""properties"": null,
+        ""shortName"": ""EUR"",
+        ""weight"": 0,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Euros""
+      },
+      {
+        ""categories"": [
+          {
+            ""id"": ""5a341c4686f77469e155819e""
+          },
+          {
+            ""id"": ""57bef4c42459772e8d35a53b""
+          },
+          {
+            ""id"": ""543be5f84bdc2dd4348b456a""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5e54f76986f7740366043752-icon.jpg"",
+        ""id"": ""5e54f76986f7740366043752"",
+        ""imageLink"": ""https://assets.tarkov.dev/5e54f76986f7740366043752-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/shroud-half-mask"",
+        ""name"": ""Shroud half-mask"",
+        ""properties"": null,
+        ""shortName"": ""Shroud"",
+        ""weight"": 0.1,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Shroud_half-mask""
+      },
+      {
+        ""categories"": [
+            {
+            ""id"": ""5645bcb74bdc2ded0b8b4578""
+            },
+            {
+            ""id"": ""543be5f84bdc2dd4348b456a""
+            }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/628e4e576d783146b124c64d-icon.jpg"",
+        ""id"": ""628e4e576d783146b124c64d"",
+        ""imageLink"": ""https://assets.tarkov.dev/628e4e576d783146b124c64d-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/peltor-comtac-4-hybrid-headset"",
+        ""name"": ""Peltor ComTac 4 Hybrid headset"",
+        ""properties"": null,
+        ""shortName"": ""ComTac 4"",
+        ""weight"": 0.6,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Peltor_ComTac_4_Hybrid_headset""
+      },
+      {
+        ""categories"": [
+          {
+            ""id"": ""5c164d2286f774194c5e69fa""
+          },
+          {
+            ""id"": ""543be5e94bdc2df1348b4568""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
+        ""id"": ""5c1d0c5f86f7744bb2683cf0"",
+        ""imageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
+        ""name"": ""TerraGroup Labs keycard (Blue)"",
+        ""properties"": {
+          ""__typename"": ""ItemPropertiesKey""
+        },
+        ""shortName"": ""Blue"",
+        ""weight"": 0.01,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
+      },
+      {
+        ""categories"": [
+          {
+            ""id"": ""5447e0e74bdc2d3c308b4567""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5991b51486f77447b112d44f-icon.jpg"",
+        ""id"": ""5991b51486f77447b112d44f"",
+        ""imageLink"": ""https://assets.tarkov.dev/5991b51486f77447b112d44f-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/ms2000-marker"",
+        ""name"": ""MS2000 Marker"",
+        ""properties"": null,
+        ""shortName"": ""MS2000"",
+        ""weight"": 0.5,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/MS2000_Marker""
       },
       {
         ""categories"": [
@@ -633,6 +946,35 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
       },
       {
         ""categories"": [
+            {
+            ""id"": ""5447b5cf4bdc2d65278b4567""
+            },
+            {
+            ""id"": ""5422acb9af1c889c16000029""
+            }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-icon.jpg"",
+        ""id"": ""5e81c3cbac2bb513793cdc75"",
+        ""imageLink"": ""https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/colt-m1911a1-45-acp-pistol"",
+        ""name"": ""Colt M1911A1 .45 ACP pistol"",
+        ""properties"": {
+            ""__typename"": ""ItemPropertiesWeapon"",
+            ""caliber"": ""Caliber1143x23ACP"",
+            ""ergonomics"": 75,
+            ""fireModes"": [
+            ""Single fire""
+            ],
+            ""fireRate"": 30,
+            ""recoilHorizontal"": 355,
+            ""recoilVertical"": 530
+        },
+        ""shortName"": ""M1911A1"",
+        ""weight"": 0.231,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Colt_M1911A1_.45_ACP_pistol""
+      },
+      {
+        ""categories"": [
           {
             ""id"": ""55818a304bdc2db5418b457d""
           },
@@ -714,27 +1056,6 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
         ""shortName"": ""6B3TM-01M"",
         ""weight"": 9.2,
         ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/6B3TM-01M_armored_rig""
-      },
-      {
-        ""categories"": [
-          {
-            ""id"": ""5c164d2286f774194c5e69fa""
-          },
-          {
-            ""id"": ""543be5e94bdc2df1348b4568""
-          }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
-        ""id"": ""5c1d0c5f86f7744bb2683cf0"",
-        ""imageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
-        ""name"": ""TerraGroup Labs keycard (Blue)"",
-        ""properties"": {
-          ""__typename"": ""ItemPropertiesKey""
-        },
-        ""shortName"": ""Blue"",
-        ""weight"": 0.01,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
       }
     ]
   }

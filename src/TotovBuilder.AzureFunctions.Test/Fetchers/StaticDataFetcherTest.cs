@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -133,9 +134,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
             }
 
-            protected override Task<Result<IEnumerable<ChangelogEntry>>> DeserializeData(string responseContent)
+            protected override Task<IEnumerable<ChangelogEntry>> DeserializeData(string responseContent)
             {
-                return Task.FromResult(Result.Ok<IEnumerable<ChangelogEntry>>(TestData.Changelog));
+                return Task.FromResult(TestData.Changelog.AsEnumerable());
             }
         }
     }

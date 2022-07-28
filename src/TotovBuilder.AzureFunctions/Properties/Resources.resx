@@ -125,6 +125,10 @@
     <value>Error while fetching "{0}" blob from Azure Blob storage :
 {1}</value>
   </data>
+  <data name="ChangelogDeserializationError" xml:space="preserve">
+    <value>Error while deserializing changelog :
+{0}</value>
+  </data>
   <data name="EndFetching" xml:space="preserve">
     <value>{0} - End : Fetching.</value>
   </data>
@@ -169,15 +173,27 @@
   <data name="InvalidStringConfigurationValue" xml:space="preserve">
     <value>Invalid "{0}" string configuration value.</value>
   </data>
+  <data name="ItemCategoryDeserializationError" xml:space="preserve">
+    <value>Error while deserializing item category :
+{0}</value>
+  </data>
   <data name="ItemDeserializationError" xml:space="preserve">
-    <value>Error while deserializing item of type "{0}" :
-{1}</value>
+    <value>Error while deserializing item :
+{0}</value>
   </data>
   <data name="NotImplementedItemCategory" xml:space="preserve">
     <value>Item category "{0}" is not implemented.</value>
   </data>
   <data name="PresetDeserializationError" xml:space="preserve">
     <value>Error while deserializing preset :
+{0}</value>
+  </data>
+  <data name="PriceDeserializationError" xml:space="preserve">
+    <value>Error while deserializing price :
+{0}</value>
+  </data>
+  <data name="QuestDeserializationError" xml:space="preserve">
+    <value>Error while deserializing quest :
 {0}</value>
   </data>
   <data name="StartFetching" xml:space="preserve">

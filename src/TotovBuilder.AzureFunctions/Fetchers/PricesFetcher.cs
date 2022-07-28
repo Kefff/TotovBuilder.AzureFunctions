@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -33,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
+        protected override Task<IEnumerable<Item>> DeserializeData(string responseContent)
         {
             List<Item> items = new List<Item>();
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
@@ -49,40 +50,48 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 foreach (JsonElement priceJson in itemJson.GetProperty("buyFor").EnumerateArray())
                 {
-                    Price price = new Price()
+                    try
                     {
-                        CurrencyName = priceJson.GetProperty("currency").GetString(),
-                        Value = priceJson.GetProperty("price").GetInt32(),
-                        ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
-                    };
+                        Price price = new Price()
+                        {
+                            CurrencyName = priceJson.GetProperty("currency").GetString(),
+                            Value = priceJson.GetProperty("price").GetInt32(),
+                            ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
+                        };
 
-                    if (priceJson.GetProperty("vendor").TryGetProperty("trader", out JsonElement traderJson))
-                    {
-                        price.Merchant = traderJson.GetProperty("normalizedName").GetString();
-                    }
-                    else
-                    {
-                        price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString();
-                    }
+                        if (priceJson.GetProperty("vendor").TryGetProperty("trader", out JsonElement traderJson))
+                        {
+                            price.Merchant = traderJson.GetProperty("normalizedName").GetString();
+                        }
+                        else
+                        {
+                            price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString();
+                        }
 
-                    if (priceJson.GetProperty("vendor").TryGetProperty("minTraderLevel", out JsonElement minTraderLevel))
-                    {
-                        price.MerchantLevel = minTraderLevel.GetInt32();
-                    }
+                        if (priceJson.GetProperty("vendor").TryGetProperty("minTraderLevel", out JsonElement minTraderLevel))
+                        {
+                            price.MerchantLevel = minTraderLevel.GetInt32();
+                        }
 
-                    if (priceJson.GetProperty("vendor").TryGetProperty("taskUnlock", out JsonElement taskUnlockJson) && taskUnlockJson.ValueKind != JsonValueKind.Null)
-                    {
-                        price.QuestId = taskUnlockJson.GetProperty("id").GetString();
-                    }
+                        if (priceJson.GetProperty("vendor").TryGetProperty("taskUnlock", out JsonElement taskUnlockJson) && taskUnlockJson.ValueKind != JsonValueKind.Null)
+                        {
+                            price.QuestId = taskUnlockJson.GetProperty("id").GetString();
+                        }
 
-                    prices.Add(price);
+                        prices.Add(price);
+                    }
+                    catch (Exception e)
+                    {
+                        string error = string.Format(Properties.Resources.PriceDeserializationError, e);
+                        Logger.LogError(error);
+                    }
                 }
 
                 item.Prices = prices.ToArray();
                 items.Add(item);
             }
 
-            return Task.FromResult(Result.Ok<IEnumerable<Item>>(items));
+            return Task.FromResult(items.AsEnumerable());
         }
     }
 }

@@ -44,18 +44,18 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
+        protected override Task<IEnumerable<Item>> DeserializeData(string responseContent)
         {
             List<Task> deserializationTasks = new List<Task>();
-            List<Result<Item>> itemResults = new List<Result<Item>>();
+            List<Item> items = new List<Item>();
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
             {
-                deserializationTasks.Add(DeserializeData(itemJson).ContinueWith(t => itemResults.Add(t.Result)));
+                deserializationTasks.Add(DeserializeData(itemJson, items));
             }
             
-            return Task.WhenAll(deserializationTasks).ContinueWith((t) => Result.Merge(itemResults.ToArray()));
+            return Task.WhenAll(deserializationTasks).ContinueWith((t) => items.AsEnumerable());
         }
 
         /// <summary>
@@ -64,46 +64,29 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Ammunition"/>.</returns>
-        private Result<Item> DeserializeAmmunition(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeAmmunition(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Ammunition> baseItemPropertiesResult = DeserializeBaseItemProperties<Ammunition>(itemJson, itemCategoryId);
+            Ammunition ammunition = DeserializeBaseItemProperties<Ammunition>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            ammunition.AccuracyPercentageModifier = propertiesJson.GetProperty("accuracy").GetDouble() / 100;
+            ammunition.ArmorDamagePercentage = propertiesJson.GetProperty("armorDamage").GetDouble() / 100;
+            //ammunition.ArmorPenetrations = ; // TODO : OBTAIN FROM WIKI
+            //ammunition.Blinding = ; // TODO : MISSING
+            ammunition.Caliber = propertiesJson.GetProperty("caliber").GetString();
+            //ammunition.DurabilityBurnPercentageModifier = ; // TODO : MISSING
+            ammunition.FleshDamage = propertiesJson.GetProperty("damage").GetDouble();
+            ammunition.FragmentationChancePercentage = propertiesJson.GetProperty("fragmentationChance").GetDouble();
+            ammunition.HeavyBleedingPercentageChance =  propertiesJson.GetProperty("heavyBleedModifier").GetDouble();
+            ammunition.LightBleedingPercentageChance = propertiesJson.GetProperty("lightBleedModifier").GetDouble();
+            ammunition.MaxStackableAmount = propertiesJson.GetProperty("stackMaxSize").GetDouble();
+            ammunition.PenetrationPower = propertiesJson.GetProperty("penetrationPower").GetDouble();
+            ammunition.Projectiles = propertiesJson.GetProperty("projectileCount").GetDouble();
+            ammunition.RecoilPercentageModifier = propertiesJson.GetProperty("recoil").GetDouble() / 100;
+            ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
+            ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Ammunition item = baseItemPropertiesResult.Value;
-                item.AccuracyPercentageModifier = propertiesJson.GetProperty("accuracy").GetDouble() / 100;
-                item.ArmorDamagePercentage = propertiesJson.GetProperty("armorDamage").GetDouble() / 100;
-                //item.ArmorPenetrations = ; // TODO : OBTAIN FROM WIKI
-                //item.Blinding = ; // TODO : MISSING
-                item.Caliber = propertiesJson.GetProperty("caliber").GetString();
-                //item.DurabilityBurnPercentageModifier = ; // TODO : MISSING
-                item.FleshDamage = propertiesJson.GetProperty("damage").GetDouble();
-                item.FragmentationChancePercentage = propertiesJson.GetProperty("fragmentationChance").GetDouble();
-                item.HeavyBleedingPercentageChance =  propertiesJson.GetProperty("heavyBleedModifier").GetDouble();
-                item.LightBleedingPercentageChance = propertiesJson.GetProperty("lightBleedModifier").GetDouble();
-                item.MaxStackableAmount = propertiesJson.GetProperty("stackMaxSize").GetDouble();
-                item.PenetrationPower = propertiesJson.GetProperty("penetrationPower").GetDouble();
-                item.Projectiles = propertiesJson.GetProperty("projectileCount").GetDouble();
-                item.RecoilPercentageModifier = propertiesJson.GetProperty("recoil").GetDouble() / 100;
-                item.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
-                item.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Ammunition), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return ammunition;
         }
 
         /// <summary>
@@ -112,38 +95,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Armor"/>.</returns>
-        private Result<Item> DeserializeArmor(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeArmor(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Armor> baseItemPropertiesResult = DeserializeBaseItemProperties<Armor>(itemJson, itemCategoryId);
+            Armor armor = DeserializeBaseItemProperties<Armor>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            armor.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
+            armor.ArmoredAreas = GetArmoredAreas(propertiesJson);
+            armor.Durability = propertiesJson.GetProperty("durability").GetDouble();
+            armor.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+            armor.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
+            armor.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
+            //armor.RicochetChance = ; // TODO : MISSING
+            armor.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Armor item = baseItemPropertiesResult.Value;
-                item.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
-                item.ArmoredAreas = GetArmoredAreas(propertiesJson);
-                item.Durability = propertiesJson.GetProperty("durability").GetDouble();
-                item.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                item.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
-                item.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                //item.RicochetChance = ; // TODO : MISSING
-                item.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Armor), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return armor;
         }
 
         /// <summary>
@@ -152,39 +118,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="ArmorMod"/>.</returns>
-        private Result<Item> DeserializeArmorMod(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeArmorMod(JsonElement itemJson, string itemCategoryId)
         {
-            Result<ArmorMod> baseItemPropertiesResult = DeserializeBaseItemProperties<ArmorMod>(itemJson, itemCategoryId);
+            ArmorMod armorMod = DeserializeBaseItemProperties<ArmorMod>(itemJson, itemCategoryId);
+            
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            armorMod.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
+            armorMod.ArmoredAreas = GetArmoredAreas(propertiesJson);
+            armorMod.Durability = propertiesJson.GetProperty("durability").GetDouble();
+            armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+            //item.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString(); // TODO : MISSING
+            //item.ModSlots = ; // TODO : MISSING
+            armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
+            //item.RicochetChance = ; // TODO : MISSING
+            armorMod.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
-
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                ArmorMod item = baseItemPropertiesResult.Value;
-                item.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
-                item.ArmoredAreas = GetArmoredAreas(propertiesJson);
-                item.Durability = propertiesJson.GetProperty("durability").GetDouble();
-                item.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                //item.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString(); // TODO : MISSING
-                //item.ModSlots = ; // TODO : MISSING
-                item.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                //item.RicochetChance = ; // TODO : MISSING
-                item.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(ArmorMod), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return armorMod;
         }
 
         /// <summary>
@@ -193,36 +142,26 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Item"/>.</returns>
-        private Result<T> DeserializeBaseItemProperties<T>(JsonElement itemJson, string itemCategoryId)
+        private T DeserializeBaseItemProperties<T>(JsonElement itemJson, string itemCategoryId)
             where T : Item, new()
         {
-            try
+            T item = new T()
             {
-                T item = new T()
-                {
-                    CategoryId = itemCategoryId,
-                    IconLink = itemJson.GetProperty("iconLink").GetString(),
-                    Id = itemJson.GetProperty("id").GetString(),
-                    ImageLink = itemJson.GetProperty("imageLink").GetString(),
-                    MarketLink = itemJson.GetProperty("link").GetString(),
-                    MaxStackableAmount = 1,
-                    Name = itemJson.GetProperty("name").GetString(),
-                    ShortName = itemJson.GetProperty("shortName").GetString(),
-                    Weight = itemJson.GetProperty("weight").GetDouble(),
-                    WikiLink = itemJson.GetProperty("wikiLink").GetString()
-                };
+                CategoryId = itemCategoryId,
+                IconLink = itemJson.GetProperty("iconLink").GetString(),
+                Id = itemJson.GetProperty("id").GetString(),
+                ImageLink = itemJson.GetProperty("imageLink").GetString(),
+                MarketLink = itemJson.GetProperty("link").GetString(),
+                MaxStackableAmount = 1,
+                Name = itemJson.GetProperty("name").GetString(),
+                ShortName = itemJson.GetProperty("shortName").GetString(),
+                Weight = itemJson.GetProperty("weight").GetDouble(),
+                WikiLink = itemJson.GetProperty("wikiLink").GetString()
+            };
 
-                //item.ConflictingItemIds = ; // TODO : MISSING
+            //item.ConflictingItemIds = ; // TODO : MISSING
 
-                return Result.Ok(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(T), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return item;
         }
 
         /// <summary>
@@ -231,30 +170,36 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Container"/>.</returns>
-        private Result<Item> DeserializeContainer(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeContainer(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Container> baseItemPropertiesResult = DeserializeBaseItemProperties<Container>(itemJson, itemCategoryId);
+            Container container = DeserializeBaseItemProperties<Container>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+
+            if (propertiesJson.ValueKind != JsonValueKind.Null)
             {
-                return baseItemPropertiesResult.ToResult<Item>();
+                container.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
             }
 
+            return container;
+        }
+
+        /// <summary>
+        /// Deserializes data representing an item into a list of items.
+        /// </summary>
+        /// <param name="itemJson">Json element representing the item to deserialize.</param>
+        /// <param name="items">List of items the deserialized item will be stored into.</param>
+        private async Task DeserializeData(JsonElement itemJson, List<Item> items)
+        {
             try
             {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Container item = baseItemPropertiesResult.Value;
-                item.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
-
-                return Result.Ok<Item>(item);
+                Item item = await DeserializeData(itemJson);
+                items.Add(item);
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Container), e);
+                string error = string.Format(Properties.Resources.ItemDeserializationError, e);
                 Logger.LogError(error);
-
-                return Result.Fail(error);
             }
         }
 
@@ -263,7 +208,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <returns>Deserialized item.</returns>
-        private async Task<Result<Item>> DeserializeData(JsonElement itemJson)
+        private async Task<Item> DeserializeData(JsonElement itemJson)
         {
             List<string> tarkovItemCategories = new List<string>();
             JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
@@ -279,13 +224,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 case "ammunition":
                     return DeserializeAmmunition(itemJson, itemCategory.Id);
-                case "armband":
-                case "currency":
-                case "faceCover":
-                case "headphones":
-                case "other":
-                case "special":
-                    return DeserializeItem(itemJson, itemCategory.Id);
                 case "armor":
                     return DeserializeArmor(itemJson, itemCategory.Id);
                 case "armorMod":
@@ -300,15 +238,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     return DeserializeGrenade(itemJson, itemCategory.Id);
                 case "headwear":
                     return DeserializeHeadwear(itemJson, itemCategory.Id);
+                case "armband":
+                case "currency":
+                case "faceCover":
+                case "headphones":
+                case "other":
+                case "special":
+                    return DeserializeItem(itemJson, itemCategory.Id);
                 case "magazine":
                     return DeserializeMagazine(itemJson, itemCategory.Id);
-                case "mainWeapon":
-                case "secondaryWeapon":
-                    return DeserializeRangedWeapon(itemJson, itemCategory.Id);
                 case "meleeWeapon":
                     return DeserializeMeleeWeapon(itemJson, itemCategory.Id);
                 case "mod":
                     return DeserializeMod(itemJson, itemCategory.Id);
+                case "mainWeapon":
+                case "secondaryWeapon":
+                    return DeserializeRangedWeapon(itemJson, itemCategory.Id);
                 case "rangedWeaponMod":
                     return DeserializeRangedWeaponMod(itemJson, itemCategory.Id);
                 case "vest":
@@ -317,7 +262,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     string error = Properties.Resources.NotImplementedItemCategory;
                     Logger.LogError(error);
 
-                    return Result.Fail(error);
+                    throw new NotImplementedException(error);
             }
         }
 
@@ -327,31 +272,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Eyewear"/>.</returns>
-        private Result<Item> DeserializeEyewear(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeEyewear(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Eyewear> baseItemPropertiesResult = DeserializeBaseItemProperties<Eyewear>(itemJson, itemCategoryId);
+            Eyewear eyewear = DeserializeBaseItemProperties<Eyewear>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            eyewear.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Eyewear item = baseItemPropertiesResult.Value;
-                item.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Eyewear), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return eyewear;
         }
 
         /// <summary>
@@ -360,46 +288,29 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Grenade"/>.</returns>
-        private Result<Item> DeserializeGrenade(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeGrenade(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Grenade> baseItemPropertiesResult = DeserializeBaseItemProperties<Grenade>(itemJson, itemCategoryId);
+            Grenade grenade = DeserializeBaseItemProperties<Grenade>(itemJson, itemCategoryId);
+            
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            grenade.ExplosionDelay = propertiesJson.GetProperty("fuse").GetDouble();
+            //grenade.FragmentAmmunitionId = ; // TOTO : MISSING
+            grenade.FragmentsAmount = propertiesJson.GetProperty("fragments").GetDouble();
+            grenade.MaximumExplosionRange = propertiesJson.GetProperty("maxExplosionDistance").GetDouble();
+            grenade.MinimumExplosionRange = propertiesJson.GetProperty("minExplosionDistance").GetDouble();
+            grenade.Type = propertiesJson.GetProperty("type").GetString();
 
-            if (!baseItemPropertiesResult.IsSuccess)
+            if (grenade.MaximumExplosionRange == 0)
             {
-                return baseItemPropertiesResult.ToResult<Item>();
+                grenade.MaximumExplosionRange = propertiesJson.GetProperty("contusionRadius").GetDouble();
             }
 
-            try
+            if (grenade.MinimumExplosionRange == 0)
             {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Grenade item = baseItemPropertiesResult.Value;
-                item.ExplosionDelay = propertiesJson.GetProperty("fuse").GetDouble();
-                //item.FragmentAmmunitionId = ; // TOTO : MISSING
-                item.FragmentsAmount = propertiesJson.GetProperty("fragments").GetDouble();
-                item.MaximumExplosionRange = propertiesJson.GetProperty("maxExplosionDistance").GetDouble();
-                item.MinimumExplosionRange = propertiesJson.GetProperty("minExplosionDistance").GetDouble();
-                item.Type = propertiesJson.GetProperty("type").GetString();
-
-                if (item.MaximumExplosionRange == 0)
-                {
-                    item.MaximumExplosionRange = propertiesJson.GetProperty("ContusionDistance").GetDouble();
-                }
-
-                if (item.MinimumExplosionRange == 0)
-                {
-                    item.MinimumExplosionRange = propertiesJson.GetProperty("ContusionDistance").GetDouble();
-                }
-
-                return Result.Ok<Item>(item);
+                grenade.MinimumExplosionRange = propertiesJson.GetProperty("contusionRadius").GetDouble();
             }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Grenade), e);
-                Logger.LogError(error);
 
-                return Result.Fail(error);
-            }
+            return grenade;
         }
 
         /// <summary>
@@ -408,40 +319,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Headwear"/>.</returns>
-        private Result<Item> DeserializeHeadwear(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeHeadwear(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Headwear> baseItemPropertiesResult = DeserializeBaseItemProperties<Headwear>(itemJson, itemCategoryId);
+            Headwear headwear = DeserializeBaseItemProperties<Headwear>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            headwear.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
+            headwear.ArmoredAreas = GetArmoredAreas(propertiesJson);
+            headwear.Deafening = propertiesJson.GetProperty("deafening").GetString();
+            headwear.Durability = propertiesJson.GetProperty("durability").GetDouble();
+            headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+            headwear.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
+            //headwear.ModSlots = ; // TODO : MISSING
+            headwear.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
+            //headwear.RicochetChance = ; // TODO : MISSING
+            headwear.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Headwear item = baseItemPropertiesResult.Value;
-                item.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
-                item.ArmoredAreas = GetArmoredAreas(propertiesJson);
-                item.Deafening = propertiesJson.GetProperty("deafening").GetString();
-                item.Durability = propertiesJson.GetProperty("durability").GetDouble();
-                item.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                item.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
-                //item.ModSlots = ; // TODO : MISSING
-                item.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                //item.RicochetChance = ; // TODO : MISSING
-                item.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Headwear), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return headwear;
         }
 
         /// <summary>
@@ -450,7 +344,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Item"/>.</returns>
-        private Result<Item> DeserializeItem(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeItem(JsonElement itemJson, string itemCategoryId)
         {
             return DeserializeBaseItemProperties<Item>(itemJson, itemCategoryId);
         }
@@ -461,37 +355,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Magazine"/>.</returns>
-        private Result<Item> DeserializeMagazine(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeMagazine(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Magazine> baseItemPropertiesResult = DeserializeBaseItemProperties<Magazine>(itemJson, itemCategoryId);
+            Magazine magazine = DeserializeBaseItemProperties<Magazine>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            //magazine.AcceptedAmmunitionIds = ; // TODO : MISSING
+            magazine.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
+            magazine.CheckSpeedPercentageModifier = propertiesJson.GetProperty("ammoCheckModifier").GetDouble();
+            magazine.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
+            magazine.LoadSpeedPercentageModifier = propertiesJson.GetProperty("loadModifier").GetDouble();
+            magazine.MalfunctionPercentage = propertiesJson.GetProperty("malfunctionChance").GetDouble();
+            //magazine.ModSlots = ; // TODO : MISSING
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Magazine item = baseItemPropertiesResult.Value;
-                //item.AcceptedAmmunitionIds = ; // TODO : MISSING
-                item.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
-                item.CheckSpeedPercentageModifier = propertiesJson.GetProperty("ammoCheckModifier").GetDouble();
-                item.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
-                item.LoadSpeedPercentageModifier = propertiesJson.GetProperty("loadModifier").GetDouble();
-                item.MalfunctionPercentage = propertiesJson.GetProperty("malfunctionChance").GetDouble();
-                //item.ModSlots = ; // TODO : MISSING
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Magazine), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return magazine;
         }
 
         /// <summary>
@@ -500,33 +377,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="MeleeWeapon"/>.</returns>
-        private Result<Item> DeserializeMeleeWeapon(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeMeleeWeapon(JsonElement itemJson, string itemCategoryId)
         {
-            Result<MeleeWeapon> baseItemPropertiesResult = DeserializeBaseItemProperties<MeleeWeapon>(itemJson, itemCategoryId);
+            MeleeWeapon meleeWeapon = DeserializeBaseItemProperties<MeleeWeapon>(itemJson, itemCategoryId);
+            
+            //JsonElement propertiesJson = itemJson.GetProperty("properties");
+            //meleeWeapon.ChopDamage = ; // TODO : MISSING
+            //meleeWeapon.HitRadius = ; // TODO : MISSING
+            //meleeWeapon.StabDamage = ; // TODO : MISSING
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
-
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                MeleeWeapon item = baseItemPropertiesResult.Value;
-                //item.ChopDamage = ; // TODO : MISSING
-                //item.HitRadius = ; // TODO : MISSING
-                //item.StabDamage = ; // TODO : MISSING
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(MeleeWeapon), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return meleeWeapon;
         }
 
         /// <summary>
@@ -535,32 +395,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Mod"/>.</returns>
-        private Result<Item> DeserializeMod(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeMod(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Mod> baseItemPropertiesResult = DeserializeBaseItemProperties<Mod>(itemJson, itemCategoryId);
+            Mod mod = DeserializeBaseItemProperties<Mod>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            mod.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
+            //mod.ModSlots = ; // TODO : MISSING
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Mod item = baseItemPropertiesResult.Value;
-                item.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
-                //item.ModSlots = ; // TODO : MISSING
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Mod), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return mod;
         }
 
         /// <summary>
@@ -569,37 +412,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="RangedWeapon"/>.</returns>
-        private Result<Item> DeserializeRangedWeapon(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeRangedWeapon(JsonElement itemJson, string itemCategoryId)
         {
-            Result<RangedWeapon> baseItemPropertiesResult = DeserializeBaseItemProperties<RangedWeapon>(itemJson, itemCategoryId);
+            RangedWeapon rangedWeapon = DeserializeBaseItemProperties<RangedWeapon>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString();
+            rangedWeapon.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
+            rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString().ToStringCase()).ToArray();
+            rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
+            rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
+            //rangedWeapon.ModSlots = ; // TODO : MISSING
+            rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                RangedWeapon item = baseItemPropertiesResult.Value;
-                item.Caliber = propertiesJson.GetProperty("caliber").GetString();
-                item.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
-                item.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString().ToStringCase()).ToArray();
-                item.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
-                item.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
-                //item.ModSlots = ; // TODO : MISSING
-                item.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(RangedWeapon), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return rangedWeapon;
         }
 
         /// <summary>
@@ -608,34 +434,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="RangedWeaponMod"/>.</returns>
-        private Result<Item> DeserializeRangedWeaponMod(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeRangedWeaponMod(JsonElement itemJson, string itemCategoryId)
         {
-            Result<RangedWeaponMod> baseItemPropertiesResult = DeserializeBaseItemProperties<RangedWeaponMod>(itemJson, itemCategoryId);
+            RangedWeaponMod rangedWeaponMod = DeserializeBaseItemProperties<RangedWeaponMod>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            //rangedWeaponMod.AccuracyPercentageModifier = ; // TODO : MISSING
+            rangedWeaponMod.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
+            //rangedWeaponMod.ModSlots = ; // TODO : MISSING
+            rangedWeaponMod.RecoilPercentageModifier = propertiesJson.GetProperty("recoil").GetDouble() / 100;
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                RangedWeaponMod item = baseItemPropertiesResult.Value;
-                //item.AccuracyPercentageModifier = ; // TODO : MISSING
-                item.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
-                //item.ModSlots = ; // TODO : MISSING
-                item.RecoilPercentageModifier = propertiesJson.GetProperty("recoil").GetDouble() / 100;
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(RangedWeaponMod), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return rangedWeaponMod;
         }
 
         /// <summary>
@@ -644,39 +453,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="Vest"/>.</returns>
-        private Result<Item> DeserializeVest(JsonElement itemJson, string itemCategoryId)
+        private Item DeserializeVest(JsonElement itemJson, string itemCategoryId)
         {
-            Result<Vest> baseItemPropertiesResult = DeserializeBaseItemProperties<Vest>(itemJson, itemCategoryId);
+            Vest vest = DeserializeBaseItemProperties<Vest>(itemJson, itemCategoryId);
 
-            if (!baseItemPropertiesResult.IsSuccess)
-            {
-                return baseItemPropertiesResult.ToResult<Item>();
-            }
+            JsonElement propertiesJson = itemJson.GetProperty("properties");
+            vest.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
+            vest.ArmoredAreas = GetArmoredAreas(propertiesJson);
+            vest.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
+            vest.Durability = propertiesJson.GetProperty("durability").GetDouble();
+            vest.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+            vest.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
+            vest.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
+            //vest.RicochetChance = ; // TODO : MISSING
+            vest.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
 
-            try
-            {
-                JsonElement propertiesJson = itemJson.GetProperty("properties");
-
-                Vest item = baseItemPropertiesResult.Value;
-                item.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
-                item.ArmoredAreas = GetArmoredAreas(propertiesJson);
-                item.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
-                item.Durability = propertiesJson.GetProperty("durability").GetDouble();
-                item.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                item.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
-                item.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                //item.RicochetChance = ; // TODO : MISSING
-                item.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
-
-                return Result.Ok<Item>(item);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ItemDeserializationError, typeof(Vest), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            return vest;
         }
 
         /// <summary>

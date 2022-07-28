@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -33,23 +34,31 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)
+        protected override Task<IEnumerable<Quest>> DeserializeData(string responseContent)
         {
             List<Quest> quests = new List<Quest>();
             JsonElement questsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement questJson in questsJson.EnumerateArray())
             {
-                quests.Add(new Quest()
+                try
                 {
-                    Id = questJson.GetProperty("id").GetString(),
-                    Name = questJson.GetProperty("name").GetString(),
-                    Merchant = questJson.GetProperty("trader").GetProperty("normalizedName").GetString(),
-                    WikiLink = questJson.GetProperty("wikiLink").GetString()
-                });
+                    quests.Add(new Quest()
+                    {
+                        Id = questJson.GetProperty("id").GetString(),
+                        Name = questJson.GetProperty("name").GetString(),
+                        Merchant = questJson.GetProperty("trader").GetProperty("normalizedName").GetString(),
+                        WikiLink = questJson.GetProperty("wikiLink").GetString()
+                    });
+                }
+                catch (Exception e)
+                {
+                    string error = string.Format(Properties.Resources.QuestDeserializationError, e);
+                    Logger.LogError(error);
+                }
             }
 
-            return Task.FromResult(Result.Ok<IEnumerable<Quest>>(quests));
+            return Task.FromResult(quests.AsEnumerable());
         }
     }
 }

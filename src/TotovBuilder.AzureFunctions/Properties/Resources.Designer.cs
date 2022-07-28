@@ -83,6 +83,16 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing changelog :
+        ///{0}.
+        /// </summary>
+        internal static string ChangelogDeserializationError {
+            get {
+                return ResourceManager.GetString("ChangelogDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} - End : Fetching..
         /// </summary>
         internal static string EndFetching {
@@ -205,8 +215,18 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while deserializing item of type &quot;{0}&quot; :
-        ///{1}.
+        ///   Looks up a localized string similar to Error while deserializing item category :
+        ///{0}.
+        /// </summary>
+        internal static string ItemCategoryDeserializationError {
+            get {
+                return ResourceManager.GetString("ItemCategoryDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing item :
+        ///{0}.
         /// </summary>
         internal static string ItemDeserializationError {
             get {
@@ -230,6 +250,26 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string PresetDeserializationError {
             get {
                 return ResourceManager.GetString("PresetDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing price :
+        ///{0}.
+        /// </summary>
+        internal static string PriceDeserializationError {
+            get {
+                return ResourceManager.GetString("PriceDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing quest :
+        ///{0}.
+        /// </summary>
+        internal static string QuestDeserializationError {
+            get {
+                return ResourceManager.GetString("QuestDeserializationError", resourceCulture);
             }
         }
         

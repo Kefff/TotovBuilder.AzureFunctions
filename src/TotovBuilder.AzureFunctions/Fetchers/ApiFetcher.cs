@@ -136,7 +136,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="responseContent">Content of a fetch response.</param>
         /// <returns>Deserialized data.</returns>
-        protected abstract Task<Result<T>> DeserializeData(string responseContent);
+        protected abstract Task<T> DeserializeData(string responseContent);
 
         /// <summary>
         /// Executes the fetch operation.
@@ -156,14 +156,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             Logger.LogInformation(string.Format(Properties.Resources.StartFetching, DataType.ToString()));
 
             string responseContent;
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ApiUrl);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-            request.Content = new StringContent(content, Encoding.UTF8, "application/json");
-
             try
             {
+                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ApiUrl);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                request.Content = new StringContent(content, Encoding.UTF8, "application/json");
+
                 IHttpClientWrapper client = HttpClientWrapperFactory.Create();
                 Task<HttpResponseMessage> fetchTask = client.SendAsync(request);
 
@@ -195,23 +195,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return isolatedDataResult.ToResult<T>();
             }
 
-            Result<T> result;
-
-            try
-            {
-                result = await DeserializeData(isolatedDataResult.Value);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ApiResponseDeserializationError, typeof(T).Name, e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
+            T deserializedData = await DeserializeData(isolatedDataResult.Value);
 
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 
-            return result;
+            return Result.Ok(deserializedData);
         }
 
         /// <summary>
@@ -255,9 +243,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 return Result.Ok(isolatedDataRawText);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
+                string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), string.Join(Environment.NewLine + Environment.NewLine, responseContent, e));
                 Logger.LogError(error);
 
                 return Result.Fail(error);

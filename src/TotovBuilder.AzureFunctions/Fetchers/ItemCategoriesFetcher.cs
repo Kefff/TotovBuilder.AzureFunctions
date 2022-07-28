@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -15,10 +16,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ItemCategoriesFetcher : StaticDataFetcher<IEnumerable<ItemCategory>>, IItemCategoriesFetcher
     {
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.ItemCategories;
+        protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzureItemCategoriesBlobNameKey;
 
         /// <inheritdoc/>
-        protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzureItemCategoriesBlobNameKey;
+        protected override DataType DataType => DataType.ItemCategories;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
@@ -33,14 +34,24 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<ItemCategory>>> DeserializeData(string responseContent)
+        protected override Task<IEnumerable<ItemCategory>> DeserializeData(string responseContent)
         {
-            IEnumerable<ItemCategory> itemCategories = JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            List<ItemCategory> itemCategories = new List<ItemCategory>();
 
-            return Task.FromResult(Result.Ok(itemCategories));
+            try
+            {
+                itemCategories.AddRange(JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
+                {
+                    PropertyNameCaseInsensitive = true
+                }));
+            }
+            catch (Exception e)
+            {
+                string error = string.Format(Properties.Resources.ItemCategoryDeserializationError, e);
+                Logger.LogError(error);
+            }
+
+            return Task.FromResult(itemCategories.AsEnumerable());
         }
     }
 }
