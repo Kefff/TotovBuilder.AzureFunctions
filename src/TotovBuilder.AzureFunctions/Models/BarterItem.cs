@@ -5,16 +5,14 @@
     /// </summary>
     public class BarterItem
     {
-        /// <inheritdoc/>
-        public string CurrencyName { get; set; } = string.Empty;
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// ID.
+        /// </summary>
         public string ItemId { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
-        public Price Price { get; set; } = new Price();
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Quantity.
+        /// </summary>
         public double Quantity { get; set; }
     }
 }

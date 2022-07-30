@@ -37,25 +37,28 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override Task<IEnumerable<Item>> DeserializeData(string responseContent)
         {
             List<Item> items = new List<Item>();
-            JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
-            foreach (JsonElement itemJson in itemsJson.EnumerateArray())
+            JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
+
+            foreach (JsonElement itemJson in pricesJson.EnumerateArray())
             {
-                Item item = new Item()
-                {
-                    Id = itemJson.GetProperty("id").GetString()
-                };
-
                 List<Price> prices = new List<Price>();
 
                 foreach (JsonElement priceJson in itemJson.GetProperty("buyFor").EnumerateArray())
                 {
                     try
                     {
+                        int value = priceJson.GetProperty("price").GetInt32();
+
+                        if (value == 0)
+                        {
+                            continue;
+                        }
+
                         Price price = new Price()
                         {
                             CurrencyName = priceJson.GetProperty("currency").GetString(),
-                            Value = priceJson.GetProperty("price").GetInt32(),
+                            Value = value,
                             ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
                         };
 
@@ -87,7 +90,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     }
                 }
 
-                item.Prices = prices.ToArray();
+                if (prices.Count == 0)
+                {
+                    continue;
+                }
+                    
+                Item item = new Item()
+                {
+                    Id = itemJson.GetProperty("id").GetString(),
+                    Prices = prices.ToArray()
+                };
+
                 items.Add(item);
             }
 

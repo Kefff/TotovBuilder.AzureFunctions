@@ -73,6 +73,16 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing barter :
+        ///{0}.
+        /// </summary>
+        internal static string BarterDeserializationError {
+            get {
+                return ResourceManager.GetString("BarterDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while fetching &quot;{0}&quot; blob from Azure Blob storage :
         ///{1}.
         /// </summary>

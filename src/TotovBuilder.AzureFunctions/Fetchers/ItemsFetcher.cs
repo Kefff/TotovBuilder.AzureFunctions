@@ -48,6 +48,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = new List<Task>();
             List<Item> items = new List<Item>();
+
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())

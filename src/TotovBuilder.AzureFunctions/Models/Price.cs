@@ -1,10 +1,17 @@
-﻿namespace TotovBuilder.AzureFunctions.Models
+﻿using System;
+
+namespace TotovBuilder.AzureFunctions.Models
 {
     /// <summary>
     /// Represents a price.
     /// </summary>
     public class Price
     {
+        /// <summary>
+        /// Barter items.
+        /// </summary>
+        public BarterItem[] BarterItems { get; set; } = Array.Empty<BarterItem>();
+
         /// <summary>
         /// Name of the currency.
         /// </summary>
@@ -26,7 +33,7 @@
         public string? QuestId { get; set; }
 
         /// <summary>
-        /// Value.
+        /// Value. 
         /// </summary>
         public double Value { get; set; }
 

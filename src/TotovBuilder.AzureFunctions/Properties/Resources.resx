@@ -121,6 +121,10 @@
     <value>Error while deserializing API response to type "{0}" :
 {1}</value>
   </data>
+  <data name="BarterDeserializationError" xml:space="preserve">
+    <value>Error while deserializing barter :
+{0}</value>
+  </data>
   <data name="BlobFetchingError" xml:space="preserve">
     <value>Error while fetching "{0}" blob from Azure Blob storage :
 {1}</value>

@@ -37,6 +37,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override Task<IEnumerable<Quest>> DeserializeData(string responseContent)
         {
             List<Quest> quests = new List<Quest>();
+
             JsonElement questsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement questJson in questsJson.EnumerateArray())

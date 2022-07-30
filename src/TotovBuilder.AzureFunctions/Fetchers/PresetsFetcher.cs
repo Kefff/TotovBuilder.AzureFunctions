@@ -37,6 +37,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override Task<IEnumerable<InventoryItem>> DeserializeData(string responseContent)
         {
             List<InventoryItem> presetsResults = new List<InventoryItem>();
+
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement inventoryItemJson in presetsJson.EnumerateArray())

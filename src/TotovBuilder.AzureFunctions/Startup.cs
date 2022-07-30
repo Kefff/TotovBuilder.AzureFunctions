@@ -24,7 +24,7 @@ namespace TotovBuilder.AzureFunctions
 
             builder.Services.AddHttpClient();
             
-            //builder.Services.AddSingleton<IBartersFetcher, BartersFetcher>();
+            builder.Services.AddSingleton<IBartersFetcher, BartersFetcher>();
             builder.Services.AddSingleton<IBlobFetcher, BlobFetcher>();
             builder.Services.AddSingleton<ICache, Cache>();
             builder.Services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
@@ -32,7 +32,7 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
             builder.Services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
             builder.Services.AddSingleton<IItemsFetcher, ItemsFetcher>();
-            //builder.Services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
+            builder.Services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
             builder.Services.AddSingleton<IPricesFetcher, PricesFetcher>();
             builder.Services.AddSingleton<IQuestsFetcher, QuestsFetcher>();
             builder.Services.AddSingleton<ItemCategoryFinder>();
