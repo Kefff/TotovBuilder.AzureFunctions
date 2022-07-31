@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 AzureChangelogBlobName = "changelog.json"
             });
-            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.Run(() => { }));
+            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.CompletedTask);
             
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
             blobFetcherMock
@@ -149,9 +149,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
             }
 
-            protected override Task<IEnumerable<ChangelogEntry>> DeserializeData(string responseContent)
+            protected override Task<Result<IEnumerable<ChangelogEntry>>> DeserializeData(string responseContent)
             {
-                return Task.FromResult(TestData.Changelog.AsEnumerable());
+                return Task.FromResult(Result.Ok(TestData.Changelog.AsEnumerable()));
             }
         }
     }

@@ -209,7 +209,7 @@ namespace TotovBuilder.AzureFunctions.Test.Mocks
               ""modSlots"": [],
               ""quantity"": 30
             }
-],
+          ],
           ""ignorePrice"": false,
           ""itemId"": ""564ca99c4bdc2d16268b4589"",
           ""modSlots"": [],

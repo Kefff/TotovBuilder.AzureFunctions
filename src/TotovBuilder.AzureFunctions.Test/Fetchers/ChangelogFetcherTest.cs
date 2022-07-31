@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -43,6 +44,53 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Changelog);
+        }
+
+        [Fact]
+        public async void Fetch_WithInvalidData_ShouldReturnNull()
+        {
+            // Arrange
+            Mock<ILogger<ChangelogFetcher>> loggerMock = new Mock<ILogger<ChangelogFetcher>>();
+
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                AzureChangelogBlobName = "changelog.json"
+            });
+
+            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
+            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+  {
+    invalid
+  },
+  {
+    ""version"": ""1.1.0"",
+    ""date"": ""2022-01-02T00:00:00+01:00"",
+    ""changes"": [
+      {
+        ""language"": ""en"",
+        ""text"": ""Added a thing.""
+      },
+      {
+        ""language"": ""fr"",
+        ""text"": ""Ajout d'une chose.""
+      }
+    ]
+  }
+]
+")));
+
+            Mock<ICache> cacheMock = new Mock<ICache>();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(value: null);
+
+            ChangelogFetcher fetcher = new ChangelogFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+
+            // Act
+            IEnumerable<ChangelogEntry>? result = await fetcher.Fetch();
+
+            // Assert
+            result.Should().BeNull();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -34,7 +35,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override Task<IEnumerable<InventoryItem>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
         {
             List<InventoryItem> presetsResults = new List<InventoryItem>();
 
@@ -53,7 +54,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            return Task.FromResult(presetsResults.AsEnumerable());
+            return Task.FromResult(Result.Ok(presetsResults.AsEnumerable()));
         }
 
         /// <summary>

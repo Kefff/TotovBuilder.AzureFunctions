@@ -36,7 +36,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override Task<IEnumerable<Item>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
             List<Item> items = new List<Item>();
 
@@ -125,7 +125,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            return Task.FromResult(items.AsEnumerable());
+            return Task.FromResult(Result.Ok(items.AsEnumerable()));
         }
     }
 }

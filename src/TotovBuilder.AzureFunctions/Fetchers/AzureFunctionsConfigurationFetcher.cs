@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -31,9 +32,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<AzureFunctionsConfiguration> DeserializeData(string responseContent)
+        protected override Task<Result<AzureFunctionsConfiguration>> DeserializeData(string responseContent)
         {
-            AzureFunctionsConfiguration azureFunctionsConfiguration = new AzureFunctionsConfiguration();
+            AzureFunctionsConfiguration azureFunctionsConfiguration;
 
             try
             {
@@ -46,9 +47,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 string error = string.Format(Properties.Resources.AzureFunctionsConfigurationDeserializationError, e);
                 Logger.LogError(error);
+
+                return Task.FromResult(Result.Fail<AzureFunctionsConfiguration>(error));
             }
 
-            return Task.FromResult(azureFunctionsConfiguration);
+            return Task.FromResult(Result.Ok(azureFunctionsConfiguration));
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -34,7 +35,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<IEnumerable<Quest>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)
         {
             List<Quest> quests = new List<Quest>();
 
@@ -59,7 +60,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            return Task.FromResult(quests.AsEnumerable());
+            return Task.FromResult(Result.Ok(quests.AsEnumerable()));
         }
     }
 }

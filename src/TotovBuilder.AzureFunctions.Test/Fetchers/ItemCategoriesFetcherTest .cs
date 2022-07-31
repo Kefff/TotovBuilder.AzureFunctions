@@ -44,5 +44,47 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEquivalentTo(TestData.ItemCategories);
         }
+
+        [Fact]
+        public async void Fetch_WithInvalidData_ShouldReturnNull()
+        {
+            // Arrange
+            Mock<ILogger<ItemCategoriesFetcher>> loggerMock = new Mock<ILogger<ItemCategoriesFetcher>>();
+
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                AzureItemCategoriesBlobName = "item-categories.json"
+            });
+
+            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
+            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+  {
+    invalid
+  },
+  {
+    ""id"": ""ammunition"",
+    ""types"": [
+      {
+        ""id"": ""5485a8684bdc2da71d8b4567"",
+        ""name"": ""Ammo""
+      }
+    ]
+  }
+]
+")));
+
+            Mock<ICache> cacheMock = new Mock<ICache>();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            cacheMock.Setup(m => m.Get<IEnumerable<ItemCategory>>(It.IsAny<DataType>())).Returns(value: null);
+
+            ItemCategoriesFetcher fetcher = new ItemCategoriesFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+
+            // Act
+            IEnumerable<ItemCategory>? result = await fetcher.Fetch();
+
+            // Assert
+            result.Should().BeNull();
+        }
     }
 }

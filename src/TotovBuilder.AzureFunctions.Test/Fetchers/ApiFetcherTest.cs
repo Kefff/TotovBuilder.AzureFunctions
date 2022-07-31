@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -33,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
-            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.Run(() => { }));
+            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.CompletedTask);
             
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
@@ -295,9 +296,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
             }
 
-            protected override Task<IEnumerable<Quest>> DeserializeData(string responseContent)
+            protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)
             {
-                return Task.FromResult(TestData.Quests.AsEnumerable());
+                return Task.FromResult(Result.Ok(TestData.Quests.AsEnumerable()));
             }
         }
     }

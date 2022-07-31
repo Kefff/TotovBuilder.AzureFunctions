@@ -132,7 +132,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="responseContent">Content of a fetch response.</param>
         /// <returns>Deserialized data.</returns>
-        protected abstract Task<T> DeserializeData(string responseContent);
+        protected abstract Task<Result<T>> DeserializeData(string responseContent);
 
         /// <summary>
         /// Executes the fetch operation.
@@ -152,6 +152,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             Logger.LogInformation(string.Format(Properties.Resources.StartFetching, DataType.ToString()));
 
             string responseContent;
+
             try
             {
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ApiUrl);
@@ -191,11 +192,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return isolatedDataResult.ToResult<T>();
             }
 
-            T deserializedData = await DeserializeData(isolatedDataResult.Value);
+            Result<T> deserializedDataResult = await DeserializeData(isolatedDataResult.Value);
 
             Logger.LogInformation(string.Format(Properties.Resources.EndFetching, DataType.ToString()));
 
-            return Result.Ok(deserializedData);
+            return deserializedDataResult;
         }
 
         /// <summary>

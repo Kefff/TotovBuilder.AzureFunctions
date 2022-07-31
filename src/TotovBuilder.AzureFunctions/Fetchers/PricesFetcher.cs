@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -35,7 +36,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<IEnumerable<Item>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
             List<Item> items = new List<Item>();
 
@@ -45,9 +46,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 List<Price> prices = new List<Price>();
 
-                foreach (JsonElement priceJson in itemJson.GetProperty("buyFor").EnumerateArray())
+                try
                 {
-                    try
+                    foreach (JsonElement priceJson in itemJson.GetProperty("buyFor").EnumerateArray())
                     {
                         int value = priceJson.GetProperty("price").GetInt32();
 
@@ -84,11 +85,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                         prices.Add(price);
                     }
-                    catch (Exception e)
-                    {
-                        string error = string.Format(Properties.Resources.PriceDeserializationError, e);
-                        Logger.LogError(error);
-                    }
+                }
+                catch (Exception e)
+                {
+                    string error = string.Format(Properties.Resources.PriceDeserializationError, e);
+                    Logger.LogError(error);
                 }
 
                 if (prices.Count == 0)
@@ -105,7 +106,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 items.Add(item);
             }
 
-            return Task.FromResult(items.AsEnumerable());
+            return Task.FromResult(Result.Ok(items.AsEnumerable()));
         }
     }
 }

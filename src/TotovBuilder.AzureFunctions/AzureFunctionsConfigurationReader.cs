@@ -71,7 +71,7 @@ namespace TotovBuilder.AzureFunctions
         /// </summary>
         private async Task Load()
         {
-            Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? new AzureFunctionsConfiguration();
+            Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
             AddEnvironmentConfiguration();
 
             LoadingTask.Start();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -34,24 +35,26 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<IEnumerable<ChangelogEntry>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<ChangelogEntry>>> DeserializeData(string responseContent)
         {
-            List<ChangelogEntry> changelog = new List<ChangelogEntry>();
+            IEnumerable<ChangelogEntry> changelog;
 
             try
             {
-                changelog.AddRange(JsonSerializer.Deserialize<IEnumerable<ChangelogEntry>>(responseContent, new JsonSerializerOptions()
+                changelog = JsonSerializer.Deserialize<IEnumerable<ChangelogEntry>>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
-                }));            
+                });
             }
             catch (Exception e)
             {
                 string error = string.Format(Properties.Resources.ChangelogDeserializationError, e);
                 Logger.LogError(error);
+
+                return Task.FromResult(Result.Fail<IEnumerable<ChangelogEntry>>(error));
             }
 
-            return Task.FromResult(changelog.OrderByDescending(c => c.Date).AsEnumerable());
+            return Task.FromResult(Result.Ok(changelog.OrderByDescending(c => c.Date).AsEnumerable()));
         }
     }
 }

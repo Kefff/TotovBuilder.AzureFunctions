@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
@@ -34,24 +34,26 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<IEnumerable<ItemCategory>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<ItemCategory>>> DeserializeData(string responseContent)
         {
-            List<ItemCategory> itemCategories = new List<ItemCategory>();
+            IEnumerable<ItemCategory> itemCategories;
 
             try
             {
-                itemCategories.AddRange(JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
+                itemCategories = JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
-                }));
+                });
             }
             catch (Exception e)
             {
                 string error = string.Format(Properties.Resources.ItemCategoryDeserializationError, e);
                 Logger.LogError(error);
+
+                return Task.FromResult(Result.Fail<IEnumerable<ItemCategory>>(error));
             }
 
-            return Task.FromResult(itemCategories.AsEnumerable());
+            return Task.FromResult(Result.Ok(itemCategories));
         }
     }
 }
