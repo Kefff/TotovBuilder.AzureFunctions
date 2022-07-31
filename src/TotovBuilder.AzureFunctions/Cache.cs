@@ -20,7 +20,7 @@ namespace TotovBuilder.AzureFunctions
         /// <summary>
         /// Configuration reader;
         /// </summary>
-        protected readonly IConfigurationReader ConfigurationReader;
+        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
         /// Cache instance.
@@ -40,10 +40,10 @@ namespace TotovBuilder.AzureFunctions
         /// Initializes a new instance of the <see cref="Cache"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="configurationReader">Configuration reader.</param>
-        public Cache(ILogger logger, IConfigurationReader configurationReader)
+        /// <param name="configurationReader">Azure Functions configuration reader.</param>
+        public Cache(ILogger logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
         {
-            ConfigurationReader = configurationReader;
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
             Logger = logger;
         }
  
@@ -68,7 +68,7 @@ namespace TotovBuilder.AzureFunctions
             }
             
             TimeSpan durationSinceLastFetch = DateTime.Now - lastStorageDate;
-            int cacheDuration = ConfigurationReader.ReadInt(dataType == DataType.Prices ? TotovBuilder.AzureFunctions.ConfigurationReader.PriceCacheDurationKey : TotovBuilder.AzureFunctions.ConfigurationReader.CacheDurationKey);
+            int cacheDuration = dataType == DataType.Prices ? AzureFunctionsConfigurationReader.Values.PriceCacheDuration : AzureFunctionsConfigurationReader.Values.CacheDuration;
 
             return durationSinceLastFetch.TotalSeconds <= cacheDuration;
         }

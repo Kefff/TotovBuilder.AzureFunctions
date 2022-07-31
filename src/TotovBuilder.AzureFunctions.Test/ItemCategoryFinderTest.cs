@@ -4,7 +4,7 @@ using FluentAssertions;
 using FluentResults;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
-using TotovBuilder.AzureFunctions.Models;
+using TotovBuilder.AzureFunctions.Models.Items;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 

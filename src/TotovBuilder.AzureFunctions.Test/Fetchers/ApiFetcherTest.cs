@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction;
@@ -28,10 +26,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink trader { normalizedName } } }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
-            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.Run(() => { }));
             
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
@@ -48,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             _ = apiFetcher.Fetch();
@@ -67,10 +69,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink trader { normalizedName } } }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
-            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
             
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
@@ -80,7 +85,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(true);
             cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<Quest>? result = await apiFetcher.Fetch();
@@ -98,10 +103,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink trader { normalizedName } } }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
-            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
@@ -114,7 +122,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<Quest>? result = await apiFetcher.Fetch();
@@ -131,14 +139,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ tasks { id name trader { normalizedName } wikiLink } }"
+            });
             
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<Quest>? result = await apiFetcher.Fetch();
@@ -156,10 +169,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink trader { normalizedName } } }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
-            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(1);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 1
+            });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
@@ -176,7 +192,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<Quest>? result = await apiFetcher.Fetch();
@@ -194,10 +210,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink trader { normalizedName } } }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
-            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
@@ -210,7 +228,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<Quest>? result = await apiFetcher.Fetch();
@@ -234,10 +252,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
 
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiQuestsQueryKey)).Returns("{ tasks { id name wikiLink trader { normalizedName } } }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
-            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
@@ -251,7 +272,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(() => null);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<Quest>? result = await apiFetcher.Fetch();
@@ -265,12 +286,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
         public class ApiFetcherImplementation : ApiFetcher<IEnumerable<Quest>>
         {
-            protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
+            protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiQuestsQuery;
 
             protected override DataType DataType => DataType.Prices;
 
-            public ApiFetcherImplementation(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache) 
-               : base(logger, httpClientWrapperFactory, configurationReader, cache)
+            public ApiFetcherImplementation(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache) 
+               : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
             {
             }
 

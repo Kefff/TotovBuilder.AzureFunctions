@@ -7,7 +7,7 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.AzureFunctions.Models;
+using TotovBuilder.AzureFunctions.Models.Items;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
@@ -23,7 +23,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<ILogger<ItemCategoriesFetcher>> loggerMock = new Mock<ILogger<ItemCategoriesFetcher>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                AzureItemCategoriesBlobName = "item-categories.json"
+            });
 
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
             blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ItemCategoriesJson)));
@@ -31,7 +36,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            ItemCategoriesFetcher fetcher = new ItemCategoriesFetcher(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            ItemCategoriesFetcher fetcher = new ItemCategoriesFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<ItemCategory>? result = await fetcher.Fetch();

@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
-using TotovBuilder.AzureFunctions.Models;
+using TotovBuilder.AzureFunctions.Models.Items;
 
 namespace TotovBuilder.AzureFunctions
 {
     public class ItemCategoryFinder
     {
-        private readonly IItemCategoriesFetcher _itemCategoriesFetcher;
+        /// <summary>
+        /// Item categories fetcher.
+        /// </summary>
+        private readonly IItemCategoriesFetcher ItemCategoriesFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemCategoryFinder"/> class.
@@ -17,7 +20,7 @@ namespace TotovBuilder.AzureFunctions
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         public ItemCategoryFinder(IItemCategoriesFetcher itemCategoriesFetcher)
         {
-            _itemCategoriesFetcher = itemCategoriesFetcher;
+            ItemCategoriesFetcher = itemCategoriesFetcher;
         }
 
         /// <summary>
@@ -28,7 +31,7 @@ namespace TotovBuilder.AzureFunctions
         /// <returns>Item category.</returns>
         public async Task<ItemCategory> FindFromTarkovCategoryId(string tarkovCategoryId)
         {
-            IEnumerable<ItemCategory> itemCategories = await _itemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
+            IEnumerable<ItemCategory> itemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
             ItemCategory? result = itemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovCategoryId));
 
             if (result == null)

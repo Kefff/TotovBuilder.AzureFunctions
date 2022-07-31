@@ -20,9 +20,9 @@ namespace TotovBuilder.AzureFunctions.Test
         {
             // Arrange
             Mock<ILogger<ICache>> loggerMock = new Mock<ILogger<ICache>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
-            Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
+            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationReaderMock.Object);
             
             // Act
             IEnumerable<ChangelogEntry>? result = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
@@ -36,9 +36,9 @@ namespace TotovBuilder.AzureFunctions.Test
         {
             // Arrange
             Mock<ILogger<ICache>> loggerMock = new Mock<ILogger<ICache>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
-            Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
+            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationReaderMock.Object);
             cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act
@@ -53,9 +53,9 @@ namespace TotovBuilder.AzureFunctions.Test
         {
             // Arrange
             Mock<ILogger<ICache>> loggerMock = new Mock<ILogger<ICache>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
-            Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
+            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationReaderMock.Object);
             
             // Act
             bool result = cache.HasValidCache(DataType.Changelog);
@@ -72,10 +72,13 @@ namespace TotovBuilder.AzureFunctions.Test
         {
             // Arrange            
             Mock<ILogger<ICache>> loggerMock = new Mock<ILogger<ICache>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadInt(It.IsAny<string>())).Returns(cacheDuration);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                CacheDuration = cacheDuration
+            });
             
-            Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
+            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationReaderMock.Object);
             cache.Store(dataType, "Test");
 
             // Act
@@ -91,9 +94,9 @@ namespace TotovBuilder.AzureFunctions.Test
         {
             // Arrange
             Mock<ILogger<ICache>> loggerMock = new Mock<ILogger<ICache>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
-            Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
+            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationReaderMock.Object);
             cache.Store(DataType.Changelog, TestData.Changelog);
             IEnumerable<ChangelogEntry>? result1 = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
             
@@ -111,10 +114,10 @@ namespace TotovBuilder.AzureFunctions.Test
         {
             // Arrange
             Mock<ILogger<ICache>> loggerMock = new Mock<ILogger<ICache>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
             
             // Act
-            Cache cache = new Cache(loggerMock.Object, configurationReaderMock.Object);
+            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationReaderMock.Object);
             cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act

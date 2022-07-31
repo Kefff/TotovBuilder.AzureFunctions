@@ -19,14 +19,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         where T: class
     {
         /// <summary>
-        /// Key for getting the API query in the configuration.
+        /// API query.
         /// </summary>
-        protected abstract string ApiQueryKey { get; }
+        protected abstract string ApiQuery { get; }
 
         /// <summary>
         /// Configuration reader;
         /// </summary>
-        protected readonly IConfigurationReader ConfigurationReader;
+        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
         /// Type of data handled.
@@ -37,11 +37,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Logger.
         /// </summary>
         protected readonly ILogger Logger;
-
-        /// <summary>
-        /// API query.
-        /// </summary>
-        private readonly string ApiQuery;
 
         /// <summary>
         /// API URL.
@@ -73,17 +68,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="configurationReader">Configuration reader.</param>
-        protected ApiFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache)
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        protected ApiFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
         {
             Cache = cache;
-            ConfigurationReader = configurationReader;
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
             HttpClientWrapperFactory = httpClientWrapperFactory;
             Logger = logger;
             
-            ApiQuery = ConfigurationReader.ReadString(ApiQueryKey);
-            ApiUrl = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.ApiUrlKey);
-            FetchTimeout = ConfigurationReader.ReadInt(TotovBuilder.AzureFunctions.ConfigurationReader.FetchTimeoutKey);
+            ApiUrl = AzureFunctionsConfigurationReader.Values.ApiUrl;
+            FetchTimeout = AzureFunctionsConfigurationReader.Values.FetchTimeout;
         }
 
         /// <summary>
@@ -92,6 +86,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Data fetched as a JSON string.</returns>
         public async Task<T?> Fetch()
         {
+            await AzureFunctionsConfigurationReader.WaitUntilReady(); // Awaiting for the configuration to be loaded
+
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(string.Format(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString()));

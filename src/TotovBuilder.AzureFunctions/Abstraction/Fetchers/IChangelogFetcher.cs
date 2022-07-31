@@ -6,7 +6,7 @@ namespace TotovBuilder.AzureFunctions.Abstraction.Fetchers
     /// <summary>
     /// Provides the functionalities of a changelog fetcher.
     /// </summary>
-    public interface IChangelogFetcher :IApiFetcher<IEnumerable<ChangelogEntry>>
+    public interface IChangelogFetcher : IApiFetcher<IEnumerable<ChangelogEntry>>
     {
     }
 }

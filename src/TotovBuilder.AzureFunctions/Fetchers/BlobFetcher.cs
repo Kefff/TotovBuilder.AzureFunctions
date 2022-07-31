@@ -35,7 +35,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Configuration reader.
         /// </summary>
-        private readonly IConfigurationReader ConfigurationReader;
+        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
         /// Logger.
@@ -46,21 +46,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="BlobFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="configurationReader">Configuration reader.</param>
-        public BlobFetcher(ILogger<BlobFetcher> logger, IConfigurationReader configurationReader)
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        public BlobFetcher(ILogger<BlobFetcher> logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
         {
-            ConfigurationReader = configurationReader;
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
             Logger = logger;
 
-            AzureBlobStorageConnectionString = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureBlobStorageConnectionStringKey);
-            AzureBlobStorageContainerName = ConfigurationReader.ReadString(TotovBuilder.AzureFunctions.ConfigurationReader.AzureBlobStorageContainerNameKey);
-            FetchTimeout = ConfigurationReader.ReadInt(TotovBuilder.AzureFunctions.ConfigurationReader.FetchTimeoutKey);
+            AzureBlobStorageConnectionString = AzureFunctionsConfigurationReader.Values.AzureBlobStorageConnectionString;
+            AzureBlobStorageContainerName = AzureFunctionsConfigurationReader.Values.AzureBlobStorageContainerName;
+            FetchTimeout = AzureFunctionsConfigurationReader.Values.FetchTimeout;
         }
 
         /// <inheritdoc/>
-        public Task<Result<string>> Fetch(string blobName)
+        public async Task<Result<string>> Fetch(string blobName)
         {
-            return Task.Run(() => ExecuteFetch(blobName));
+            await AzureFunctionsConfigurationReader.WaitUntilReady(); // Awaiting for the configuration to be loaded
+
+            return ExecuteFetch(blobName);
         }
 
         /// <summary>

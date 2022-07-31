@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.AzureFunctions.Models;
+using TotovBuilder.AzureFunctions.Models.Items;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
@@ -24,10 +24,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<BartersFetcher>> loggerMock = new Mock<ILogger<BartersFetcher>>();
 
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiBartersQueryKey)).Returns("{ barters { level requiredItems { item { id } quantity } rewardItems { item { id } quantity } trader { normalizedName } taskUnlock { id }  }  }");
-            configurationReaderMock.Setup(m => m.ReadString(ConfigurationReader.ApiUrlKey)).Returns("https://localhost/api");
-            configurationReaderMock.Setup(m => m.ReadInt(ConfigurationReader.FetchTimeoutKey)).Returns(5);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiBartersQuery = "{ barters { level requiredItems { item { id } quantity } rewardItems { item { id } quantity } trader { normalizedName } taskUnlock { id }  }  }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
@@ -40,7 +43,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            BartersFetcher fetcher = new BartersFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            BartersFetcher fetcher = new BartersFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();

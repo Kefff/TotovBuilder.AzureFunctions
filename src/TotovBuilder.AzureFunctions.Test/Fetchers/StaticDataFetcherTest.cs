@@ -24,7 +24,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<ILogger<StaticDataFetcherImplementation>> loggerMock = new Mock<ILogger<StaticDataFetcherImplementation>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                AzureChangelogBlobName = "changelog.json"
+            });
+            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.Run(() => { }));
             
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
             blobFetcherMock
@@ -38,7 +43,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(TestData.Changelog);
 
-            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             _ = staticDataFetcher.Fetch();
@@ -56,14 +61,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<ILogger<StaticDataFetcherImplementation>> loggerMock = new Mock<ILogger<StaticDataFetcherImplementation>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(true);
             cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(TestData.Changelog);
 
-            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
             
             // Act
             IEnumerable<ChangelogEntry>? result = await staticDataFetcher.Fetch();
@@ -79,7 +84,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithoutValidCachedData_ShouldFetchDataAndCacheIt()
         {
             Mock<ILogger<StaticDataFetcherImplementation>> loggerMock = new Mock<ILogger<StaticDataFetcherImplementation>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                AzureChangelogBlobName = "changelog.json"
+            });
 
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
             blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
@@ -87,7 +97,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             
-            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
             
             // Act
             IEnumerable<ChangelogEntry>? result = await staticDataFetcher.Fetch();
@@ -103,7 +113,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithError_ShouldReturnCachedData()
         {
             Mock<ILogger<StaticDataFetcherImplementation>> loggerMock = new Mock<ILogger<StaticDataFetcherImplementation>>();
-            Mock<IConfigurationReader> configurationReaderMock = new Mock<IConfigurationReader>();
+
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                AzureChangelogBlobName = "changelog.json"
+            });
 
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
             blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Fail<string>(string.Empty)));
@@ -111,7 +126,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(TestData.Changelog);
             
-            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, configurationReaderMock.Object, cacheMock.Object);
+            StaticDataFetcherImplementation staticDataFetcher = new StaticDataFetcherImplementation(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
             
             // Act
             IEnumerable<ChangelogEntry>? result = await staticDataFetcher.Fetch();
@@ -125,12 +140,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     
         public class StaticDataFetcherImplementation : StaticDataFetcher<IEnumerable<ChangelogEntry>>
         {
-            protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey;
+            protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureChangelogBlobName;
 
             protected override DataType DataType => DataType.Changelog;
 
-            public StaticDataFetcherImplementation(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache) 
-               : base(logger, blobFetcher, configurationReader, cache)
+            public StaticDataFetcherImplementation(ILogger logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache) 
+               : base(logger, blobFetcher, azureFunctionsConfigurationReader, cache)
             {
             }
 

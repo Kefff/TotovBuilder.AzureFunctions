@@ -16,7 +16,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ChangelogFetcher : StaticDataFetcher<IEnumerable<ChangelogEntry>>, IChangelogFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobNameKey => TotovBuilder.AzureFunctions.ConfigurationReader.AzureChangelogBlobNameKey;
+        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureChangelogBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Changelog;
@@ -26,10 +26,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="configurationReader">Configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public ChangelogFetcher(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache)
-            : base(logger, blobFetcher, configurationReader, cache)
+        public ChangelogFetcher(ILogger logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+            : base(logger, blobFetcher, azureFunctionsConfigurationReader, cache)
         {
         }
         

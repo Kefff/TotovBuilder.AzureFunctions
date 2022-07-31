@@ -6,6 +6,11 @@
     public enum DataType
     {
         /// <summary>
+        /// Azure Functions configuration.
+        /// </summary>
+        AzureFunctionsConfiguration,
+
+        /// <summary>
         /// Item categories.
         /// </summary>
         Barters,

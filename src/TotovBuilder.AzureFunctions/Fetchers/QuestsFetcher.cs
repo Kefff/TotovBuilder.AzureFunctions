@@ -16,7 +16,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class QuestsFetcher : ApiFetcher<IEnumerable<Quest>>, IQuestsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiQuestsQueryKey;
+        protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiQuestsQuery;
         
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Quests;
@@ -26,10 +26,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="configurationReader">Configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public QuestsFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IConfigurationReader configurationReader, ICache cache)
-            : base(logger, httpClientWrapperFactory, configurationReader, cache)
+        public QuestsFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
         {
         }
         

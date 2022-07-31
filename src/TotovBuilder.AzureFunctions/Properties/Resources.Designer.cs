@@ -73,6 +73,16 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing Azure Functions configuration :
+        ///{0}.
+        /// </summary>
+        internal static string AzureFunctionsConfigurationDeserializationError {
+            get {
+                return ResourceManager.GetString("AzureFunctionsConfigurationDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing barter :
         ///{0}.
         /// </summary>

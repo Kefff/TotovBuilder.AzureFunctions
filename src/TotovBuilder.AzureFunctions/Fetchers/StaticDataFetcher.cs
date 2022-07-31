@@ -15,27 +15,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Configuration reader;
         /// </summary>
-        protected readonly IConfigurationReader ConfigurationReader; 
+        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+
+        /// <summary>
+        /// Name of the Azure Blob that stores the data.
+        /// </summary>
+        protected abstract string AzureBlobName { get; }
 
         /// <summary>
         /// Type of data handled.
         /// </summary>
         protected abstract DataType DataType { get; }
-        
-        /// <summary>
-        /// Key for getting the blob name in the configuration.
-        /// </summary>
-        protected abstract string AzureBlobNameKey { get; }
 
         /// <summary>
         /// Logger.
         /// </summary>
         protected readonly ILogger Logger;
-
-        /// <summary>
-        /// Name of the Azure Blob that stores the data.
-        /// </summary>
-        private readonly string AzureBlobName;
 
         /// <summary>
         /// Blob fetcher.
@@ -57,21 +52,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="configurationReader">Configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        protected StaticDataFetcher(ILogger logger, IBlobFetcher blobFetcher, IConfigurationReader configurationReader, ICache cache)
+        protected StaticDataFetcher(ILogger logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
         {
             BlobFetcher = blobFetcher;
             Cache = cache;
-            ConfigurationReader = configurationReader;
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
             Logger = logger;
-
-            AzureBlobName = ConfigurationReader.ReadString(AzureBlobNameKey);
         }
 
         /// <inheritdoc/>
         public async Task<T?> Fetch()
         {
+            await AzureFunctionsConfigurationReader.WaitUntilReady(); // Awaiting for the configuration to be loaded
+
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(string.Format(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString()));

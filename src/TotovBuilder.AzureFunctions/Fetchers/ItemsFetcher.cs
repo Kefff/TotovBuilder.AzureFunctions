@@ -7,7 +7,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstraction;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
-using TotovBuilder.AzureFunctions.Models;
+using TotovBuilder.AzureFunctions.Models.Items;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -16,31 +16,34 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// </summary>
     public class ItemsFetcher : ApiFetcher<IEnumerable<Item>>, IItemsFetcher
     {
-        private readonly ItemCategoryFinder _itemCategoryFinder;
-
         /// <inheritdoc/>
-        protected override string ApiQueryKey => TotovBuilder.AzureFunctions.ConfigurationReader.ApiItemsQueryKey;
+        protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiItemsQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Items;
+
+        /// <summary>
+        /// Items category finder.
+        /// </summary>
+        private readonly ItemCategoryFinder ItemCategoryFinder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemsFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="configurationReader">Configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="cache">Cache.</param>
         /// <param name="itemCategoryFinder">Item category finder.</param>
         public ItemsFetcher(
             ILogger logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IConfigurationReader configurationReader,
+            IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
             ICache cache,
             ItemCategoryFinder itemCategoryFinder
-        ) : base(logger, httpClientWrapperFactory, configurationReader, cache)
+        ) : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
         {
-            _itemCategoryFinder = itemCategoryFinder;
+            ItemCategoryFinder = itemCategoryFinder;
         }
         
         /// <inheritdoc/>
@@ -219,7 +222,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 tarkovItemCategories.Add(tarkovItemCategoryJson.GetProperty("id").GetString());
             }
 
-            ItemCategory itemCategory = await _itemCategoryFinder.FindFromTarkovCategoryId(tarkovItemCategories.First());
+            ItemCategory itemCategory = await ItemCategoryFinder.FindFromTarkovCategoryId(tarkovItemCategories.First());
 
             switch (itemCategory.Id)
             {
