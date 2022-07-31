@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Models.Items;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -16,16 +18,23 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetPrices
     {
         /// <summary>
-        /// Data fetcher.
+        /// Barters fetcher.
+        /// </summary>
+        private readonly IBartersFetcher BartersFetcher;
+
+        /// <summary>
+        /// Prices fetcher.
         /// </summary>
         private readonly IPricesFetcher PricesFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetPrices"/> class.
         /// </summary>
+        /// <param name="bartersFetcher">Barters fetcher.</param>
         /// <param name="pricesFetcher">Prices fetcher.</param>
-        public GetPrices(IPricesFetcher pricesFetcher)
+        public GetPrices(IBartersFetcher bartersFetcher, IPricesFetcher pricesFetcher)
         {
+            BartersFetcher = bartersFetcher;
             PricesFetcher = pricesFetcher;
         }
 
@@ -39,9 +48,24 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "prices")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            IEnumerable<Item> response = await PricesFetcher.Fetch() ?? Array.Empty<Item>();
+            List<Item> prices = new List<Item>(await PricesFetcher.Fetch() ?? Array.Empty<Item>());
+            IEnumerable<Item> barters = await BartersFetcher.Fetch() ?? Array.Empty<Item>();
 
-            return new OkObjectResult(response);
+            foreach (Item barter in barters)
+            {
+                Item? price = prices.FirstOrDefault(p => p.Id == barter.Id);
+
+                if (price != null)
+                {
+                    price.Prices = price.Prices.Concat(barter.Prices).ToArray();
+                }
+                else
+                {
+                    prices.Add(barter);
+                }
+            }
+
+            return new OkObjectResult(prices);
         }
     }
 }
