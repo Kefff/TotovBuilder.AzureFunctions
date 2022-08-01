@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentResults;
@@ -12,15 +10,15 @@ using TotovBuilder.AzureFunctions.Models;
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
-    /// Represents a changelog fetcher.
+    /// Represents of a Tarkov values fetcher.
     /// </summary>
-    public class ChangelogFetcher : StaticDataFetcher<IEnumerable<ChangelogEntry>>, IChangelogFetcher
+    public class TarkovValuesFetcher : StaticDataFetcher<TarkovValues>, ITarkovValuesFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureChangelogBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureTarkovValuesBlobName;
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Changelog;
+        protected override DataType DataType => DataType.TarkovValues;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
@@ -29,29 +27,29 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="blobFetcher">Blob fetcher.</param>
         /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public ChangelogFetcher(ILogger logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+        public TarkovValuesFetcher(ILogger logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
             : base(logger, blobFetcher, azureFunctionsConfigurationReader, cache)
         {
         }
         
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<ChangelogEntry>>> DeserializeData(string responseContent)
+        protected override Task<Result<TarkovValues>> DeserializeData(string responseContent)
         {
             try
             {
-                IEnumerable<ChangelogEntry> changelog = JsonSerializer.Deserialize<IEnumerable<ChangelogEntry>>(responseContent, new JsonSerializerOptions()
+                TarkovValues tarkovValues = JsonSerializer.Deserialize<TarkovValues>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-                return Task.FromResult(Result.Ok(changelog.OrderByDescending(c => c.Date).AsEnumerable()));
+                return Task.FromResult(Result.Ok(tarkovValues));
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.ChangelogDeserializationError, e);
+                string error = string.Format(Properties.Resources.TarkovValuesDeserializationError, e);
                 Logger.LogError(error);
 
-                return Task.FromResult(Result.Fail<IEnumerable<ChangelogEntry>>(error));
+                return Task.FromResult(Result.Fail<TarkovValues>(error));
             }
         }
     }

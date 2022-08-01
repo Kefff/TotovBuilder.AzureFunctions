@@ -121,6 +121,10 @@
     <value>Error while deserializing API response to type "{0}" :
 {1}</value>
   </data>
+  <data name="ArmorPenetrationsDeserializationError" xml:space="preserve">
+    <value>Error while deserializing armor penetrations :
+{0}</value>
+  </data>
   <data name="AzureFunctionsConfigurationDeserializationError" xml:space="preserve">
     <value>Error while deserializing Azure Functions configuration :
 {0}</value>
@@ -209,5 +213,9 @@
   </data>
   <data name="StartWaitingForPreviousFetching" xml:space="preserve">
     <value>{0} - Start : Waiting for previous fetching to finish.</value>
+  </data>
+  <data name="TarkovValuesDeserializationError" xml:space="preserve">
+    <value>Error while deserializing Tarkov values :
+{0}</value>
   </data>
 </root>

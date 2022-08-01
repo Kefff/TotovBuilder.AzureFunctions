@@ -31,6 +31,11 @@
         public string ApiUrl { get; set; } = string.Empty;
 
         /// <summary>
+        /// Name of the Azure blob containing the armor penetrations.
+        /// </summary>
+        public string AzureArmorPenetrationsBlobName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Connection string to the Azure blob storage containing static data.
         /// </summary>
         public string AzureBlobStorageConnectionString { get; set; } = string.Empty;
@@ -59,6 +64,11 @@
         /// Name of the Azure blob containing the presets.
         /// </summary>
         public string AzurePresetsBlobName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Name of the Azure blob containing the values related to Tarkov gameplay.
+        /// </summary>
+        public string AzureTarkovValuesBlobName { get; set; } = string.Empty;
 
         /// <summary>
         /// Time (in seconds) fetched API data is kept before needing to refresh it.

@@ -36,14 +36,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<ItemCategory>>> DeserializeData(string responseContent)
         {
-            IEnumerable<ItemCategory> itemCategories;
-
             try
             {
-                itemCategories = JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
+                IEnumerable<ItemCategory> itemCategories = JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
                 });
+
+                return Task.FromResult(Result.Ok(itemCategories));
             }
             catch (Exception e)
             {
@@ -52,8 +52,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 return Task.FromResult(Result.Fail<IEnumerable<ItemCategory>>(error));
             }
-
-            return Task.FromResult(Result.Ok(itemCategories));
         }
     }
 }

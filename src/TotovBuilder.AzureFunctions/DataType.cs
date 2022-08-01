@@ -6,6 +6,11 @@
     public enum DataType
     {
         /// <summary>
+        /// Armor penetrations.
+        /// </summary>
+        ArmorPenetrations,
+
+        /// <summary>
         /// Azure Functions configuration.
         /// </summary>
         AzureFunctionsConfiguration,
@@ -43,6 +48,11 @@
         /// <summary>
         /// Quests.
         /// </summary>
-        Quests
+        Quests,
+
+        /// <summary>
+        /// Values related to Tarkov gameplay
+        /// </summary>
+        TarkovValues
     }
 }

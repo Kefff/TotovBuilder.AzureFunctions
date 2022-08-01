@@ -9,12 +9,14 @@
             ApiPricesQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
             ApiQuestsQuery = "{ tasks { id name trader { normalizedName } wikiLink } }",
             ApiUrl = "https://api.tarkov.dev/graphql",
+            AzureArmorPenetrationsBlobName = "armor-penetrations.json",
             AzureChangelogBlobName = "changelog.json",
             AzureItemCategoriesBlobName = "item-categories.json",
-            AzurePresetsBlobName= "presets.json",
+            AzurePresetsBlobName= "presets.json",            
+            AzureTarkovValuesBlobName = "tarkov-values.json",
             CacheDuration = 43200,
             FetchTimeout = 30,
-            PriceCacheDuration = 3600
+            PriceCacheDuration = 3600,
         };
 
         public const string AzureFunctionsConfigurationJson = @"{
@@ -23,9 +25,11 @@
     ""ApiPricesQuery"": ""{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }"",
     ""ApiQuestsQuery"": ""{ tasks { id name trader { normalizedName } wikiLink } }"",
     ""ApiUrl"": ""https://api.tarkov.dev/graphql"",
+    ""AzureArmorPenetrationsBlobName"": ""armor-penetrations.json"",
     ""AzureChangelogBlobName"": ""changelog.json"",
     ""AzureItemCategoriesBlobName"": ""item-categories.json"",
     ""AzurePresetsBlobName"": ""presets.json"",
+    ""AzureTarkovValuesBlobName"": ""tarkov-values.json"",
     ""CacheDuration"": 43200,
     ""FetchTimeout"": 30,
     ""PriceCacheDuration"": 3600

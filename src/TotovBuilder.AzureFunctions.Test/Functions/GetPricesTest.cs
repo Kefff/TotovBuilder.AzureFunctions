@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +25,27 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Arrange
             List<Item> barters = new List<Item>() // Not using TestData.Barters here because this tests modifies the list making other tests fail
             {
+                new Item()
+                {
+                    Id = "545cdb794bdc2d3a198b456a",
+                    Prices = new Price[]
+                    {
+                        new Price()
+                        {
+                            BarterItems = new BarterItem[]
+                            {
+                                new BarterItem()
+                                {
+                                    ItemId = "5f9949d869e2777a0e779ba5",
+                                    Quantity = 4
+                                }
+                            },
+                            CurrencyName = "barter",
+                            Merchant = "mechanic",
+                            MerchantLevel = 3
+                        }
+                    }
+                },
                 new Item()
                 {
                     Id = "57dc2fa62459775949412633",
@@ -121,7 +141,28 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                             }
                         }
                     }
-                }
+                },                
+                new Item()
+                {
+                    Id = "545cdb794bdc2d3a198b456a",
+                    Prices = new Price[]
+                    {
+                        new Price()
+                        {
+                            BarterItems = new BarterItem[]
+                            {
+                                new BarterItem()
+                                {
+                                    ItemId = "5f9949d869e2777a0e779ba5",
+                                    Quantity = 4
+                                }
+                            },
+                            CurrencyName = "barter",
+                            Merchant = "mechanic",
+                            MerchantLevel = 3
+                        }
+                    }
+                },
             });
         }
 
