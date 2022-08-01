@@ -1,7 +1,7 @@
 ﻿namespace TotovBuilder.AzureFunctions
 {
     /// <summary>
-    /// Represents an Azure functions configuration.
+    /// Represents the Totov Builder Azure functions configuration.
     /// </summary>
     public class AzureFunctionsConfiguration
     {
@@ -69,6 +69,11 @@
         /// Name of the Azure blob containing the values related to Tarkov gameplay.
         /// </summary>
         public string AzureTarkovValuesBlobName { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// Name of the Azure blob containing the website configuration.
+        /// </summary>
+        public string AzureWebsiteConfigurationBlobName { get; set; } = string.Empty;
 
         /// <summary>
         /// Time (in seconds) fetched API data is kept before needing to refresh it.

@@ -39,6 +39,7 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddSingleton<IQuestsFetcher, QuestsFetcher>();
             builder.Services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
             builder.Services.AddSingleton<ItemCategoryFinder>();
+            builder.Services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
             
             
         }

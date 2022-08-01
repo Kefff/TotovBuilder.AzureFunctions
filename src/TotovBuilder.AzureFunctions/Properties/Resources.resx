@@ -218,4 +218,8 @@
     <value>Error while deserializing Tarkov values :
 {0}</value>
   </data>
+  <data name="WebsiteConfigurationDeserializationError" xml:space="preserve">
+    <value>Error while deserializing website configuration :
+{0}</value>
+  </data>
 </root>

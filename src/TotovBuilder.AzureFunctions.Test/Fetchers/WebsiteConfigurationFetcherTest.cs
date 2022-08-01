@@ -14,74 +14,64 @@ using Xunit;
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
     /// <summary>
-    /// Represents tests on the <see cref="TarkovValuesFetcher"/> class.
+    /// Represents tests on the <see cref="WebsiteConfigurationFetcher"/> class.
     /// </summary>
-    public class TarkovValuesFetcherTest
+    public class WebsiteConfigurationFetcherTest
     {
         [Fact]
-        public async Task Fetch_ShouldReturnTarkovValues()
+        public async Task Fetch_ShouldReturnWebsiteConfiguration()
         {
             // Arrange
-            Mock<ILogger<TarkovValuesFetcher>> loggerMock = new Mock<ILogger<TarkovValuesFetcher>>();
+            Mock<ILogger<WebsiteConfigurationFetcher>> loggerMock = new Mock<ILogger<WebsiteConfigurationFetcher>>();
 
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
             azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureTarkovValuesBlobName = "tarkov-values.json"
+                AzureWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.TarkovValuesJson)));
+            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            TarkovValuesFetcher fetcher = new TarkovValuesFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            TarkovValues? result = await fetcher.Fetch();
+            WebsiteConfiguration? result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.TarkovValues);
+            result.Should().BeEquivalentTo(TestData.WebsiteConfiguration);
         }
 
         [Fact]
         public async void Fetch_WithInvalidData_ShouldReturnNull()
         {
             // Arrange
-            Mock<ILogger<TarkovValuesFetcher>> loggerMock = new Mock<ILogger<TarkovValuesFetcher>>();
+            Mock<ILogger<WebsiteConfigurationFetcher>> loggerMock = new Mock<ILogger<WebsiteConfigurationFetcher>>();
 
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
             azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureTarkovValuesBlobName = "tarkov-values.json"
+                AzureWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
             blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
-  ""invalid"": {
-    invalid
-  },
-  ""armorPenetrationEfficiencies"": [
-    ""> 20"",
-    ""13 - 20"",
-    ""9 - 13"",
-    ""5 - 9"",
-    ""3 - 5"",
-    ""1 - 3"",
-    ""< 1""
-  ]
+  invalid,
+  ""bugReportUrl"": ""https://discord.gg/bugreport""
 }
 ")));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<TarkovValues>>(It.IsAny<DataType>())).Returns(value: null);
+            cacheMock.Setup(m => m.Get<IEnumerable<WebsiteConfiguration>>(It.IsAny<DataType>())).Returns(value: null);
 
-            TarkovValuesFetcher fetcher = new TarkovValuesFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
-            TarkovValues? result = await fetcher.Fetch();
+            WebsiteConfiguration? result = await fetcher.Fetch();
 
             // Assert
             result.Should().BeNull();

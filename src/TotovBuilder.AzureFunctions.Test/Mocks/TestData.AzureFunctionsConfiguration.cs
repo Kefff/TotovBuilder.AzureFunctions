@@ -14,6 +14,7 @@
             AzureItemCategoriesBlobName = "item-categories.json",
             AzurePresetsBlobName= "presets.json",            
             AzureTarkovValuesBlobName = "tarkov-values.json",
+            AzureWebsiteConfigurationBlobName = "website-configuration.json",
             CacheDuration = 43200,
             FetchTimeout = 30,
             PriceCacheDuration = 3600,
@@ -30,6 +31,7 @@
     ""AzureItemCategoriesBlobName"": ""item-categories.json"",
     ""AzurePresetsBlobName"": ""presets.json"",
     ""AzureTarkovValuesBlobName"": ""tarkov-values.json"",
+    ""AzureWebsiteConfigurationBlobName"": ""website-configuration.json"",
     ""CacheDuration"": 43200,
     ""FetchTimeout"": 30,
     ""PriceCacheDuration"": 3600

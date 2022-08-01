@@ -330,5 +330,15 @@ namespace TotovBuilder.AzureFunctions.Properties {
                 return ResourceManager.GetString("TarkovValuesDeserializationError", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing website configuration :
+        ///{0}.
+        /// </summary>
+        internal static string WebsiteConfigurationDeserializationError {
+            get {
+                return ResourceManager.GetString("WebsiteConfigurationDeserializationError", resourceCulture);
+            }
+        }
     }
 }

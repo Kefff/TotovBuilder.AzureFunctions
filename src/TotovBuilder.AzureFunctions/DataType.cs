@@ -11,7 +11,7 @@
         ArmorPenetrations,
 
         /// <summary>
-        /// Azure Functions configuration.
+        /// Totov Builder Azure Functions configuration.
         /// </summary>
         AzureFunctionsConfiguration,
 
@@ -51,8 +51,13 @@
         Quests,
 
         /// <summary>
-        /// Values related to Tarkov gameplay
+        /// Values related to Tarkov gameplay.
         /// </summary>
-        TarkovValues
+        TarkovValues,
+
+        /// <summary>
+        /// Totov Builder website configuration.
+        /// </summary>
+        WebsiteConfiguration
     }
 }

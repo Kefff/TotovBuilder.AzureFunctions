@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
-using TotovBuilder.AzureFunctions.Models;
 using TotovBuilder.AzureFunctions.Models.Items;
 
 namespace TotovBuilder.AzureFunctions.Functions
