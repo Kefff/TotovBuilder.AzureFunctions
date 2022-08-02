@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
-using TotovBuilder.AzureFunctions.Models.Items;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions
 {

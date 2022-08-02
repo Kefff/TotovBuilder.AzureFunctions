@@ -1,6 +1,6 @@
 ﻿using System;
-using TotovBuilder.AzureFunctions.Models;
-using TotovBuilder.AzureFunctions.Models.Items;
+using TotovBuilder.Model;
+using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Test.Mocks
 {

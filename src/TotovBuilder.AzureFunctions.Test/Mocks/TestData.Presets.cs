@@ -1,4 +1,4 @@
-﻿using TotovBuilder.AzureFunctions.Models.Builds;
+﻿using TotovBuilder.Model.Builds;
 
 namespace TotovBuilder.AzureFunctions.Test.Mocks
 {

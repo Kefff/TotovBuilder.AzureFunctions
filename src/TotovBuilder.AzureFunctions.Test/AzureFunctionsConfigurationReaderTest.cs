@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 

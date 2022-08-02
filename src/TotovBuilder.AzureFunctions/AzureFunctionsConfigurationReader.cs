@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstraction;
-using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 
 namespace TotovBuilder.AzureFunctions
 {

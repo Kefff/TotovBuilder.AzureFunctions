@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstractions;
 
 namespace TotovBuilder.AzureFunctions
 {

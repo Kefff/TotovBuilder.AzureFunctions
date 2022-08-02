@@ -8,9 +8,9 @@ using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstraction;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.AzureFunctions.Models;
+using TotovBuilder.Model;
 using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 

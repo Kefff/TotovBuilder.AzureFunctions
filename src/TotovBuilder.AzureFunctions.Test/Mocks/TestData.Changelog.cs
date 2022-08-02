@@ -1,5 +1,5 @@
 ﻿using System;
-using TotovBuilder.AzureFunctions.Models;
+using TotovBuilder.Model;
 
 namespace TotovBuilder.AzureFunctions.Test.Mocks
 {

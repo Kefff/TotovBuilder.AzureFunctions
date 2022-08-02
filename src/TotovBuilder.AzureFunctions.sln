@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31729.503
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.AzureFunctions", "TotovBuilder.AzureFunctions\TotovBuilder.AzureFunctions.csproj", "{F7B9DB94-29FA-4ECF-8E82-0DDF68E8887F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.AzureFunctions.Test", "TotovBuilder.AzureFunctions.Test\TotovBuilder.AzureFunctions.Test.csproj", "{3452380C-3490-4AB2-812D-2C0CC7A6215E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.Model", "..\..\TotovBuilder.Model\src\TotovBuilder.Model\TotovBuilder.Model.csproj", "{A62F4189-2ADC-4410-B60C-7DBC9A243A50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{3452380C-3490-4AB2-812D-2C0CC7A6215E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3452380C-3490-4AB2-812D-2C0CC7A6215E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3452380C-3490-4AB2-812D-2C0CC7A6215E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A62F4189-2ADC-4410-B60C-7DBC9A243A50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A62F4189-2ADC-4410-B60C-7DBC9A243A50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A62F4189-2ADC-4410-B60C-7DBC9A243A50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A62F4189-2ADC-4410-B60C-7DBC9A243A50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

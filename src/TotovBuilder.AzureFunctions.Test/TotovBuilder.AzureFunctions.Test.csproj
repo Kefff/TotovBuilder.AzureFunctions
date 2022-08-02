@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\TotovBuilder.Model\src\TotovBuilder.Model\TotovBuilder.Model.csproj" />
     <ProjectReference Include="..\TotovBuilder.AzureFunctions\TotovBuilder.AzureFunctions.csproj" />
   </ItemGroup>
 

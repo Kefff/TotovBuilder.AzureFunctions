@@ -5,9 +5,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstraction;
-using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
-using TotovBuilder.AzureFunctions.Models.Items;
+using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {

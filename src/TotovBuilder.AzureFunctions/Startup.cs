@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using TotovBuilder.AzureFunctions.Abstraction;
-using TotovBuilder.AzureFunctions.Abstraction.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
 
 [assembly: FunctionsStartup(typeof(TotovBuilder.AzureFunctions.Startup))]

@@ -37,4 +37,10 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\TotovBuilder.Model\src\TotovBuilder.Model\TotovBuilder.Model.csproj" />
+  </ItemGroup>
 </Project>
