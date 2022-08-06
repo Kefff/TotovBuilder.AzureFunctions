@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.AzureFunctions
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.Model", "..\..\TotovBuilder.Model\src\TotovBuilder.Model\TotovBuilder.Model.csproj", "{A62F4189-2ADC-4410-B60C-7DBC9A243A50}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TotovBuilder.Model.Test", "..\..\TotovBuilder.Model\src\TotovBuilder.Model.Test\TotovBuilder.Model.Test.csproj", "{B7939986-234F-45E3-A9BD-CD28AAD275D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A62F4189-2ADC-4410-B60C-7DBC9A243A50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A62F4189-2ADC-4410-B60C-7DBC9A243A50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A62F4189-2ADC-4410-B60C-7DBC9A243A50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7939986-234F-45E3-A9BD-CD28AAD275D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7939986-234F-45E3-A9BD-CD28AAD275D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7939986-234F-45E3-A9BD-CD28AAD275D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7939986-234F-45E3-A9BD-CD28AAD275D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

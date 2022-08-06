@@ -86,7 +86,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Data fetched as a JSON string.</returns>
         public async Task<T?> Fetch()
         {
-            await AzureFunctionsConfigurationReader.WaitUntilReady(); // Awaiting for the configuration to be loaded
+            await AzureFunctionsConfigurationReader.WaitForLoading(); // Awaiting for the configuration to be loaded
 
             if (!FetchingTask.IsCompleted)
             {

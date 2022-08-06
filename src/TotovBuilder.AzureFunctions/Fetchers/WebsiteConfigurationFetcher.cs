@@ -5,6 +5,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {

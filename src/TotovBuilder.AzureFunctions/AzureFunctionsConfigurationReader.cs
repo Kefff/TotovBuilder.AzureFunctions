@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model;
 
 namespace TotovBuilder.AzureFunctions
 {
@@ -12,7 +13,7 @@ namespace TotovBuilder.AzureFunctions
     public class AzureFunctionsConfigurationReader : IAzureFunctionsConfigurationReader
     {
         /// <inheritdoc/>
-        public AzureFunctionsConfiguration Values { get; private set; } = new AzureFunctionsConfiguration();
+        public AzureFunctionsConfiguration Values { get; private set; }
 
         private const string AzureBlobStorageConnectionStringKey = "TOTOVBUILDER_AzureBlobStorageConnectionString";
         private const string AzureBlobStorageContainerNameKey = "TOTOVBUILDER_AzureBlobStorageContainerName";
@@ -31,7 +32,7 @@ namespace TotovBuilder.AzureFunctions
         /// <summary>
         /// Fake loading task used to wait util the loading has finished.
         /// </summary>
-        private readonly Task LoadingTask = new Task(() => { });
+        private readonly Task LoadingTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFunctionsConfigurationInitializer"/> class.
@@ -43,27 +44,22 @@ namespace TotovBuilder.AzureFunctions
             AzureFunctionsConfigurationFetcher = azureFunctionsConfigurationFetcher;
             Logger = logger;
 
-            // Temporary configuration for the fetcher.
+            // Temporary configuration for the fetcher to be able to get the configuration blob.
             // Will be replaced by the complete configuration once it is loaded.
-            AddEnvironmentConfiguration();
+            Values = new AzureFunctionsConfiguration()
+            {
+                AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey),
+                AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
+                AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey),
+            };
 
-            _ = Load();
+            LoadingTask = Load();
         }
 
         /// <inheritdoc/>
-        public Task WaitUntilReady()
+        public Task WaitForLoading()
         {
             return LoadingTask;
-        }
-
-        /// <summary>
-        /// Adds environment configuration values to the Azure Functions configuration.
-        /// </summary>
-        private void AddEnvironmentConfiguration()
-        {
-            Values.AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey);
-            Values.AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey);
-            Values.AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey);
         }
 
         /// <summary>
@@ -72,9 +68,6 @@ namespace TotovBuilder.AzureFunctions
         private async Task Load()
         {
             Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
-            AddEnvironmentConfiguration();
-
-            LoadingTask.Start();
         }
 
         ///// <summary>

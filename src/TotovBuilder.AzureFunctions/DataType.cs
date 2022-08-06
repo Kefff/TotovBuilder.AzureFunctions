@@ -31,6 +31,11 @@
         ItemCategories,
 
         /// <summary>
+        /// Item missing properties.
+        /// </summary>
+        ItemMissingProperties,
+
+        /// <summary>
         /// Items.
         /// </summary>
         Items,

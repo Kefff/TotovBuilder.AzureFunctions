@@ -9,8 +9,8 @@ using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model;
-using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
+using TotovBuilder.Model.Test;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 AzureChangelogBlobName = "changelog.json"
             });
-            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.CompletedTask);
+            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitForLoading()).Returns(Task.CompletedTask);
             
             Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
             blobFetcherMock

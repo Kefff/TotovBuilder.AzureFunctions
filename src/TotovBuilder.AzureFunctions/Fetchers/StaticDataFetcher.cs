@@ -65,7 +65,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         public async Task<T?> Fetch()
         {
-            await AzureFunctionsConfigurationReader.WaitUntilReady(); // Awaiting for the configuration to be loaded
+            await AzureFunctionsConfigurationReader.WaitForLoading(); // Awaiting for the configuration to be loaded
 
             if (!FetchingTask.IsCompleted)
             {

@@ -33,6 +33,7 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
             builder.Services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
             builder.Services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
+            builder.Services.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
             builder.Services.AddSingleton<IItemsFetcher, ItemsFetcher>();
             builder.Services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
             builder.Services.AddSingleton<IPricesFetcher, PricesFetcher>();

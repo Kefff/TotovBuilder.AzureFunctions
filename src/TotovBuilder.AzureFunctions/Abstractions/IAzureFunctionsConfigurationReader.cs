@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TotovBuilder.Model;
 
 namespace TotovBuilder.AzureFunctions.Abstractions
 {
@@ -15,6 +16,6 @@ namespace TotovBuilder.AzureFunctions.Abstractions
         /// <summary>
         /// Waits for the configuration to be loaded.
         /// </summary>
-        Task WaitUntilReady();
+        Task WaitForLoading();
     }
 }

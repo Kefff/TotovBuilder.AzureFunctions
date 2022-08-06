@@ -9,8 +9,10 @@ using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Items;
-using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
+using TotovBuilder.Model;
+using TotovBuilder.Model.Test;
+using System;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -47,12 +49,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
 
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
                 azureFunctionsConfigurationReaderMock.Object,
                 cacheMock.Object,
-                new ItemCategoryFinder(itemCategoriesFetcherMock.Object));
+                new ItemCategoryFinder(itemCategoriesFetcherMock.Object),
+                itemMissingPropertiesFetcher.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -118,12 +124,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
 
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
                 azureFunctionsConfigurationReaderMock.Object,
                 cacheMock.Object,
-                new ItemCategoryFinder(itemCategoriesFetcherMock.Object));
+                new ItemCategoryFinder(itemCategoriesFetcherMock.Object),
+                itemMissingPropertiesFetcher.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -134,7 +144,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Item()
                 {
                     CategoryId = "other",
-                    //ConflictingItemIds = , // TODO : MISSING
+                    ConflictingItemIds = Array.Empty<string>(), // TODO : MISSING FROM API
                     IconLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg",
                     Id = "5c1d0c5f86f7744bb2683cf0",
                     ImageLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg",
@@ -213,12 +223,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 }
             }));
 
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
                 azureFunctionsConfigurationReaderMock.Object,
                 cacheMock.Object,
-                new ItemCategoryFinder(itemCategoriesFetcherMock.Object));
+                new ItemCategoryFinder(itemCategoriesFetcherMock.Object),
+                itemMissingPropertiesFetcher.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();

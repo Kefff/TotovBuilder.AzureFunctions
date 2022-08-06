@@ -60,7 +60,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         public async Task<Result<string>> Fetch(string blobName)
         {
-            await AzureFunctionsConfigurationReader.WaitUntilReady(); // Awaiting for the configuration to be loaded
+            await AzureFunctionsConfigurationReader.WaitForLoading(); // Awaiting for the configuration to be loaded
 
             return ExecuteFetch(blobName);
         }

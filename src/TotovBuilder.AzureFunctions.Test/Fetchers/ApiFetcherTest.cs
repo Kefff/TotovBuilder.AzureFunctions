@@ -11,8 +11,8 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model;
-using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
+using TotovBuilder.Model.Test;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -34,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
-            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitUntilReady()).Returns(Task.CompletedTask);
+            azureFunctionsConfigurationReaderMock.Setup(m => m.WaitForLoading()).Returns(Task.CompletedTask);
             
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock

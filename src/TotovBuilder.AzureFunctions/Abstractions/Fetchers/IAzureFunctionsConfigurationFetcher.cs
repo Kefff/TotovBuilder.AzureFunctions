@@ -1,4 +1,6 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
+﻿using TotovBuilder.Model;
+
+namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
 {
     /// <summary>
     /// Provides the functionnalities of an Azure Functions configuration fetcher.

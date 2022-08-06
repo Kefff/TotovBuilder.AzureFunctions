@@ -8,8 +8,8 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model;
-using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
+using TotovBuilder.Model.Test;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {

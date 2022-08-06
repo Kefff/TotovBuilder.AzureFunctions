@@ -37,15 +37,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
         {
-            List<InventoryItem> presetsResults = new List<InventoryItem>();
-
+            List<InventoryItem> presets = new List<InventoryItem>();
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement inventoryItemJson in presetsJson.EnumerateArray())
             {
                 try
                 {
-                    presetsResults.Add(DeserializeInventoryItem(inventoryItemJson));
+                    presets.Add(DeserializeInventoryItem(inventoryItemJson));
                 }
                 catch (Exception e)
                 {
@@ -54,7 +53,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            return Task.FromResult(Result.Ok(presetsResults.AsEnumerable()));
+            return Task.FromResult(Result.Ok(presets.AsEnumerable()));
         }
 
         /// <summary>
@@ -80,7 +79,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             inventoryItem.Content = content.ToArray();
 
-            List<InventoryModSlot> modSlots = new List<InventoryModSlot>();
+            List<InventoryItemModSlot> modSlots = new List<InventoryItemModSlot>();
 
             foreach (JsonElement modSlotJson in inventoryItemJson.GetProperty("modSlots").EnumerateArray())
             {
@@ -93,13 +92,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Deserilizes an <see cref="InventoryModSlot"/>.
+        /// Deserilizes an <see cref="InventoryItemModSlot"/>.
         /// </summary>
         /// <param name="inventoryModSlotJson">Json element representing the inventory mod slot to deserialize.</param>
-        /// <returns>Deserilized <see cref="InventoryModSlot"/>.</returns>
-        private InventoryModSlot DeserializeInventoryModSlot(JsonElement inventoryModSlotJson)
+        /// <returns>Deserilized <see cref="InventoryItemModSlot"/>.</returns>
+        private InventoryItemModSlot DeserializeInventoryModSlot(JsonElement inventoryModSlotJson)
         {
-            InventoryModSlot inventoryModSlot = new InventoryModSlot()
+            InventoryItemModSlot inventoryModSlot = new InventoryItemModSlot()
             {
                 Item = DeserializeInventoryItem(inventoryModSlotJson.GetProperty("item")),
                 ModSlotName = inventoryModSlotJson.GetProperty("modSlotName").GetString()

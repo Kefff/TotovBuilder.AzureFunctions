@@ -193,6 +193,10 @@
     <value>Error while deserializing item :
 {0}</value>
   </data>
+  <data name="ItemMissingPropertiesDeserializationError" xml:space="preserve">
+    <value>Error while deserializing item missing properties :
+{0}</value>
+  </data>
   <data name="NotImplementedItemCategory" xml:space="preserve">
     <value>Item category "{0}" is not implemented.</value>
   </data>

@@ -8,8 +8,9 @@ using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Builds;
-using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
+using TotovBuilder.Model;
+using TotovBuilder.Model.Test;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -167,9 +168,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new InventoryItem()
                 {
                     ItemId = "57dc2fa62459775949412633",
-                    ModSlots = new InventoryModSlot[]
+                    ModSlots = new InventoryItemModSlot[]
                     {
-                        new InventoryModSlot()
+                        new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
                             {
@@ -177,7 +178,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                             },
                             ModSlotName = "mod_pistol_grip"
                         },
-                        new InventoryModSlot()
+                        new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
                             {
@@ -185,7 +186,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                             },
                             ModSlotName = "mod_stock"
                         },
-                        new InventoryModSlot()
+                        new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
                             {
@@ -201,7 +202,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                             },
                             ModSlotName = "mod_magazine"
                         },
-                        new InventoryModSlot()
+                        new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
                             {
@@ -209,7 +210,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                             },
                             ModSlotName = "mod_muzzle"
                         },
-                        new InventoryModSlot()
+                        new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
                             {
@@ -217,14 +218,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                             },
                             ModSlotName = "mod_reciever"
                         },
-                        new InventoryModSlot()
+                        new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
                             {
                                 ItemId = "59d36a0086f7747e673f3946",
-                                ModSlots = new InventoryModSlot[]
+                                ModSlots = new InventoryItemModSlot[]
                                 {
-                                    new InventoryModSlot()
+                                    new InventoryItemModSlot()
                                     {
                                         Item = new InventoryItem()
                                         {

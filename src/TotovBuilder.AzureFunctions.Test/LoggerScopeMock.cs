@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TotovBuilder.AzureFunctions.Test.Mocks
+namespace TotovBuilder.AzureFunctions.Test
 {
     /// <summary>
     /// Represents a mock for a logger scope.

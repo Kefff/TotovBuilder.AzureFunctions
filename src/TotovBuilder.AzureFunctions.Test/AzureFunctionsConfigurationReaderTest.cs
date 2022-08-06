@@ -4,7 +4,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Test.Mocks;
+using TotovBuilder.Model;
+using TotovBuilder.Model.Test;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test
@@ -41,7 +42,7 @@ namespace TotovBuilder.AzureFunctions.Test
 
             // Act
             AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new AzureFunctionsConfigurationReader(loggerMock.Object, azureFunctionsConfigurationFetcherMock.Object);
-            Func<Task> act = async () => { await azureFunctionsConfigurationReader.WaitUntilReady(); };
+            Func<Task> act = async () => { await azureFunctionsConfigurationReader.WaitForLoading(); };
 
             // Assert
             act.Should().ThrowAsync<Exception>("Invalid configuration");

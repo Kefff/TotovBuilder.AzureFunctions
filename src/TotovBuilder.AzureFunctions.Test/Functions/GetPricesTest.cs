@@ -9,7 +9,6 @@ using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model;
 using TotovBuilder.Model.Items;
-using TotovBuilder.AzureFunctions.Test.Mocks;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
