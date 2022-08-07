@@ -30,13 +30,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureArmorPenetrationsBlobName = "armor-penetrations.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ArmorPenetrationsJson)));
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ArmorPenetrationsJson)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<ArmorPenetration>? result = await fetcher.Fetch();
@@ -57,8 +57,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureArmorPenetrationsBlobName = "armor-penetrations.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
   },
@@ -74,7 +74,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<ArmorPenetration>>(It.IsAny<DataType>())).Returns(value: null);
 
-            ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<ArmorPenetration>? result = await fetcher.Fetch();

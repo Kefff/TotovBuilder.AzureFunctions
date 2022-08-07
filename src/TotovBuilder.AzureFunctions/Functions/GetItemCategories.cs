@@ -33,15 +33,15 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// Gets the item categories to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <returns>Items.</returns>
+        /// <returns>Item categories.</returns>
         [FunctionName("GetItemCategories")]
 #pragma warning disable IDE0060 // Remove unused parameter
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "itemcategories")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            IEnumerable<ItemCategory> response = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
+            IEnumerable<ItemCategory> itemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
 
-            return new OkObjectResult(response);
+            return new OkObjectResult(itemCategories);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetPresets
     {
         /// <summary>
-        /// Data fetcher.
+        /// Presets fetcher.
         /// </summary>
         private readonly IPresetsFetcher PresetsFetcher;
 
@@ -33,15 +33,15 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// Gets the presets to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <returns>Items.</returns>
+        /// <returns>Presets.</returns>
         [FunctionName("GetPresets")]
 #pragma warning disable IDE0060 // Remove unused parameter
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "presets")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            IEnumerable<InventoryItem> response = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
+            IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
 
-            return new OkObjectResult(response);
+            return new OkObjectResult(presets);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetChangelog
     {
         /// <summary>
-        /// Item categories fetcher.
+        /// Changelog fetcher.
         /// </summary>
         private readonly IChangelogFetcher ChangelogFetcher;
 
@@ -31,10 +31,10 @@ namespace TotovBuilder.AzureFunctions.Functions
         }
 
         /// <summary>
-        /// Gets the item categories to return to the caller.
+        /// Gets the changelog to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <returns>Items.</returns>
+        /// <returns>Changelog.</returns>
         [FunctionName("GetChangelog")]
 #pragma warning disable IDE0060 // Remove unused parameter
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequest httpRequest)

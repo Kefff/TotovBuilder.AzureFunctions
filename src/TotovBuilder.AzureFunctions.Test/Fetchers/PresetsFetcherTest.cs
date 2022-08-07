@@ -31,13 +31,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzurePresetsBlobName = "presets.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.PresetsJson)));
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.PresetsJson)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            PresetsFetcher fetcher = new PresetsFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            PresetsFetcher fetcher = new PresetsFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<InventoryItem>? result = await fetcher.Fetch();
@@ -58,8 +58,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzurePresetsBlobName = "presets.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     ""invalid"": {}
   },
@@ -157,7 +157,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<InventoryItem>>(It.IsAny<DataType>())).Returns(value: null);
 
-            PresetsFetcher fetcher = new PresetsFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            PresetsFetcher fetcher = new PresetsFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<InventoryItem>? result = await fetcher.Fetch();

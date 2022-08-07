@@ -30,13 +30,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             WebsiteConfiguration? result = await fetcher.Fetch();
@@ -57,8 +57,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
   invalid,
   ""bugReportUrl"": ""https://discord.gg/bugreport""
 }
@@ -68,7 +68,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<WebsiteConfiguration>>(It.IsAny<DataType>())).Returns(value: null);
 
-            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             WebsiteConfiguration? result = await fetcher.Fetch();

@@ -29,13 +29,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             AzureFunctionsConfiguration? result = await fetcher.Fetch();
@@ -56,14 +56,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobFetcherMock = new Mock<IBlobFetcher>();
-            blobFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
 
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<AzureFunctionsConfiguration>(It.IsAny<DataType>())).Returns(value: null);
 
-            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(loggerMock.Object, blobFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             AzureFunctionsConfiguration? result = await fetcher.Fetch();

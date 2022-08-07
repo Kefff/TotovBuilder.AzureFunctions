@@ -39,9 +39,9 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "items")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            IEnumerable<Item> response = await ItemsFetcher.Fetch() ?? Array.Empty<Item>();
+            IEnumerable<Item> items = await ItemsFetcher.Fetch() ?? Array.Empty<Item>();
 
-            return new OkObjectResult(response);
+            return new OkObjectResult(items);
         }
     }
 }

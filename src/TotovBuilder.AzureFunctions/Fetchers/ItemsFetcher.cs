@@ -428,7 +428,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             mod.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
             mod.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == mod.Id)?.ModSlots ?? Array.Empty<ModSlot>();
 
-
             return mod;
         }
 
@@ -450,9 +449,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
             rangedWeapon.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.ModSlots ?? Array.Empty<ModSlot>();
             rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
-
-            //TODO CHAMBERS
-
 
             return rangedWeapon;
         }

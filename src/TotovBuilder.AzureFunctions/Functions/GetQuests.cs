@@ -16,12 +16,12 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetQuests
     {
         /// <summary>
-        /// Data fetcher.
+        /// Quests fetcher.
         /// </summary>
         private readonly IQuestsFetcher QuestsFetcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GetItemCategories"/> class.
+        /// Initializes a new instance of the <see cref="GetQuests"/> class.
         /// </summary>
         /// <param name="questsFetcher">Quests fetcher.</param>
         public GetQuests(IQuestsFetcher questsFetcher)
@@ -39,9 +39,9 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "quests")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            IEnumerable<Quest> response = await QuestsFetcher.Fetch() ?? Array.Empty<Quest>();
+            IEnumerable<Quest> quests = await QuestsFetcher.Fetch() ?? Array.Empty<Quest>();
 
-            return new OkObjectResult(response);
+            return new OkObjectResult(quests);
         }
     }
 }
