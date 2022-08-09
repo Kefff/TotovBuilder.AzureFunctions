@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -70,7 +71,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override async Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
             List<Task> deserializationTasks = new List<Task>();
-            List<Item> items = new List<Item>();
+            ConcurrentBag<Item> items = new ConcurrentBag<Item>();
             ItemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
             ItemMissingProperties = await ItemMissingPropertiesFetcher.Fetch() ?? Array.Empty<ItemMissingProperties>();
 
@@ -226,7 +227,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="items">List of items the deserialized item will be stored into.</param>
-        private void DeserializeData(JsonElement itemJson, List<Item> items)
+        private void DeserializeData(JsonElement itemJson, ConcurrentBag<Item> items)
         {
             try
             {

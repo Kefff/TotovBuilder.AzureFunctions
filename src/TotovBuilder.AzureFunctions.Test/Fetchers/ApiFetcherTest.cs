@@ -13,6 +13,8 @@ using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model;
 using Xunit;
 using TotovBuilder.Model.Test;
+using static System.Text.Json.JsonElement;
+using System.Text.Json;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -284,6 +286,136 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Never);
         }
 
+        [Theory]
+        [InlineData("{ \"value\": [\"123456789\"] }", true)]
+        [InlineData("[\"123456789\"]", false)]
+        public void TryDeserializeArray_ShouldTryToDeserializeArray(string json, bool expected)
+        {
+            // Arrange
+            Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            Mock<ICache> cacheMock = new Mock<ICache>();
+
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+                loggerMock.Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
+                cacheMock.Object);
+
+            JsonElement jsonElement = JsonDocument.Parse(json).RootElement;
+
+            // Act
+            bool result = apiFetcher.TestTryDeserializeArray(jsonElement, "value", out ArrayEnumerator arrayEnumerator);
+
+            // Assert
+            result.Should().Be(expected);
+
+            if (result)
+            {
+                arrayEnumerator.First().GetString().Should().Be("123456789");
+            }
+        }
+
+        [Theory]
+        [InlineData("{ \"value\": 123456789 }", true)]
+        [InlineData("{ \"value\": \"123456789\"}", false)]
+        [InlineData("{ \"invalid\": 123456789 }", false)]
+        [InlineData("[123456789]", false)]
+        public void TryDeserializeDouble_ShouldTryToDeserializeDouble(string json, bool expected)
+        {
+            // Arrange
+            Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            Mock<ICache> cacheMock = new Mock<ICache>();
+
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+                loggerMock.Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
+                cacheMock.Object);
+
+            JsonElement jsonElement = JsonDocument.Parse(json).RootElement;
+
+            // Act
+            bool result = apiFetcher.TestTryDeserializeDouble(jsonElement, "value", out double resultValue);
+
+            // Assert
+            result.Should().Be(expected);
+
+            if (result)
+            {
+                resultValue.Should().Be(123456789);
+            }
+        }
+
+        [Theory]
+        [InlineData("{ \"value\": { \"id\": \"123456789\" } }", true)]
+        [InlineData("{ \"value\": \"123456789\" }", false)]
+        [InlineData("{ \"invalid\": { \"id\": \"123456789\" } }", false)]
+        [InlineData("[{ \"id\": \"123456789\" }]", false)]
+        public void TryDeserializeObject_ShouldTryToDeserializeObject(string json, bool expected)
+        {
+            // Arrange
+            Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            Mock<ICache> cacheMock = new Mock<ICache>();
+
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+                loggerMock.Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
+                cacheMock.Object);
+
+            JsonElement jsonElement = JsonDocument.Parse(json).RootElement;
+
+            // Act
+            bool result = apiFetcher.TestTryDeserializeObject(jsonElement, "value", out JsonElement resultValue);
+
+            // Assert
+            result.Should().Be(expected);
+
+            if (result)
+            {
+                resultValue.GetProperty("id").GetString().Should().Be("123456789");
+            }
+        }
+
+        [Theory]
+        [InlineData("{ \"value\": \"123456789\" }", true)]
+        [InlineData("{ \"value\": 123456789 }", false)]
+        [InlineData("{ \"invalid\": \"123456789\" }", false)]
+        [InlineData("[\"123456789\"]", false)]
+        public void TryDeserializeString_ShouldTryToDeserializeString(string json, bool expected)
+        {
+            // Arrange
+            Mock<ILogger<ApiFetcherImplementation>> loggerMock = new Mock<ILogger<ApiFetcherImplementation>>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            Mock<ICache> cacheMock = new Mock<ICache>();
+
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+                loggerMock.Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
+                cacheMock.Object);
+
+            JsonElement jsonElement = JsonDocument.Parse(json).RootElement;
+
+            // Act
+            bool result = apiFetcher.TestTryDeserializeString(jsonElement, "value", out string resultValue);
+
+            // Assert
+            result.Should().Be(expected);
+
+            if (result)
+            {
+                resultValue.Should().Be("123456789");
+            }
+        }
+
         public class ApiFetcherImplementation : ApiFetcher<IEnumerable<Quest>>
         {
             protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiQuestsQuery;
@@ -293,6 +425,26 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             public ApiFetcherImplementation(ILogger<ApiFetcherImplementation> logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache) 
                : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationWrapper, cache)
             {
+            }
+
+            public bool TestTryDeserializeArray(JsonElement jsonElement, string propertyName, out ArrayEnumerator value)
+            {
+                return TryDeserializeArray(jsonElement, propertyName, out value);
+            }
+
+            public bool TestTryDeserializeDouble(JsonElement jsonElement, string propertyName, out double value)
+            {
+                return TryDeserializeDouble(jsonElement, propertyName, out value);
+            }
+
+            public bool TestTryDeserializeObject(JsonElement jsonElement, string propertyName, out JsonElement value)
+            {
+                return TryDeserializeObject(jsonElement, propertyName, out value);
+            }
+
+            public bool TestTryDeserializeString(JsonElement jsonElement, string propertyName, out string value)
+            {
+                return TryDeserializeString(jsonElement, propertyName, out value);
             }
 
             protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)

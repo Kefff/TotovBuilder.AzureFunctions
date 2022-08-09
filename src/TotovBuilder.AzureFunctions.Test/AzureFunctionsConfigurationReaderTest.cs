@@ -29,9 +29,11 @@ namespace TotovBuilder.AzureFunctions.Test
             // Act
             AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new AzureFunctionsConfigurationReader(loggerMock.Object, azureFunctionsConfigurationWrapper, azureFunctionsConfigurationFetcherMock.Object);
             await azureFunctionsConfigurationReader.Load();
+            await azureFunctionsConfigurationReader.Load();
 
             // Assert
             azureFunctionsConfigurationWrapper.Values.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
+            azureFunctionsConfigurationFetcherMock.Verify(m => m.Fetch(), Times.Once);
         }
 
         [Fact]
