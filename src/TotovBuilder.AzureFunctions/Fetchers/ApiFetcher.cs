@@ -71,10 +71,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             Logger = logger;
         }
 
-        /// <summary>
-        /// Fetches data.
-        /// </summary>
-        /// <returns>Data fetched as a JSON string.</returns>
+        /// <inheritdoc/>
         public async Task<T?> Fetch()
         {
             if (!FetchingTask.IsCompleted)

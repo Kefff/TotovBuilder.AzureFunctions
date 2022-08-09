@@ -630,5 +630,90 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEmpty();
         }
+
+        [Fact]
+        public async Task Fetch_WithoutItemCategories_ShouldReturnItemsWithOtherItemCategory()
+        {
+            // Arrange
+            Mock<ILogger<ItemsFetcher>> loggerMock = new Mock<ILogger<ItemsFetcher>>();
+
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+  ""data"": {
+    ""items"": [
+      {
+        ""categories"": [
+          {
+            ""id"": ""5448e53e4bdc2d60728b4567""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg"",
+        ""id"": ""5ab8ebf186f7742d8b372e80"",
+        ""imageLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/sso-attack-2-raid-backpack"",
+        ""name"": ""SSO Attack 2 raid backpack"",
+        ""properties"": {
+          ""__typename"": ""ItemPropertiesBackpack"",
+          ""capacity"": 35
+        },
+        ""shortName"": ""Attack 2"",
+        ""weight"": 6.12,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack""
+      }
+    ]
+  }
+}") }));
+            
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            Mock<ICache> cacheMock = new Mock<ICache>();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(null));
+
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+
+            ItemsFetcher fetcher = new ItemsFetcher(
+                loggerMock.Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
+                cacheMock.Object,
+                itemCategoriesFetcherMock.Object,
+                itemMissingPropertiesFetcher.Object);
+
+            // Act
+            IEnumerable<Item>? result = await fetcher.Fetch();
+
+            // Assert
+            result.Should().BeEquivalentTo(new Item[]
+            {
+                new Container()
+                {
+                    Capacity = 35,
+                    CategoryId = "other",
+                    IconLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg",
+                    Id = "5ab8ebf186f7742d8b372e80",
+                    ImageLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/sso-attack-2-raid-backpack",
+                    Name = "SSO Attack 2 raid backpack",
+                    ShortName = "Attack 2",
+                    Weight = 6.12,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack"
+                }
+            });
+        }
     }
 }

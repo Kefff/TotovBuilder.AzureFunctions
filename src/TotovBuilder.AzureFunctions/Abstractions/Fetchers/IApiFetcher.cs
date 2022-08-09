@@ -9,9 +9,10 @@ namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
         where T: class
     {
         /// <summary>
-        /// Fetches barter data from the API.
+        /// Fetches data from the API.
         /// </summary>
-        /// <returns>Fetched data.</returns>
+        /// <remarks>Can return null because we cannot know what the "default" value should be when the API call fails.</remarks>
+        /// <returns>Data fetched as a JSON string.</returns>
         Task<T?> Fetch();
     }
 }
