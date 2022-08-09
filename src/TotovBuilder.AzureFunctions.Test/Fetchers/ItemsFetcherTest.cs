@@ -27,8 +27,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ItemsFetcher>> loggerMock = new Mock<ILogger<ItemsFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
@@ -55,9 +55,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationReaderMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
-                new ItemCategoryFinder(itemCategoriesFetcherMock.Object),
+                itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object);
 
             // Act
@@ -73,8 +73,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ItemsFetcher>> loggerMock = new Mock<ILogger<ItemsFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
@@ -298,9 +298,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationReaderMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
-                new ItemCategoryFinder(itemCategoriesFetcherMock.Object),
+                itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object);
 
             // Act
@@ -463,8 +463,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ItemsFetcher>> loggerMock = new Mock<ILogger<ItemsFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
@@ -520,9 +520,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationReaderMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
-                new ItemCategoryFinder(itemCategoriesFetcherMock.Object),
+                itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object);
 
             // Act
@@ -554,8 +554,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<ItemsFetcher>> loggerMock = new Mock<ILogger<ItemsFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
@@ -619,9 +619,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationReaderMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
-                new ItemCategoryFinder(itemCategoriesFetcherMock.Object),
+                itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object);
 
             // Act

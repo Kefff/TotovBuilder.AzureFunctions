@@ -169,26 +169,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Fetching response :
-        ///{1}.
-        /// </summary>
-        internal static string FetchingResponse {
-            get {
-                return ResourceManager.GetString("FetchingResponse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} - Fetching response content :
-        ///{1}.
-        /// </summary>
-        internal static string FetchingResponseContent {
-            get {
-                return ResourceManager.GetString("FetchingResponseContent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} - Invalid API query :
         ///{1}.
         /// </summary>

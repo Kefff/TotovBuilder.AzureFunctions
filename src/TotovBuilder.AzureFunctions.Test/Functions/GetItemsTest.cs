@@ -10,6 +10,7 @@ using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model.Items;
 using Xunit;
 using TotovBuilder.Model.Test;
+using TotovBuilder.AzureFunctions.Abstractions;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
@@ -22,15 +23,17 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldFetchData()
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
             Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Items));
 
-            GetItems function = new GetItems(itemsFetcherMock.Object);
+            GetItems function = new GetItems(azureFunctionsConfigurationReaderMock.Object, itemsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().Be(TestData.Items);
         }
@@ -39,15 +42,17 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
             Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
 
-            GetItems function = new GetItems(itemsFetcherMock.Object);
+            GetItems function = new GetItems(azureFunctionsConfigurationReaderMock.Object, itemsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Item>());
         }

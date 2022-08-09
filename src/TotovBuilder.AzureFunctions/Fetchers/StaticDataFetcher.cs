@@ -13,9 +13,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         where T: class
     {
         /// <summary>
-        /// Configuration reader;
+        /// Azure Functions configuration wrapper;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        protected readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
 
         /// <summary>
         /// Name of the Azure Blob that stores the data.
@@ -30,7 +30,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Logger.
         /// </summary>
-        protected readonly ILogger Logger;
+        protected readonly ILogger<StaticDataFetcher<T>> Logger;
 
         /// <summary>
         /// Blob fetcher.
@@ -52,21 +52,19 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        protected StaticDataFetcher(ILogger logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+        protected StaticDataFetcher(ILogger<StaticDataFetcher<T>> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
         {
             BlobFetcher = blobFetcher;
             Cache = cache;
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
+            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper ;
             Logger = logger;
         }
 
         /// <inheritdoc/>
         public async Task<T?> Fetch()
         {
-            await AzureFunctionsConfigurationReader.WaitForLoading(); // Awaiting for the configuration to be loaded
-
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(string.Format(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString()));

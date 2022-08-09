@@ -24,8 +24,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<WebsiteConfigurationFetcher>> loggerMock = new Mock<ILogger<WebsiteConfigurationFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureWebsiteConfigurationBlobName = "website-configuration.json"
             });
@@ -36,7 +36,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
             WebsiteConfiguration? result = await fetcher.Fetch();
@@ -51,8 +51,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<WebsiteConfigurationFetcher>> loggerMock = new Mock<ILogger<WebsiteConfigurationFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureWebsiteConfigurationBlobName = "website-configuration.json"
             });
@@ -68,7 +68,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<WebsiteConfiguration>>(It.IsAny<DataType>())).Returns(value: null);
 
-            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
             WebsiteConfiguration? result = await fetcher.Fetch();

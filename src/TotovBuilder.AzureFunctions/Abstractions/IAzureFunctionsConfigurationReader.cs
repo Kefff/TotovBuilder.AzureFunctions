@@ -9,13 +9,8 @@ namespace TotovBuilder.AzureFunctions.Abstractions
     public interface IAzureFunctionsConfigurationReader
     {
         /// <summary>
-        /// Configuration values.
+        /// Loads the Azure Functions configuration.
         /// </summary>
-        AzureFunctionsConfiguration Values { get; }
-
-        /// <summary>
-        /// Waits for the configuration to be loaded.
-        /// </summary>
-        Task WaitForLoading();
+        Task Load();
     }
 }

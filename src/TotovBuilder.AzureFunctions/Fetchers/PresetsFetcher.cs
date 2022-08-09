@@ -17,7 +17,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PresetsFetcher : StaticDataFetcher<IEnumerable<InventoryItem>>, IPresetsFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzurePresetsBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationWrapper.Values.AzurePresetsBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Presets;
@@ -27,10 +27,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        public PresetsFetcher(ILogger logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
-            : base(logger, blobDataFetcher, azureFunctionsConfigurationReader, cache)
+        public PresetsFetcher(ILogger<PresetsFetcher> logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
+            : base(logger, blobDataFetcher, azureFunctionsConfigurationWrapper, cache)
         {
         }
 

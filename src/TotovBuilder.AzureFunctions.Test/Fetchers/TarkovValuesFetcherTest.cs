@@ -24,8 +24,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<TarkovValuesFetcher>> loggerMock = new Mock<ILogger<TarkovValuesFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationReaderWrapper = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationReaderWrapper.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureTarkovValuesBlobName = "tarkov-values.json"
             });
@@ -36,7 +36,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            TarkovValuesFetcher fetcher = new TarkovValuesFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            TarkovValuesFetcher fetcher = new TarkovValuesFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderWrapper.Object, cacheMock.Object);
 
             // Act
             TarkovValues? result = await fetcher.Fetch();
@@ -51,8 +51,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Arrange
             Mock<ILogger<TarkovValuesFetcher>> loggerMock = new Mock<ILogger<TarkovValuesFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureTarkovValuesBlobName = "tarkov-values.json"
             });
@@ -78,7 +78,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<TarkovValues>>(It.IsAny<DataType>())).Returns(value: null);
 
-            TarkovValuesFetcher fetcher = new TarkovValuesFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            TarkovValuesFetcher fetcher = new TarkovValuesFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
             TarkovValues? result = await fetcher.Fetch();

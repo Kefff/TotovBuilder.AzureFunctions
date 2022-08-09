@@ -10,6 +10,7 @@ using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model;
 using Xunit;
 using TotovBuilder.Model.Test;
+using TotovBuilder.AzureFunctions.Abstractions;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
@@ -25,12 +26,15 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
 
-            GetArmorPenetrations function = new GetArmorPenetrations(armorPenetrationsFetcherMock.Object);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
+            GetArmorPenetrations function = new GetArmorPenetrations(azureFunctionsConfigurationReaderMock.Object, armorPenetrationsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(TestData.ArmorPenetrations);
         }
@@ -42,12 +46,15 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(null));
 
-            GetArmorPenetrations function = new GetArmorPenetrations(armorPenetrationsFetcherMock.Object);
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
+            GetArmorPenetrations function = new GetArmorPenetrations(azureFunctionsConfigurationReaderMock.Object, armorPenetrationsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<ArmorPenetration>());
         }

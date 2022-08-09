@@ -18,7 +18,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class BartersFetcher : ApiFetcher<IEnumerable<Item>>, IBartersFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiBartersQuery;
+        protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiBartersQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Barters;
@@ -28,10 +28,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        public BartersFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
-            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
+        public BartersFetcher(ILogger<BartersFetcher> logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
+            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationWrapper, cache)
         {
         }
 
@@ -49,13 +49,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     List<BarterItem> barterItems = new List<BarterItem>();
                     string merchant = barterJson.GetProperty("trader").GetProperty("normalizedName").GetString();
                     int merchantLevel = barterJson.GetProperty("level").GetInt32();
-                    string? questId = null;
 
                     JsonElement questJson = barterJson.GetProperty("taskUnlock");
 
-                    if (questJson.ValueKind != JsonValueKind.Null)
+                    if (!TryDeserializeString(questJson, "id", out string? questId))
                     {
-                        questId = questJson.GetProperty("id").GetString();
+                        questId = null;
                     }
 
                     foreach (JsonElement baterItemJson in barterJson.GetProperty("requiredItems").EnumerateArray())

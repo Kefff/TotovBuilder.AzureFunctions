@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Builds;
 
@@ -16,6 +17,11 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetPresets
     {
         /// <summary>
+        /// Azure Functions configuration reader.
+        /// </summary>
+        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+
+        /// <summary>
         /// Presets fetcher.
         /// </summary>
         private readonly IPresetsFetcher PresetsFetcher;
@@ -23,9 +29,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetPresets"/> class.
         /// </summary>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="presetsFetcher">Presets fetcher.</param>
-        public GetPresets(IPresetsFetcher presetsFetcher)
+        public GetPresets(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IPresetsFetcher presetsFetcher)
         {
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
             PresetsFetcher = presetsFetcher;
         }
 
@@ -39,6 +47,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "presets")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
+            await AzureFunctionsConfigurationReader.Load();
             IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
 
             return new OkObjectResult(presets);

@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model;
@@ -92,18 +93,21 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 }
             };
 
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
             Mock<IBartersFetcher> bartersFetcherMock = new Mock<IBartersFetcher>();
             bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(barters));
 
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
             pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(prices));
 
-            GetPrices function = new GetPrices(bartersFetcherMock.Object, pricesFetcherMock.Object);
+            GetPrices function = new GetPrices(azureFunctionsConfigurationReaderMock.Object, bartersFetcherMock.Object, pricesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(new List<Item>()
             {
@@ -169,18 +173,21 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
             Mock<IBartersFetcher> bartersFetcherMock = new Mock<IBartersFetcher>();
             bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
 
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
             pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
 
-            GetPrices function = new GetPrices(bartersFetcherMock.Object, pricesFetcherMock.Object);
+            GetPrices function = new GetPrices(azureFunctionsConfigurationReaderMock.Object, bartersFetcherMock.Object, pricesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Item>());
         }

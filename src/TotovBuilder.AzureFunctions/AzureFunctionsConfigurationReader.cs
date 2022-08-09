@@ -12,9 +12,6 @@ namespace TotovBuilder.AzureFunctions
     /// </summary>
     public class AzureFunctionsConfigurationReader : IAzureFunctionsConfigurationReader
     {
-        /// <inheritdoc/>
-        public AzureFunctionsConfiguration Values { get; private set; }
-
         private const string AzureBlobStorageConnectionStringKey = "TOTOVBUILDER_AzureBlobStorageConnectionString";
         private const string AzureBlobStorageContainerNameKey = "TOTOVBUILDER_AzureBlobStorageContainerName";
         private const string AzureFunctionsConfigurationBlobNameKey = "TOTOVBUILDER_AzureFunctionsConfigurationBlobName";
@@ -30,44 +27,47 @@ namespace TotovBuilder.AzureFunctions
         private readonly ILogger<AzureFunctionsConfigurationReader> Logger;
 
         /// <summary>
-        /// Fake loading task used to wait util the loading has finished.
+        /// Wrapper in which the readen Azure Functions configuration is stored.
         /// </summary>
-        private readonly Task LoadingTask;
+        private readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFunctionsConfigurationInitializer"/> class.
         /// </summary>
         /// <param name="logger">Logger</param>
         /// <param name="azureFunctionsConfigurationFetcher">Azure Functions configuration fetcher.</param>
-        public AzureFunctionsConfigurationReader(ILogger<AzureFunctionsConfigurationReader> logger, IAzureFunctionsConfigurationFetcher azureFunctionsConfigurationFetcher)
+        /// <param name="azureFunctionsConfigurationWrapper">Wrapper in which the readen Azure Functions configuration is stored.</param>
+        public AzureFunctionsConfigurationReader(
+            ILogger<AzureFunctionsConfigurationReader> logger,
+            IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper,
+            IAzureFunctionsConfigurationFetcher azureFunctionsConfigurationFetcher)
         {
+            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper;
             AzureFunctionsConfigurationFetcher = azureFunctionsConfigurationFetcher;
             Logger = logger;
-
-            // Temporary configuration for the fetcher to be able to get the configuration blob.
-            // Will be replaced by the complete configuration once it is loaded.
-            Values = new AzureFunctionsConfiguration()
-            {
-                AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey),
-                AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
-                AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey),
-            };
-
-            LoadingTask = Load();
-        }
-
-        /// <inheritdoc/>
-        public Task WaitForLoading()
-        {
-            return LoadingTask;
         }
 
         /// <summary>
         /// Loads the Azure Functions configuration.
         /// </summary>
-        private async Task Load()
+        public async Task Load()
         {
-            Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
+            if (AzureFunctionsConfigurationWrapper.IsLoaded())
+            {
+                return;
+            }
+
+            // Temporary configuration for the fetcher to be able to get the configuration blob.
+            // Will be replaced by the complete configuration once it is loaded.
+            AzureFunctionsConfigurationWrapper.Values = new AzureFunctionsConfiguration()
+            {
+                AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey),
+                AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
+                AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
+            };
+
+            AzureFunctionsConfigurationWrapper.Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
+            await AzureFunctionsConfigurationWrapper.SetLoaded();
         }
 
         ///// <summary>

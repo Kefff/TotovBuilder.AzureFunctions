@@ -18,9 +18,9 @@ namespace TotovBuilder.AzureFunctions
         private readonly MemoryCacheEntryOptions CachingOptions = new MemoryCacheEntryOptions() { Priority = CacheItemPriority.NeverRemove };
 
         /// <summary>
-        /// Configuration reader;
+        /// Azure functions onfiguration wrapper;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        protected readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
 
         /// <summary>
         /// Cache instance.
@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions
         /// <summary>
         /// Logger.
         /// </summary>
-        private readonly ILogger Logger;
+        private readonly ILogger<Cache> Logger;
 
         /// <summary>
         /// Last storage date for each data types.
@@ -40,10 +40,10 @@ namespace TotovBuilder.AzureFunctions
         /// Initializes a new instance of the <see cref="Cache"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="configurationReader">Azure Functions configuration reader.</param>
-        public Cache(ILogger logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
+        /// <param name="configurationReader">Azure Functions configuration wrapper.</param>
+        public Cache(ILogger<Cache> logger, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
+            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper ;
             Logger = logger;
         }
  
@@ -68,7 +68,7 @@ namespace TotovBuilder.AzureFunctions
             }
             
             TimeSpan durationSinceLastFetch = DateTime.Now - lastStorageDate;
-            int cacheDuration = dataType == DataType.Prices ? AzureFunctionsConfigurationReader.Values.PriceCacheDuration : AzureFunctionsConfigurationReader.Values.CacheDuration;
+            int cacheDuration = dataType == DataType.Prices ? AzureFunctionsConfigurationWrapper.Values.PriceCacheDuration : AzureFunctionsConfigurationWrapper.Values.CacheDuration;
 
             return durationSinceLastFetch.TotalSeconds <= cacheDuration;
         }

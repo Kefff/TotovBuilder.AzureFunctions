@@ -8,6 +8,7 @@ using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model;
 using Xunit;
 using TotovBuilder.Model.Test;
+using TotovBuilder.AzureFunctions.Abstractions;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
@@ -20,15 +21,18 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldFetchData()
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
 
-            GetTarkovValues function = new GetTarkovValues(tarkovValuesFetcherMock.Object);
+            GetTarkovValues function = new GetTarkovValues(azureFunctionsConfigurationReaderMock.Object, tarkovValuesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(TestData.TarkovValues);
         }
@@ -37,15 +41,18 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(null));
 
-            GetTarkovValues function = new GetTarkovValues(tarkovValuesFetcherMock.Object);
+            GetTarkovValues function = new GetTarkovValues(azureFunctionsConfigurationReaderMock.Object, tarkovValuesFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(new TarkovValues());
         }

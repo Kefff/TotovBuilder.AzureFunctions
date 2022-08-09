@@ -27,6 +27,7 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
             builder.Services.AddSingleton<IAzureFunctionsConfigurationReader, AzureFunctionsConfigurationReader>();
             builder.Services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
+            builder.Services.AddSingleton<IAzureFunctionsConfigurationWrapper, AzureFunctionsConfigurationWrapper>();
             builder.Services.AddSingleton<IBartersFetcher, BartersFetcher>();
             builder.Services.AddSingleton<IBlobFetcher, BlobFetcher>();
             builder.Services.AddSingleton<ICache, Cache>();
@@ -39,10 +40,7 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddSingleton<IPricesFetcher, PricesFetcher>();
             builder.Services.AddSingleton<IQuestsFetcher, QuestsFetcher>();
             builder.Services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
-            builder.Services.AddSingleton<ItemCategoryFinder>();
             builder.Services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
-            
-            
         }
     }
 }

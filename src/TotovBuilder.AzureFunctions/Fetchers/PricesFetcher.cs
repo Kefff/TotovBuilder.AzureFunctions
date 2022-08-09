@@ -18,7 +18,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PricesFetcher : ApiFetcher<IEnumerable<Item>>, IPricesFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiPricesQuery;
+        protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiPricesQuery;
         
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Prices;
@@ -28,10 +28,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        public PricesFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
-            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
+        public PricesFetcher(ILogger<PricesFetcher> logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
+            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationWrapper, cache)
         {
         }
         

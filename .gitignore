@@ -5,3 +5,5 @@ TestResults/
 PublishProfiles/
 ServiceDependencies/
 *Zip Deploy.json*
+serviceDependencies**.json
+src/TotovBuilder.AzureFunctions/Properties/serviceDependencies.json

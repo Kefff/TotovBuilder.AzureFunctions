@@ -10,6 +10,7 @@ using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model;
 using Xunit;
 using TotovBuilder.Model.Test;
+using TotovBuilder.AzureFunctions.Abstractions;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
@@ -22,15 +23,18 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldFetchData()
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
             Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
             changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ChangelogEntry>?>(TestData.Changelog));
 
-            GetChangelog function = new GetChangelog(changelogFetcherMock.Object);
+            GetChangelog function = new GetChangelog(azureFunctionsConfigurationReaderMock.Object, changelogFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(TestData.Changelog);
         }
@@ -39,15 +43,18 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
             Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
             changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ChangelogEntry>?>(null));
 
-            GetChangelog function = new GetChangelog(changelogFetcherMock.Object);
+            GetChangelog function = new GetChangelog(azureFunctionsConfigurationReaderMock.Object, changelogFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
 
             // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<ChangelogEntry>());
         }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model;
 
@@ -17,6 +18,11 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetChangelog
     {
         /// <summary>
+        /// Azure Functions configuration reader.
+        /// </summary>
+        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+
+        /// <summary>
         /// Changelog fetcher.
         /// </summary>
         private readonly IChangelogFetcher ChangelogFetcher;
@@ -24,9 +30,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetChangelog"/> class.
         /// </summary>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="changelogFetcher">Changelog fetcher.</param>
-        public GetChangelog(IChangelogFetcher changelogFetcher)
+        public GetChangelog(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IChangelogFetcher changelogFetcher)
         {
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
             ChangelogFetcher = changelogFetcher;
         }
 
@@ -40,6 +48,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
+            await AzureFunctionsConfigurationReader.Load();
             IEnumerable<ChangelogEntry> changelog = await ChangelogFetcher.Fetch() ?? Array.Empty<ChangelogEntry>();
 
             return new OkObjectResult(changelog);

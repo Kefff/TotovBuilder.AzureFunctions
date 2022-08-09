@@ -9,6 +9,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using static System.Text.Json.JsonElement;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -24,9 +25,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected abstract string ApiQuery { get; }
 
         /// <summary>
-        /// Configuration reader;
+        /// Azure Functions configuration wrapper;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        protected readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
 
         /// <summary>
         /// Type of data handled.
@@ -36,12 +37,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Logger.
         /// </summary>
-        protected readonly ILogger Logger;
-
-        /// <summary>
-        /// API URL.
-        /// </summary>
-        private readonly string ApiUrl;
+        protected readonly ILogger<ApiFetcher<T>> Logger;
 
         /// <summary>
         /// Cache.
@@ -54,11 +50,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private Task FetchingTask = Task.CompletedTask;
 
         /// <summary>
-        /// Fetch timeout in seconds.
-        /// </summary>
-        private readonly int FetchTimeout;
-
-        /// <summary>
         /// HTTP client wrapper factory.
         /// </summary>
         private readonly IHttpClientWrapperFactory HttpClientWrapperFactory;
@@ -68,16 +59,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
-        protected ApiFetcher(ILogger logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        protected ApiFetcher(
+            ILogger<ApiFetcher<T>> logger,
+            IHttpClientWrapperFactory httpClientWrapperFactory,
+            IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
         {
+            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper;
             Cache = cache;
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
             HttpClientWrapperFactory = httpClientWrapperFactory;
             Logger = logger;
-            
-            ApiUrl = AzureFunctionsConfigurationReader.Values.ApiUrl;
-            FetchTimeout = AzureFunctionsConfigurationReader.Values.FetchTimeout;
         }
 
         /// <summary>
@@ -86,8 +77,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Data fetched as a JSON string.</returns>
         public async Task<T?> Fetch()
         {
-            await AzureFunctionsConfigurationReader.WaitForLoading(); // Awaiting for the configuration to be loaded
-
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(string.Format(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString()));
@@ -135,12 +124,133 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected abstract Task<Result<T>> DeserializeData(string responseContent);
 
         /// <summary>
+        /// Tries to deserialize an array.
+        /// </summary>
+        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
+        /// <param name="propertyName">Name of the property to deserialize.</param>
+        /// <param name="value">Deserialized value when successful.</param>
+        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
+        protected bool TryDeserializeArray(JsonElement jsonElement, string propertyName, out ArrayEnumerator value)
+        {
+            value = new ArrayEnumerator();
+
+            if (jsonElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
+            {
+                return false;
+            }
+
+            if (propertyJson.ValueKind == JsonValueKind.Array)
+            {
+                value = propertyJson.EnumerateArray();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to deserialize a double value.
+        /// </summary>
+        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
+        /// <param name="propertyName">Name of the property to deserialize.</param>
+        /// <param name="value">Deserialized value when successful.</param>
+        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
+        protected bool TryDeserializeDouble(JsonElement jsonElement, string propertyName, out double value)
+        {
+            value = 0;
+
+            if (jsonElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
+            {
+                return false;
+            }
+
+            if (propertyJson.ValueKind == JsonValueKind.Number)
+            {
+                value = propertyJson.GetDouble();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to deserialize an object value.
+        /// </summary>
+        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
+        /// <param name="propertyName">Name of the property to deserialize.</param>
+        /// <param name="value">Deserialized value when successful.</param>
+        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
+        protected bool TryDeserializeObject(JsonElement jsonElement, string propertyName, out JsonElement value)
+        {
+            value = new JsonElement();
+
+            if (jsonElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (jsonElement.TryGetProperty(propertyName, out JsonElement element))
+            {
+                if (element.ValueKind == JsonValueKind.Object)
+                {
+                    value = element;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to deserialize a string value.
+        /// </summary>
+        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
+        /// <param name="propertyName">Name of the property to deserialize.</param>
+        /// <param name="value">Deserialized value when successful.</param>
+        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
+        protected bool TryDeserializeString(JsonElement jsonElement, string propertyName, out string value)
+        {
+            value = string.Empty;
+
+            if (jsonElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
+            {
+                return false;
+            }
+
+            if (propertyJson.ValueKind == JsonValueKind.String)
+            {
+                value = propertyJson.GetString();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Executes the fetch operation.
         /// </summary>
         /// <returns>Fetched data as a JSON string.</returns>
         private async Task<Result<T>> ExecuteFetch()
         {
-            if (string.IsNullOrWhiteSpace(ApiUrl)
+            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationWrapper.Values.ApiUrl)
                 || string.IsNullOrWhiteSpace(ApiQuery))
             {
                 string error = Properties.Resources.InvalidConfiguration;
@@ -155,7 +265,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ApiUrl);
+                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, AzureFunctionsConfigurationWrapper.Values.ApiUrl);
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -164,7 +274,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IHttpClientWrapper client = HttpClientWrapperFactory.Create();
                 Task<HttpResponseMessage> fetchTask = client.SendAsync(request);
 
-                if (!fetchTask.Wait(FetchTimeout * 1000))
+                if (!fetchTask.Wait(AzureFunctionsConfigurationWrapper.Values.FetchTimeout * 1000))
                 {
                     string error = string.Format(Properties.Resources.FetchingDelayExceeded, DataType.ToString());
                     Logger.LogError(error);
@@ -173,9 +283,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
 
                 responseContent = await fetchTask.Result.Content.ReadAsStringAsync();
-
-                Logger.LogInformation(string.Format(Properties.Resources.FetchingResponse, DataType.ToString(), fetchTask.Result.ToString()));
-                Logger.LogInformation(string.Format(Properties.Resources.FetchingResponseContent, DataType.ToString(), responseContent));
             }
             catch (Exception e)
             {

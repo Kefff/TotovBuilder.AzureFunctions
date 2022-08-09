@@ -18,24 +18,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class BlobFetcher : IBlobFetcher
     {
         /// <summary>
-        /// Azure blob store connection string.
+        /// Azure Functions configuration wrapper.
         /// </summary>
-        private readonly string AzureBlobStorageConnectionString;
-
-        /// <summary>
-        /// Azure blob storage container name.
-        /// </summary>
-        private readonly string AzureBlobStorageContainerName;
-
-        /// <summary>
-        /// Fetch timeout in seconds.
-        /// </summary>
-        private readonly int FetchTimeout;
-
-        /// <summary>
-        /// Configuration reader.
-        /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
 
         /// <summary>
         /// Logger.
@@ -46,23 +31,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="BlobFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
-        public BlobFetcher(ILogger<BlobFetcher> logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
+        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        public BlobFetcher(ILogger<BlobFetcher> logger, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader ;
+            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper;
             Logger = logger;
-
-            AzureBlobStorageConnectionString = AzureFunctionsConfigurationReader.Values.AzureBlobStorageConnectionString;
-            AzureBlobStorageContainerName = AzureFunctionsConfigurationReader.Values.AzureBlobStorageContainerName;
-            FetchTimeout = AzureFunctionsConfigurationReader.Values.FetchTimeout;
         }
 
         /// <inheritdoc/>
-        public async Task<Result<string>> Fetch(string blobName)
+        public Task<Result<string>> Fetch(string blobName)
         {
-            await AzureFunctionsConfigurationReader.WaitForLoading(); // Awaiting for the configuration to be loaded
-
-            return ExecuteFetch(blobName);
+            return Task.Run(() => ExecuteFetch(blobName));
         }
 
         /// <summary>
@@ -72,8 +51,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Blob value.</returns>
         private Result<string> ExecuteFetch(string blobName)
         {
-            if (string.IsNullOrWhiteSpace(AzureBlobStorageConnectionString)
-                || string.IsNullOrWhiteSpace(AzureBlobStorageContainerName))
+            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageConnectionString)
+                || string.IsNullOrWhiteSpace(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageContainerName))
             {
                 string error = Properties.Resources.InvalidConfiguration;
                 Logger.LogError(error);
@@ -85,15 +64,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                CloudStorageAccount cloudBlobAccount = CloudStorageAccount.Parse(AzureBlobStorageConnectionString);
+                CloudStorageAccount cloudBlobAccount = CloudStorageAccount.Parse(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageConnectionString);
                 CloudBlobClient cloudBlobClient = cloudBlobAccount.CreateCloudBlobClient();
-                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(AzureBlobStorageContainerName);
+                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageContainerName);
                 CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(blobName);
 
                 using MemoryStream memoryStream = new MemoryStream();
                 Task fetchTask = cloudBlockBlob.DownloadToStreamAsync(memoryStream);
 
-                if (!fetchTask.Wait(FetchTimeout * 1000))
+                if (!fetchTask.Wait(AzureFunctionsConfigurationWrapper.Values.FetchTimeout * 1000))
                 {
                     string error = Properties.Resources.FetchingDelayExceeded;
                     Logger.LogError(error);

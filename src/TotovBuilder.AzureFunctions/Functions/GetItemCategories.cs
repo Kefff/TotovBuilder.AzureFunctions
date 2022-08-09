@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Items;
 
@@ -16,6 +17,11 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetItemCategories
     {
         /// <summary>
+        /// Azure Functions configuration reader.
+        /// </summary>
+        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+
+        /// <summary>
         /// Item categories fetcher.
         /// </summary>
         private readonly IItemCategoriesFetcher ItemCategoriesFetcher;
@@ -23,9 +29,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetItemCategories"/> class.
         /// </summary>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
-        public GetItemCategories(IItemCategoriesFetcher itemCategoriesFetcher)
+        public GetItemCategories(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IItemCategoriesFetcher itemCategoriesFetcher)
         {
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
             ItemCategoriesFetcher = itemCategoriesFetcher;
         }
 
@@ -39,6 +47,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "itemcategories")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
+            await AzureFunctionsConfigurationReader.Load();
             IEnumerable<ItemCategory> itemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
 
             return new OkObjectResult(itemCategories);

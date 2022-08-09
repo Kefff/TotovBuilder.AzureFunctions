@@ -22,10 +22,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnItemMissingProperties()
         {
             // Arrange
-            Mock<ILogger<ChangelogFetcher>> loggerMock = new Mock<ILogger<ChangelogFetcher>>();
+            Mock<ILogger<ItemMissingPropertiesFetcher>> loggerMock = new Mock<ILogger<ItemMissingPropertiesFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureItemMissingPropertiesBlobName = "item-missing-properties.json"
             });
@@ -39,7 +39,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ItemMissingPropertiesFetcher fetcher = new ItemMissingPropertiesFetcher(
                 loggerMock.Object,
                 blobDataFetcherMock.Object,
-                azureFunctionsConfigurationReaderMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object);
 
             // Act
@@ -53,10 +53,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldReturnNull()
         {
             // Arrange
-            Mock<ILogger<ChangelogFetcher>> loggerMock = new Mock<ILogger<ChangelogFetcher>>();
+            Mock<ILogger<ItemMissingPropertiesFetcher>> loggerMock = new Mock<ILogger<ItemMissingPropertiesFetcher>>();
 
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureItemMissingPropertiesBlobName = "item-missing-properties.json"
             });
@@ -89,7 +89,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ItemMissingPropertiesFetcher fetcher = new ItemMissingPropertiesFetcher(
                 loggerMock.Object,
                 blobDataFetcherMock.Object,
-                azureFunctionsConfigurationReaderMock.Object,
+                azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object);
 
             // Act
