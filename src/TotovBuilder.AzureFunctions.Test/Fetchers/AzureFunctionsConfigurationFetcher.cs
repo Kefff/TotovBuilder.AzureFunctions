@@ -6,7 +6,7 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.Model;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
 using Xunit;
 
@@ -24,7 +24,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ILogger<AzureFunctionsConfigurationFetcher>> loggerMock = new Mock<ILogger<AzureFunctionsConfigurationFetcher>>();
 
             Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new Model.AzureFunctionsConfiguration()
+            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });

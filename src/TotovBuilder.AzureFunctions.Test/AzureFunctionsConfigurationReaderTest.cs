@@ -4,7 +4,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
 using Xunit;
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
-using TotovBuilder.Model;
+using TotovBuilder.Model.Configuration;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test

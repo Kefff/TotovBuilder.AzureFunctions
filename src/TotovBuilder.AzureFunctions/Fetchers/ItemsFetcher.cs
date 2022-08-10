@@ -8,7 +8,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using static System.Text.Json.JsonElement;
 

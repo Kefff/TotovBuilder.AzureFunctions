@@ -8,7 +8,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model;
+using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {

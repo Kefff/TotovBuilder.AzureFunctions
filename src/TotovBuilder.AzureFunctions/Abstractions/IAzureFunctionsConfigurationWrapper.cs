@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TotovBuilder.Model;
+using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Abstractions
 {

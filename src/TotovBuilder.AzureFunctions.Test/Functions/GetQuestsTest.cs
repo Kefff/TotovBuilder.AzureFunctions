@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
-using TotovBuilder.Model;
 using Xunit;
 using TotovBuilder.Model.Test;
 using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {

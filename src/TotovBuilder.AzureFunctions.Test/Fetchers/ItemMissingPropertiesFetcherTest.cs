@@ -7,7 +7,7 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.Model;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
 using Xunit;
 
