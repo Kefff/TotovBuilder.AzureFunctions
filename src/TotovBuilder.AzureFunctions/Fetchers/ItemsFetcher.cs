@@ -26,7 +26,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override DataType DataType => DataType.Items;
 
         /// <summary>
-        /// List of item item categories.
+        /// List of armor penetrations.
+        /// </summary>
+        private IEnumerable<ArmorPenetration> ArmorPenetrations = Array.Empty<ArmorPenetration>();
+
+        /// <summary>
+        /// Armor penetrations fetcher.
+        /// </summary>
+        private readonly IArmorPenetrationsFetcher ArmorPenetrationsFetcher;
+
+        /// <summary>
+        /// List of item categories.
         /// </summary>
         private IEnumerable<ItemCategory> ItemCategories = Array.Empty<ItemCategory>();
 
@@ -54,15 +64,18 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="cache">Cache.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemMissingPropertiesFetcher">Item missing properties fetcher.</param>
+        /// <param name="armorPenetrationsFetcher">Armor penetrations fetcher.</param>
         public ItemsFetcher(
             ILogger<ItemsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper,
             ICache cache,
             IItemCategoriesFetcher itemCategoriesFetcher,
-            IItemMissingPropertiesFetcher itemMissingPropertiesFetcher
+            IItemMissingPropertiesFetcher itemMissingPropertiesFetcher,
+            IArmorPenetrationsFetcher armorPenetrationsFetcher
         ) : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationWrapper, cache)
         {
+            ArmorPenetrationsFetcher = armorPenetrationsFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
             ItemMissingPropertiesFetcher = itemMissingPropertiesFetcher;
         }
@@ -72,6 +85,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = new List<Task>();
             ConcurrentBag<Item> items = new ConcurrentBag<Item>();
+            ArmorPenetrations = await ArmorPenetrationsFetcher.Fetch() ?? Array.Empty<ArmorPenetration>();
             ItemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
             ItemMissingProperties = await ItemMissingPropertiesFetcher.Fetch() ?? Array.Empty<ItemMissingProperties>();
 
@@ -99,7 +113,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 ammunition.AccuracyPercentageModifier = propertiesJson.GetProperty("accuracyModifier").GetDouble();
                 ammunition.ArmorDamagePercentage = propertiesJson.GetProperty("armorDamage").GetDouble() / 100;
-                //ammunition.ArmorPenetrations = ; // TODO : OBTAIN FROM WIKI
+                ammunition.ArmorPenetrations = ArmorPenetrations.FirstOrDefault(ac => ac.AmmunitionId == ammunition.Id)?.Values ?? Array.Empty<double>(); // TODO : OBTAIN FROM WIKI
                 //ammunition.Blinding = ; // TODO : MISSING FROM API
                 ammunition.Caliber = propertiesJson.GetProperty("caliber").GetString();
                 ammunition.DurabilityBurnPercentageModifier = propertiesJson.GetProperty("durabilityBurnFactor").GetDouble() - 1;
@@ -256,7 +270,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 tarkovItemCategories.Add(tarkovItemCategoryJson.GetProperty("id").GetString());
             }
 
-            ItemCategory itemCategory = FindItemCategoryFromTarkovCategoryId(tarkovItemCategories.First());
+            ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategories.First());
 
             switch (itemCategory.Id)
             {
@@ -559,24 +573,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Finds an item category from a tarkov item category ID.
-        /// When no matching item category is found, return the "other" item category.
-        /// </summary>
-        /// <param name="tarkovCategoryIds">Tarkov item category IDs.</param>
-        /// <returns>Item category.</returns>
-        private ItemCategory FindItemCategoryFromTarkovCategoryId(string tarkovCategoryId)
-        {
-            ItemCategory? result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovCategoryId));
-
-            if (result == null)
-            {
-                result = new ItemCategory() { Id = "other" };
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Gets an armored areas.
         /// </summary>
         /// <param name="propertiesJson">Json element representing the properties of an item.</param>
@@ -608,6 +604,24 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             return armoredAreas.ToArray();
+        }
+
+        /// <summary>
+        /// Gets an item category from a tarkov item category ID.
+        /// When no matching item category is found, return the "other" item category.
+        /// </summary>
+        /// <param name="tarkovCategoryIds">Tarkov item category IDs.</param>
+        /// <returns>Item category.</returns>
+        private ItemCategory GetItemCategoryFromTarkovCategoryId(string tarkovCategoryId)
+        {
+            ItemCategory? result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovCategoryId));
+
+            if (result == null)
+            {
+                result = new ItemCategory() { Id = "other" };
+            }
+
+            return result;
         }
     }
 }

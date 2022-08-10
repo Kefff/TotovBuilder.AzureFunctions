@@ -52,13 +52,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
 
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
                 azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object);
+                itemMissingPropertiesFetcher.Object,
+                armorPenetrationsFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -68,7 +72,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }
 
         [Fact]
-        public async Task Fetch_WithoutItemMissingProperties_ShouldReturnItems()
+        public async Task Fetch_WithoutItemMissingPropertiesAndArmorPenetrations_ShouldReturnItems()
         {
             // Arrange
             Mock<ILogger<ItemsFetcher>> loggerMock = new Mock<ILogger<ItemsFetcher>>();
@@ -87,6 +91,40 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
   ""data"": {
     ""items"": [
+      {
+        ""categories"": [
+          {
+            ""id"": ""5485a8684bdc2da71d8b4567""
+          }
+        ],
+        ""iconLink"": ""https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg"",
+        ""id"": ""601aa3d2b2bcb34913271e6d"",
+        ""imageLink"": ""https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg"",
+        ""link"": ""https://tarkov.dev/item/762x39mm-mai-ap"",
+        ""name"": ""7.62x39mm MAI AP"",
+        ""properties"": {
+          ""__typename"": ""ItemPropertiesAmmo"",
+          ""accuracyModifier"": -0.05,
+          ""armorDamage"": 76,
+          ""caliber"": ""Caliber762x39"",
+          ""damage"": 47,
+          ""durabilityBurnFactor"": 1.7,
+          ""fragmentationChance"": 0.05,
+          ""heavyBleedModifier"": 0.1,
+          ""initialSpeed"": 730,
+          ""lightBleedModifier"": 0.1,
+          ""penetrationChance"": 0.65,
+          ""penetrationPower"": 58,
+          ""projectileCount"": 1,
+          ""recoilModifier"": 0.1,
+          ""ricochetChance"": 0.435,
+          ""stackMaxSize"": 60,
+          ""tracer"": false
+        },
+        ""shortName"": ""MAI AP"",
+        ""weight"": 0.012,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/7.62x39mm_MAI_AP""
+      },
       {
         ""categories"": [
           {
@@ -294,6 +332,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(null));
+            
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(null));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
@@ -301,7 +342,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object);
+                itemMissingPropertiesFetcher.Object,
+                armorPenetrationsFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -309,6 +351,35 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEquivalentTo(new Item[]
             {
+                new Ammunition()
+                {
+                    AccuracyPercentageModifier = -0.05,
+                    ArmorDamagePercentage = 0.76,
+                    ArmorPenetrations = Array.Empty<double>(), // TODO : OBTAIN FROM WIKI
+                    //Blinding = , // TODO : MISSING FROM API
+                    Caliber = "Caliber762x39",
+                    CategoryId = "ammunition",
+                    DurabilityBurnPercentageModifier = 0.7,
+                    FleshDamage = 47,
+                    FragmentationChancePercentage = 0.05,
+                    HeavyBleedingPercentageChance = 0.1,
+                    IconLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg",
+                    Id = "601aa3d2b2bcb34913271e6d",
+                    ImageLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg",
+                    LightBleedingPercentageChance = 0.1,
+                    MarketLink = "https://tarkov.dev/item/762x39mm-mai-ap",
+                    MaxStackableAmount = 60,
+                    Name = "7.62x39mm MAI AP",
+                    PenetrationPower = 58,
+                    Projectiles = 1,
+                    RecoilPercentageModifier = 0.10,
+                    ShortName = "MAI AP",
+                    Subsonic = false,
+                    Tracer = false,
+                    Velocity = 730,
+                    Weight = 0.012,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/7.62x39mm_MAI_AP"
+                },
                 new ArmorMod()
                 {
                     ArmorClass = 3,
@@ -516,6 +587,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+            
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
@@ -523,7 +597,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object);
+                itemMissingPropertiesFetcher.Object,
+                armorPenetrationsFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -616,13 +691,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
 
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
                 azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object);
+                itemMissingPropertiesFetcher.Object,armorPenetrationsFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -686,13 +764,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
 
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
                 azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object);
+                itemMissingPropertiesFetcher.Object,
+                armorPenetrationsFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
