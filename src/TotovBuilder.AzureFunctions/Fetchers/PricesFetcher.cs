@@ -72,9 +72,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString();
                         }
 
-                        if (priceJson.GetProperty("vendor").TryGetProperty("minTraderLevel", out JsonElement minTraderLevel))
+                        if (priceJson.GetProperty("vendor").TryGetProperty("minTraderLevel", out JsonElement minTraderLevelJson))
                         {
-                            price.MerchantLevel = minTraderLevel.GetInt32();
+                            int minTraderLevel = minTraderLevelJson.GetInt32();
+
+                            if (minTraderLevel > 0)
+                            {
+                                price.MerchantLevel = minTraderLevel;
+                            }
                         }
 
                         if (priceJson.GetProperty("vendor").TryGetProperty("taskUnlock", out JsonElement taskUnlockJson) && taskUnlockJson.ValueKind != JsonValueKind.Null)
