@@ -10,11 +10,15 @@ namespace TotovBuilder.AzureFunctions.Test
     {
         [Theory]
         [InlineData("THORAX", "Thorax")]
-        [InlineData("Full Auto", "Full auto")]
-        public void ToStringCase_ShouldReturnStringMatchingStringCase(string stringToFormat, string expected)
+        [InlineData("Left arm", "LeftArm")]
+        [InlineData("Single fire", "SingleFire")]
+        [InlineData("Full Auto", "FullAuto")]
+        [InlineData("Ultra high molecular weight polyethylene", "UltraHighMolecularWeightPolyethylene")]
+        [InlineData("high", "High")]
+        public void ToPascalCase_ShouldReturnStringInPascalCase(string stringToFormat, string expected)
         {
             // Act
-            string formattedString = StringExtensions.ToStringCase(stringToFormat);
+            string formattedString = StringExtensions.ToPascalCase(stringToFormat);
 
             // Asssert
             formattedString.Should().Be(expected);

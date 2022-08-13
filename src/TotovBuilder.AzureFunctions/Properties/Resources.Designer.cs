@@ -235,6 +235,15 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item category &quot;{0}&quot; is not implemented..
+        /// </summary>
+        internal static string ItemCategoryNotImplemented {
+            get {
+                return ResourceManager.GetString("ItemCategoryNotImplemented", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing item :
         ///{0}.
         /// </summary>
@@ -251,15 +260,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string ItemMissingPropertiesDeserializationError {
             get {
                 return ResourceManager.GetString("ItemMissingPropertiesDeserializationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Item category &quot;{0}&quot; is not implemented..
-        /// </summary>
-        internal static string NotImplementedItemCategory {
-            get {
-                return ResourceManager.GetString("NotImplementedItemCategory", resourceCulture);
             }
         }
         

@@ -55,6 +55,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
 
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
@@ -62,7 +65,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
-                armorPenetrationsFetcherMock.Object);
+                armorPenetrationsFetcherMock.Object,
+                tarkovValuesFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -72,7 +76,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }
 
         [Fact]
-        public async Task Fetch_WithoutItemMissingPropertiesAndArmorPenetrations_ShouldReturnItems()
+        public async Task Fetch_WithoutItemMissingProperties_ShouldReturnItems()
         {
             // Arrange
             Mock<ILogger<ItemsFetcher>> loggerMock = new Mock<ILogger<ItemsFetcher>>();
@@ -336,6 +340,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(null));
 
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(null));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
@@ -343,7 +350,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
-                armorPenetrationsFetcherMock.Object);
+                armorPenetrationsFetcherMock.Object,
+                tarkovValuesFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -425,7 +433,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Id = "5e4bfc1586f774264f7582d3",
                     ImageLink = "https://assets.tarkov.dev/5e4bfc1586f774264f7582d3-image.jpg",
                     MarketLink = "https://tarkov.dev/item/msa-gallet-tc-800-high-cut-combat-helmet",
-                    Material = "Combined materials",
+                    Material = "CombinedMaterials",
                     MaxStackableAmount = 1,
                     ModSlots = Array.Empty<ModSlot>(), // TODO : MISSING FROM API
                     MovementSpeedPercentageModifier = -0.02,
@@ -492,7 +500,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     CategoryId = "mainWeapon",
                     ConflictingItemIds = Array.Empty<string>(), // TODO : MISSING FROM API
                     Ergonomics = 44,
-                    FireModes = new string[] { "Single fire", "Full auto" },
+                    FireModes = new string[] { "SingleFire", "FullAuto" },
                     FireRate = 650,
                     HorizontalRecoil = 445,
                     IconLink = "https://assets.tarkov.dev/57dc2fa62459775949412633-icon.jpg",
@@ -591,6 +599,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
 
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
@@ -598,7 +609,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
-                armorPenetrationsFetcherMock.Object);
+                armorPenetrationsFetcherMock.Object,
+                tarkovValuesFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -694,13 +706,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
 
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
                 azureFunctionsConfigurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,armorPenetrationsFetcherMock.Object);
+                itemMissingPropertiesFetcher.Object,
+                armorPenetrationsFetcherMock.Object,
+                tarkovValuesFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();
@@ -767,6 +784,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
 
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+
             ItemsFetcher fetcher = new ItemsFetcher(
                 loggerMock.Object,
                 httpClientWrapperFactoryMock.Object,
@@ -774,7 +794,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
-                armorPenetrationsFetcherMock.Object);
+                armorPenetrationsFetcherMock.Object,
+                tarkovValuesFetcherMock.Object);
 
             // Act
             IEnumerable<Item>? result = await fetcher.Fetch();

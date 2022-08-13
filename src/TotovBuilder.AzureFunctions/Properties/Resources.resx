@@ -181,6 +181,9 @@
     <value>Error while deserializing item category :
 {0}</value>
   </data>
+  <data name="ItemCategoryNotImplemented" xml:space="preserve">
+    <value>Item category "{0}" is not implemented.</value>
+  </data>
   <data name="ItemDeserializationError" xml:space="preserve">
     <value>Error while deserializing item :
 {0}</value>
@@ -188,9 +191,6 @@
   <data name="ItemMissingPropertiesDeserializationError" xml:space="preserve">
     <value>Error while deserializing item missing properties :
 {0}</value>
-  </data>
-  <data name="NotImplementedItemCategory" xml:space="preserve">
-    <value>Item category "{0}" is not implemented.</value>
   </data>
   <data name="PresetDeserializationError" xml:space="preserve">
     <value>Error while deserializing preset :

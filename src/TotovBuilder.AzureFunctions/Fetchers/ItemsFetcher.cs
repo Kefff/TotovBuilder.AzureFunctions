@@ -56,6 +56,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private readonly IItemMissingPropertiesFetcher ItemMissingPropertiesFetcher;
 
         /// <summary>
+        /// Tarkov values.
+        /// </summary>
+        private TarkovValues TarkovValues = new TarkovValues();
+
+        /// <summary>
+        /// Tarkov values fetcher.
+        /// </summary>
+        private readonly ITarkovValuesFetcher TarkovValuesFetcher;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ItemsFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
@@ -65,6 +75,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemMissingPropertiesFetcher">Item missing properties fetcher.</param>
         /// <param name="armorPenetrationsFetcher">Armor penetrations fetcher.</param>
+        /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         public ItemsFetcher(
             ILogger<ItemsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
@@ -72,12 +83,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ICache cache,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemMissingPropertiesFetcher itemMissingPropertiesFetcher,
-            IArmorPenetrationsFetcher armorPenetrationsFetcher
+            IArmorPenetrationsFetcher armorPenetrationsFetcher,
+            ITarkovValuesFetcher tarkovValuesFetcher
         ) : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationWrapper, cache)
         {
             ArmorPenetrationsFetcher = armorPenetrationsFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
             ItemMissingPropertiesFetcher = itemMissingPropertiesFetcher;
+            TarkovValuesFetcher = tarkovValuesFetcher;
         }
         
         /// <inheritdoc/>
@@ -88,6 +101,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ArmorPenetrations = await ArmorPenetrationsFetcher.Fetch() ?? Array.Empty<ArmorPenetration>();
             ItemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
             ItemMissingProperties = await ItemMissingPropertiesFetcher.Fetch() ?? Array.Empty<ItemMissingProperties>();
+            TarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
 
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -148,7 +162,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armor.ArmoredAreas = GetArmoredAreas(propertiesJson);
                 armor.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armor.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                armor.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
+                armor.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString().ToPascalCase();
                 armor.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 //armor.RicochetChance = ; // TODO : MISSING FROM API
                 armor.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
@@ -174,7 +188,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armorMod.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
                 armorMod.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
+                armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString().ToPascalCase();
                 armorMod.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == armorMod.Id)?.ModSlots ?? Array.Empty<ModSlot>();
                 armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 //item.RicochetChance = ; // TODO : MISSING FROM API
@@ -245,8 +259,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             try
             {
-                Item item = DeserializeData(itemJson);
-                items.Add(item);
+                Item? item = DeserializeData(itemJson);
+
+                if (item != null)
+                {
+                    items.Add(item);
+                }
             }
             catch (Exception e)
             {
@@ -260,7 +278,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <returns>Deserialized item.</returns>
-        private Item DeserializeData(JsonElement itemJson)
+        private Item? DeserializeData(JsonElement itemJson)
         {
             List<string> tarkovItemCategories = new List<string>();
             JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
@@ -270,52 +288,55 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 tarkovItemCategories.Add(tarkovItemCategoryJson.GetProperty("id").GetString());
             }
 
-            ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategories.First());
-
-            switch (itemCategory.Id)
+            foreach (string tarkovItemCategory in tarkovItemCategories)
             {
-                case "ammunition":
-                    return DeserializeAmmunition(itemJson, itemCategory.Id);
-                case "armor":
-                    return DeserializeArmor(itemJson, itemCategory.Id);
-                case "armorMod":
-                    return DeserializeArmorMod(itemJson, itemCategory.Id);
-                case "backpack":
-                case "container":
-                case "securedContainer":
-                    return DeserializeContainer(itemJson, itemCategory.Id);
-                case "eyewear":
-                    return DeserializeEyewear(itemJson, itemCategory.Id);
-                case "grenade":
-                    return DeserializeGrenade(itemJson, itemCategory.Id);
-                case "headwear":
-                    return DeserializeHeadwear(itemJson, itemCategory.Id);
-                case "armband":
-                case "currency":
-                case "faceCover":
-                case "headphones":
-                case "other":
-                case "special":
-                    return DeserializeItem(itemJson, itemCategory.Id);
-                case "magazine":
-                    return DeserializeMagazine(itemJson, itemCategory.Id);
-                case "meleeWeapon":
-                    return DeserializeMeleeWeapon(itemJson, itemCategory.Id);
-                case "mod":
-                    return DeserializeMod(itemJson, itemCategory.Id);
-                case "mainWeapon":
-                case "secondaryWeapon":
-                    return DeserializeRangedWeapon(itemJson, itemCategory.Id);
-                case "rangedWeaponMod":
-                    return DeserializeRangedWeaponMod(itemJson, itemCategory.Id);
-                case "vest":
-                    return DeserializeVest(itemJson, itemCategory.Id);
-                default:
-                    string error = Properties.Resources.NotImplementedItemCategory;
-                    Logger.LogError(error);
+                ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategory);
 
-                    throw new NotImplementedException(error);
+                switch (itemCategory.Id)
+                {
+                    case "ammunition":
+                        return DeserializeAmmunition(itemJson, itemCategory.Id);
+                    case "armor":
+                        return DeserializeArmor(itemJson, itemCategory.Id);
+                    case "armorMod":
+                        return DeserializeArmorMod(itemJson, itemCategory.Id);
+                    case "backpack":
+                    case "container":
+                    case "securedContainer":
+                        return DeserializeContainer(itemJson, itemCategory.Id);
+                    case "eyewear":
+                        return DeserializeEyewear(itemJson, itemCategory.Id);
+                    case "grenade":
+                        return DeserializeGrenade(itemJson, itemCategory.Id);
+                    case "headwear":
+                        return DeserializeHeadwear(itemJson, itemCategory.Id);
+                    case "armband":
+                    case "currency":
+                    case "faceCover":
+                    case "headphones":
+                    case "other":
+                    case "special":
+                        return DeserializeItem(itemJson, itemCategory.Id);
+                    case "magazine":
+                        return DeserializeMagazine(itemJson, itemCategory.Id);
+                    case "meleeWeapon":
+                        return DeserializeMeleeWeapon(itemJson, itemCategory.Id);
+                    case "mod":
+                        return DeserializeMod(itemJson, itemCategory.Id);
+                    case "mainWeapon":
+                    case "secondaryWeapon":
+                        return DeserializeRangedWeapon(itemJson, itemCategory.Id);
+                    case "rangedWeaponMod":
+                        return DeserializeRangedWeaponMod(itemJson, itemCategory.Id);
+                    case "vest":
+                        return DeserializeVest(itemJson, itemCategory.Id);
+                }
             }
+
+            string error = Properties.Resources.ItemCategoryNotImplemented;
+            Logger.LogError(error);
+
+            throw new NotImplementedException(error);
         }
 
         /// <summary>
@@ -385,10 +406,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 headwear.Deafening = propertiesJson.GetProperty("deafening").GetString();
                 headwear.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                headwear.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString();
+                headwear.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString().ToPascalCase();
                 headwear.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == headwear.Id)?.ModSlots ?? Array.Empty<ModSlot>();
                 headwear.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                //headwear.RicochetChance = ; // TODO : MISSING FROM API
+                headwear.RicochetChance = GetRicochetChance(headwear.Id); // TODO : MISSING FROM API
                 headwear.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
             }
 
@@ -475,25 +496,28 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
         /// <returns>Deserialized <see cref="RangedWeapon"/>.</returns>
-        private Item DeserializeRangedWeapon(JsonElement itemJson, string itemCategoryId)
+        private Item? DeserializeRangedWeapon(JsonElement itemJson, string itemCategoryId)
         {
-            RangedWeapon rangedWeapon = DeserializeBaseItemProperties<RangedWeapon>(itemJson, itemCategoryId);
+            RangedWeapon? rangedWeapon = DeserializeBaseItemProperties<RangedWeapon>(itemJson, itemCategoryId);
 
-            if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
+            if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson))
             {
-                if (propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesWeapon") // Ignoring ItemPropertiesPreset
+                if (propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesWeapon")
                 {
+                    // Presets sent by the API are ignored
                     rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString();
                     rangedWeapon.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
-                    rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString().ToStringCase()).ToArray();
+                    rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString().ToPascalCase()).ToArray();
                     rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
                     rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
                     rangedWeapon.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.ModSlots ?? Array.Empty<ModSlot>();
                     rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
+
+                    return rangedWeapon;
                 }
             }
-
-            return rangedWeapon;
+            
+            return null;
         }
 
         /// <summary>
@@ -553,7 +577,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeString(propertiesJson.GetProperty("material"), "name", out string material))
                 {
-                    vest.Material = material;
+                    vest.Material = material.ToPascalCase();
                 }
 
                 if (TryDeserializeDouble(propertiesJson, "speedPenalty", out double movementSpeedPercentageModifier))
@@ -587,7 +611,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 {
                     if (armoredAreaJson.ValueKind == JsonValueKind.String)
                     {
-                        armoredAreas.Add(armoredAreaJson.GetString().ToStringCase());
+                        armoredAreas.Add(armoredAreaJson.GetString().ToPascalCase());
                     }
                 }
             }
@@ -598,7 +622,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 {
                     if (headArmoredAreaJson.ValueKind == JsonValueKind.String)
                     {
-                        armoredAreas.Add(headArmoredAreaJson.GetString().ToStringCase());
+                        armoredAreas.Add(headArmoredAreaJson.GetString().ToPascalCase());
                     }
                 }
             }
@@ -622,6 +646,26 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Gets a ricochet chance of an item.
+        /// </summary>
+        /// <param name="itemId">Item ID.</param>
+        /// <returns>Ricochet chance.</returns>
+        private string GetRicochetChance(string itemId)
+        {
+            double ricochetXValue = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == itemId)?.RicochetXValue ?? 0;            
+            RicochetChance? ricochetChance = TarkovValues.RicochetChances.SingleOrDefault((rc) =>
+            {
+                // Forced to do this for code coverage
+                bool isGreaterThanMin = rc.XMinValue <= ricochetXValue;
+                bool isLesserThanMax = rc.XMaxValue >= ricochetXValue;
+
+                return isGreaterThanMin && isLesserThanMax;
+            });
+
+            return (ricochetChance?.Name ?? string.Empty).ToPascalCase();
         }
     }
 }
