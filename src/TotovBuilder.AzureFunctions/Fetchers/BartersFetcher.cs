@@ -51,9 +51,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                     JsonElement questJson = barterJson.GetProperty("taskUnlock");
 
-                    if (!TryDeserializeString(questJson, "id", out string? questId))
+                    if (!TryDeserializeString(questJson, "id", out string questId))
                     {
-                        questId = null;
+                        questId = string.Empty;
                     }
 
                     foreach (JsonElement baterItemJson in barterJson.GetProperty("requiredItems").EnumerateArray())
