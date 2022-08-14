@@ -14,7 +14,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a prices fetcher.
     /// </summary>
-    public class PricesFetcher : ApiFetcher<IEnumerable<Item>>, IPricesFetcher
+    public class PricesFetcher : ApiFetcher<IEnumerable<Price>>, IPricesFetcher
     {
         /// <inheritdoc/>
         protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiPricesQuery;
@@ -35,16 +35,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
         
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Item> items = new List<Item>();
+            List<Price> prices = new List<Price>();
 
             JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in pricesJson.EnumerateArray())
             {
-                List<Price> prices = new List<Price>();
-
                 try
                 {
                     foreach (JsonElement priceJson in itemJson.GetProperty("buyFor").EnumerateArray())
@@ -59,6 +57,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                         Price price = new Price()
                         {
                             CurrencyName = priceJson.GetProperty("currency").GetString(),
+                            ItemId = itemJson.GetProperty("id").GetString(),
                             Value = value,
                             ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
                         };
@@ -95,22 +94,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     string error = string.Format(Properties.Resources.PriceDeserializationError, e);
                     Logger.LogError(error);
                 }
-
-                if (prices.Count == 0)
-                {
-                    continue;
-                }
-                    
-                Item item = new Item()
-                {
-                    Id = itemJson.GetProperty("id").GetString(),
-                    Prices = prices.ToArray()
-                };
-
-                items.Add(item);
             }
 
-            return Task.FromResult(Result.Ok(items.AsEnumerable()));
+            return Task.FromResult(Result.Ok(prices.AsEnumerable()));
         }
     }
 }

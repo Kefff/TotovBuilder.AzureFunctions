@@ -47,7 +47,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             PricesFetcher fetcher = new PricesFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            IEnumerable<Price>? result = await fetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Prices);
@@ -103,24 +103,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             PricesFetcher fetcher = new PricesFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            IEnumerable<Price>? result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(new Item[]
+            result.Should().BeEquivalentTo(new Price[]
             {
-                new Item()
+                new Price()
                 {
-                    Id = "5783c43d2459774bbe137486",
-                    Prices = new Price[]
-                    {
-                        new Price()
-                        {
-                            CurrencyName = "RUB",
-                            Merchant = "flea-market",
-                            Value = 18111,
-                            ValueInMainCurrency = 18111
-                        }
-                    }
+                    CurrencyName = "RUB",
+                    ItemId = "5783c43d2459774bbe137486",
+                    Merchant = "flea-market",
+                    Value = 18111,
+                    ValueInMainCurrency = 18111
                 }
             });
         }

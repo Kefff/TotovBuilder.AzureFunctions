@@ -47,7 +47,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             BartersFetcher fetcher = new BartersFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            IEnumerable<Price>? result = await fetcher.Fetch();
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Barters);
@@ -121,37 +121,31 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             BartersFetcher fetcher = new BartersFetcher(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            IEnumerable<Price>? result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(new Item[]
+            result.Should().BeEquivalentTo(new Price[]
             {
-                new Item()
+                new Price()
                 {
-                    Id = "545cdb794bdc2d3a198b456a",
-                    Prices = new Price[]
+                    BarterItems = new BarterItem[]
                     {
-                        new Price()
+                        new BarterItem()
                         {
-                            BarterItems = new BarterItem[]
-                            {
-                                new BarterItem()
-                                {
-                                    ItemId = "5e32f56fcb6d5863cc5e5ee4",
-                                    Quantity = 2
-                                },
-                                new BarterItem()
-                                {
-                                    ItemId = "5b432be65acfc433000ed01f",
-                                    Quantity = 1
-                                }
-                            },
-                            CurrencyName = "barter",
-                            Merchant = "prapor",
-                            MerchantLevel = 1,
-                            QuestId = "59675d6c86f7740a842fc482"
+                            ItemId = "5e32f56fcb6d5863cc5e5ee4",
+                            Quantity = 2
+                        },
+                        new BarterItem()
+                        {
+                            ItemId = "5b432be65acfc433000ed01f",
+                            Quantity = 1
                         }
-                    }
+                    },
+                    CurrencyName = "barter",
+                    ItemId = "545cdb794bdc2d3a198b456a",
+                    Merchant = "prapor",
+                    MerchantLevel = 1,
+                    QuestId = "59675d6c86f7740a842fc482"
                 }
             });
         }

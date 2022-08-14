@@ -22,83 +22,66 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            List<Item> barters = new List<Item>() // Not using TestData.Barters here because this tests modifies the list making other tests fail
+            List<Price> barters = new List<Price>() // Not using TestData.Barters here because this tests modifies the list making other tests fail
             {
-                new Item()
+                new Price()
                 {
-                    Id = "545cdb794bdc2d3a198b456a",
-                    Prices = new Price[]
+                    BarterItems = new BarterItem[]
                     {
-                        new Price()
+                        new BarterItem()
                         {
-                            BarterItems = new BarterItem[]
-                            {
-                                new BarterItem()
-                                {
-                                    ItemId = "5f9949d869e2777a0e779ba5",
-                                    Quantity = 4
-                                }
-                            },
-                            CurrencyName = "barter",
-                            Merchant = "mechanic",
-                            MerchantLevel = 3
+                            ItemId = "5f9949d869e2777a0e779ba5",
+                            Quantity = 4
                         }
-                    }
+                    },
+                    CurrencyName = "barter",
+                    ItemId = "545cdb794bdc2d3a198b456a",
+                    Merchant = "mechanic",
+                    MerchantLevel = 3
                 },
-                new Item()
+                new Price()
                 {
-                    Id = "57dc2fa62459775949412633",
-                    Prices = new Price[]
+                    BarterItems = new BarterItem[]
                     {
-                        new Price()
+                        new BarterItem()
                         {
-                            BarterItems = new BarterItem[]
-                            {
-                                new BarterItem()
-                                {
-                                    ItemId = "5c13cd2486f774072c757944",
-                                    Quantity = 5
-                                }
-                            }
+                            ItemId = "5c13cd2486f774072c757944",
+                            Quantity = 5
                         }
-                    }
+                    },
+                    ItemId = "57dc2fa62459775949412633"
                 }
             };
 
-            List<Item> prices = new List<Item>() // Not using TestData.Prices here because this tests modifies the list making other tests fail
+            List<Price> prices = new List<Price>() // Not using TestData.Prices here because this tests modifies the list making other tests fail
             {
-                new Item()
+                new Price()
                 {
-                    Id = "57dc2fa62459775949412633",
-                    Prices = new Price[]
-                    {
-                        new Price()
-                        {
-                            CurrencyName = "RUB",
-                            Merchant = "prapor",
-                            MerchantLevel = 1,
-                            QuestId = "5936d90786f7742b1420ba5b",
-                            Value = 24605,
-                            ValueInMainCurrency = 24605
-                        },
-                        new Price()
-                        {
-                            CurrencyName = "RUB",
-                            Merchant = "flea-market",
-                            Value = 35000,
-                            ValueInMainCurrency = 35000
-                        }
-                    }
+                    CurrencyName = "RUB",
+                    ItemId = "57dc2fa62459775949412633",
+                    Merchant = "prapor",
+                    MerchantLevel = 1,
+                    QuestId = "5936d90786f7742b1420ba5b",
+                    Value = 24605,
+                    ValueInMainCurrency = 24605
+                },
+                new Price()
+                {
+                    CurrencyName = "RUB",
+                    ItemId = "57dc2fa62459775949412633",
+                    Merchant = "flea-market",
+                    Value = 35000,
+                    ValueInMainCurrency = 35000
                 }
             };
 
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
             Mock<IBartersFetcher> bartersFetcherMock = new Mock<IBartersFetcher>();
-            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(barters));
+            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(barters));
 
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(prices));
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(prices));
 
             GetPrices function = new GetPrices(azureFunctionsConfigurationReaderMock.Object, bartersFetcherMock.Object, pricesFetcherMock.Object);
 
@@ -108,62 +91,52 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(new List<Item>()
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(new List<Price>()
             {
-                new Item()
+                new Price()
                 {
-                    Id = "57dc2fa62459775949412633",
-                    Prices = new Price[]
-                    {
-                        new Price()
-                        {
-                            CurrencyName = "RUB",
-                            Merchant = "prapor",
-                            MerchantLevel = 1,
-                            QuestId = "5936d90786f7742b1420ba5b",
-                            Value = 24605,
-                            ValueInMainCurrency = 24605
-                        },
-                        new Price()
-                        {
-                            CurrencyName = "RUB",
-                            Merchant = "flea-market",
-                            Value = 35000,
-                            ValueInMainCurrency = 35000
-                        },
-                        new Price()
-                        {
-                            BarterItems = new BarterItem[]
-                            {
-                                new BarterItem()
-                                {
-                                    ItemId = "5c13cd2486f774072c757944",
-                                    Quantity = 5
-                                }
-                            }
-                        }
-                    }
-                },                
-                new Item()
+                    CurrencyName = "RUB",
+                    ItemId = "57dc2fa62459775949412633",
+                    Merchant = "prapor",
+                    MerchantLevel = 1,
+                    QuestId = "5936d90786f7742b1420ba5b",
+                    Value = 24605,
+                    ValueInMainCurrency = 24605
+                },
+                new Price()
                 {
-                    Id = "545cdb794bdc2d3a198b456a",
-                    Prices = new Price[]
+                    CurrencyName = "RUB",
+                    ItemId = "57dc2fa62459775949412633",
+                    Merchant = "flea-market",
+                    Value = 35000,
+                    ValueInMainCurrency = 35000
+                },
+                new Price()
+                {
+                    BarterItems = new BarterItem[]
                     {
-                        new Price()
+                        new BarterItem()
                         {
-                            BarterItems = new BarterItem[]
-                            {
-                                new BarterItem()
-                                {
-                                    ItemId = "5f9949d869e2777a0e779ba5",
-                                    Quantity = 4
-                                }
-                            },
-                            CurrencyName = "barter",
-                            Merchant = "mechanic",
-                            MerchantLevel = 3
+                            ItemId = "5c13cd2486f774072c757944",
+                            Quantity = 5
+                        },
+                    },
+                    ItemId = "57dc2fa62459775949412633"
+                },
+                new Price()
+                {
+                    BarterItems = new BarterItem[]
+                    {
+                        new BarterItem()
+                        {
+                            ItemId = "5f9949d869e2777a0e779ba5",
+                            Quantity = 4
                         }
-                    }
+                    },
+                    CurrencyName = "barter",
+                    ItemId = "545cdb794bdc2d3a198b456a",
+                    Merchant = "mechanic",
+                    MerchantLevel = 3
                 },
             });
         }
@@ -175,10 +148,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
             Mock<IBartersFetcher> bartersFetcherMock = new Mock<IBartersFetcher>();
-            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
+            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(null));
 
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(null));
 
             GetPrices function = new GetPrices(azureFunctionsConfigurationReaderMock.Object, bartersFetcherMock.Object, pricesFetcherMock.Object);
 

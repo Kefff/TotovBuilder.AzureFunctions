@@ -57,24 +57,10 @@ namespace TotovBuilder.AzureFunctions.Functions
         {
             await AzureFunctionsConfigurationReader.Load();
 
-            List<Item> prices = new List<Item>(await PricesFetcher.Fetch() ?? Array.Empty<Item>());
-            IEnumerable<Item> barters = await BartersFetcher.Fetch() ?? Array.Empty<Item>();
+            IEnumerable<Price> prices = await PricesFetcher.Fetch() ?? Array.Empty<Price>();
+            IEnumerable<Price> barters = await BartersFetcher.Fetch() ?? Array.Empty<Price>();
 
-            foreach (Item barter in barters)
-            {
-                Item? price = prices.FirstOrDefault(p => p.Id == barter.Id);
-
-                if (price != null)
-                {
-                    price.Prices = price.Prices.Concat(barter.Prices).ToArray();
-                }
-                else
-                {
-                    prices.Add(barter);
-                }
-            }
-
-            return new OkObjectResult(prices);
+            return new OkObjectResult(prices.Concat(barters).OrderBy(p => p.ItemId));
         }
     }
 }

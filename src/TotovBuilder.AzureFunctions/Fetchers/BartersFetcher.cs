@@ -14,7 +14,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a barters fetcher.
     /// </summary>
-    public class BartersFetcher : ApiFetcher<IEnumerable<Item>>, IBartersFetcher
+    public class BartersFetcher : ApiFetcher<IEnumerable<Price>>, IBartersFetcher
     {
         /// <inheritdoc/>
         protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiBartersQuery;
@@ -35,9 +35,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Item> items = new List<Item>();
+            List<Price> prices = new List<Price>();
 
             JsonElement bartersJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -67,53 +67,27 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                     foreach (JsonElement itemJson in barterJson.GetProperty("rewardItems").EnumerateArray())
                     {
-                        Item item;
                         int quantity = itemJson.GetProperty("quantity").GetInt32();
-                        string id = itemJson.GetProperty("item").GetProperty("id").GetString();
                         Price barter = new Price()
                         {
                             BarterItems = barterItems.ToArray(),
                             CurrencyName = "barter",
+                            ItemId = itemJson.GetProperty("item").GetProperty("id").GetString(),
                             Merchant = merchant,
                             MerchantLevel = merchantLevel,
                             QuestId = questId
                         };
 
-                        if (items.Any(i => i.Id == id))
-                        {
-                            item = items.Single(i => i.Id == id);
-
-                            List<Price> prices = new List<Price>(item.Prices)
-                            {
-                                barter
-                            };
-                            item.Prices = prices.ToArray();
-                        }
-                        else
-                        {
-                            item = new Item()
-                            {
-                                Id = id,
-                                Prices = new Price[]
-                                {
-                                    barter
-                                }
-                            };
-
-                            items.Add(item);
-                        }
-
                         if (quantity > 1)
                         {
-                            foreach (Price price in item.Prices)
+                            foreach (BarterItem barterItem in barter.BarterItems)
                             {
-                                foreach (BarterItem barterItem in price.BarterItems)
-                                {
-                                    // Dividing the required number of items by the amount of received items
-                                    barterItem.Quantity /= quantity;
-                                }
+                                // Dividing the required number of items by the amount of received items
+                                barterItem.Quantity /= quantity;
                             }
                         }
+
+                        prices.Add(barter);
                     }
                 }
                 catch (Exception e)
@@ -123,7 +97,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            return Task.FromResult(Result.Ok(items.AsEnumerable()));
+            return Task.FromResult(Result.Ok(prices.AsEnumerable()));
         }
     }
 }
