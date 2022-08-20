@@ -141,6 +141,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.RecoilPercentageModifier = propertiesJson.GetProperty("recoilModifier").GetDouble();
                 ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
+
+                if (ammunition.RecoilPercentageModifier > 1)
+                {
+                    ammunition.RecoilPercentageModifier = Math.Round(ammunition.RecoilPercentageModifier - 1, 2); // Only usefull for 12/70 8.5mm Magnum buckshot which has a recoil modifier of 1.15 instead or 0.15
+                }
             }
 
             return ammunition;
