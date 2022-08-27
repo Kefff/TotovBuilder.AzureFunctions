@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace TotovBuilder.AzureFunctions
@@ -22,7 +23,7 @@ namespace TotovBuilder.AzureFunctions
                 {
                     StringBuilder result = new StringBuilder();
 
-                    foreach (Group? group in m.Groups)
+                    foreach (Group? group in m.Groups.Cast<Group?>())
                     {
                         switch (group!.Name)
                         {

@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.AzureFunctions
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.Model", "..\..\TotovBuilder.Model\src\TotovBuilder.Model\TotovBuilder.Model.csproj", "{A62F4189-2ADC-4410-B60C-7DBC9A243A50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TotovBuilder.Model.Test", "..\..\TotovBuilder.Model\src\TotovBuilder.Model.Test\TotovBuilder.Model.Test.csproj", "{B7939986-234F-45E3-A9BD-CD28AAD275D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.Model.Test", "..\..\TotovBuilder.Model\src\TotovBuilder.Model.Test\TotovBuilder.Model.Test.csproj", "{B7939986-234F-45E3-A9BD-CD28AAD275D5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB215096-7BFE-4638-A0CF-B70207E6B6A3}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

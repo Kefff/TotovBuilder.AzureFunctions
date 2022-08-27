@@ -194,7 +194,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armorMod.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
                 armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString().ToPascalCase();
-                armorMod.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == armorMod.Id)?.ModSlots ?? Array.Empty<ModSlot>();
+                armorMod.ModSlots = DeserializeModSlots(propertiesJson); // TODO : MISSING FROM API
                 armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 //item.RicochetChance = ; // TODO : MISSING FROM API
                 armorMod.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
@@ -412,7 +412,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 headwear.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
                 headwear.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString().ToPascalCase();
-                headwear.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == headwear.Id)?.ModSlots ?? Array.Empty<ModSlot>();
+                headwear.ModSlots = DeserializeModSlots(propertiesJson);
                 headwear.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 headwear.RicochetChance = GetRicochetChance(headwear.Id); // TODO : MISSING FROM API
                 headwear.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
@@ -444,13 +444,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                magazine.AcceptedAmmunitionIds = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == magazine.Id)?.AcceptedAmmunitionIds ?? Array.Empty<string>(); // TODO : MISSING FROM API
+                magazine.AcceptedAmmunitionIds = propertiesJson.GetProperty("allowedAmmo").EnumerateArray().Select(allowedAmmoJson => allowedAmmoJson.GetProperty("id").GetString()).ToArray();
                 magazine.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
                 magazine.CheckSpeedPercentageModifier = propertiesJson.GetProperty("ammoCheckModifier").GetDouble();
                 magazine.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
                 magazine.LoadSpeedPercentageModifier = propertiesJson.GetProperty("loadModifier").GetDouble();
                 magazine.MalfunctionPercentage = propertiesJson.GetProperty("malfunctionChance").GetDouble();
-                magazine.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == magazine.Id)?.ModSlots ?? Array.Empty<ModSlot>();
+                magazine.ModSlots = DeserializeModSlots(propertiesJson);
             }
 
             return magazine;
@@ -489,10 +489,35 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
                 mod.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
-                mod.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == mod.Id)?.ModSlots ?? Array.Empty<ModSlot>();
+                mod.ModSlots = DeserializeModSlots(propertiesJson);
             }
 
             return mod;
+        }
+
+        /// <summary>
+        /// Deserializes an array of <see cref="ModSlot"/>.
+        /// </summary>
+        /// <param name="propertiesJson">Json element representing the properties of an item.</param>
+        /// <returns>Deserialized array of <see cref="ModSlot"/>.</returns>
+        private ModSlot[] DeserializeModSlots(JsonElement propertiesJson)
+        {
+            List<ModSlot> modSlots = new List<ModSlot>();
+
+            if (propertiesJson.TryGetProperty("slots", out JsonElement modSlotsJson))
+            {
+                foreach (JsonElement modSlotJson in modSlotsJson.EnumerateArray())
+                {
+                    ModSlot modSlot = new ModSlot()
+                    {
+                        CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()).ToArray(),
+                        Name = modSlotJson.GetProperty("nameId").GetString()
+                    };
+                    modSlots.Add(modSlot);
+                }
+            }
+
+            return modSlots.ToArray();
         }
 
         /// <summary>
@@ -515,8 +540,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString().ToPascalCase()).ToArray();
                     rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
                     rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
-                    rangedWeapon.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.ModSlots ?? Array.Empty<ModSlot>();
                     rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
+
+                    List<ModSlot> modSlots = new List<ModSlot>();
+                    modSlots.AddRange(ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.RangedWeaponChambers ?? Array.Empty<ModSlot>());
+                    modSlots.AddRange(DeserializeModSlots(propertiesJson));
+                    rangedWeapon.ModSlots = modSlots.ToArray();
 
                     return rangedWeapon;
                 }
@@ -543,7 +572,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
 
                 rangedWeaponMod.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
-                rangedWeaponMod.ModSlots = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeaponMod.Id)?.ModSlots ?? Array.Empty<ModSlot>();
+                rangedWeaponMod.ModSlots = DeserializeModSlots(propertiesJson);
                 rangedWeaponMod.RecoilPercentageModifier = propertiesJson.GetProperty("recoilModifier").GetDouble();
             }
 
