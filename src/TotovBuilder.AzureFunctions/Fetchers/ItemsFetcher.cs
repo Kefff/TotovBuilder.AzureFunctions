@@ -217,7 +217,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 CategoryId = itemCategoryId,
                 IconLink = itemJson.GetProperty("iconLink").GetString(),
                 Id = itemJson.GetProperty("id").GetString(),
-                ImageLink = itemJson.GetProperty("imageLink").GetString(),
+                ImageLink = itemJson.GetProperty("inspectImageLink").GetString(),
                 MarketLink = itemJson.GetProperty("link").GetString(),
                 MaxStackableAmount = 1,
                 Name = itemJson.GetProperty("name").GetString(),
@@ -408,13 +408,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 headwear.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
                 headwear.ArmoredAreas = GetArmoredAreas(propertiesJson);
+                headwear.BlocksHeadphones = propertiesJson.GetProperty("blocksHeadset").GetBoolean();
                 headwear.Deafening = propertiesJson.GetProperty("deafening").GetString();
                 headwear.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
                 headwear.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString().ToPascalCase();
                 headwear.ModSlots = DeserializeModSlots(propertiesJson);
                 headwear.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                headwear.RicochetChance = GetRicochetChance(headwear.Id); // TODO : MISSING FROM API
+                headwear.RicochetChance = GetRicochetChance(propertiesJson.GetProperty("ricochetX").GetDouble());
                 headwear.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
             }
 
@@ -535,12 +536,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 if (propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesWeapon")
                 {
                     // Presets sent by the API are ignored
-                    rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString();
+                    rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString();                    
                     rangedWeapon.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
                     rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString().ToPascalCase()).ToArray();
                     rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
                     rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
                     rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
+
+                    JsonElement defaultPreset = propertiesJson.GetProperty("defaultPreset");
+                    
+                    if (defaultPreset.ValueKind == JsonValueKind.Object)
+                    {
+                        rangedWeapon.DefaultPresetId = propertiesJson.GetProperty("defaultPreset").GetProperty("id").GetString();
+                        rangedWeapon.IconLink = propertiesJson.GetProperty("defaultPreset").GetProperty("iconLink").GetString();
+                        rangedWeapon.ImageLink = propertiesJson.GetProperty("defaultPreset").GetProperty("inspectImageLink").GetString();
+                    }
 
                     List<ModSlot> modSlots = new List<ModSlot>();
                     modSlots.AddRange(ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.RangedWeaponChambers ?? Array.Empty<ModSlot>());
@@ -685,11 +695,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Gets a ricochet chance of an item.
         /// </summary>
-        /// <param name="itemId">Item ID.</param>
+        /// <param name="ricochetXValue">Ricochet X value.</param>
         /// <returns>Ricochet chance.</returns>
-        private string GetRicochetChance(string itemId)
+        private string GetRicochetChance(double ricochetXValue)
         {
-            double ricochetXValue = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == itemId)?.RicochetXValue ?? 0;            
             RicochetChance? ricochetChance = TarkovValues.RicochetChances.SingleOrDefault((rc) =>
             {
                 // Forced to do this for code coverage

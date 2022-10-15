@@ -607,13 +607,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Caliber = "Caliber545x39",
                     CategoryId = "mainWeapon",
+                    DefaultPresetId = "584147732459775a2b6d9f12",
                     Ergonomics = 44,
                     FireModes = new string[] { "SingleFire", "FullAuto" },
                     FireRate = 650,
                     HorizontalRecoil = 445,
-                    IconLink = "https://assets.tarkov.dev/57dc2fa62459775949412633-icon.jpg",
+                    IconLink = "https://assets.tarkov.dev/584147732459775a2b6d9f12-icon.jpg",
                     Id = "57dc2fa62459775949412633",
-                    ImageLink = "https://assets.tarkov.dev/57dc2fa62459775949412633-image.jpg",
+                    ImageLink = "https://assets.tarkov.dev/584147732459775a2b6d9f12-image.jpg",
                     MarketLink = "https://tarkov.dev/item/kalashnikov-aks-74u-545x39-assault-rifle",
                     ModSlots = new ModSlot[]
                     {
@@ -730,13 +731,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Caliber = "Caliber1143x23ACP",
                     CategoryId = "secondaryWeapon",
+                    DefaultPresetId = "5eb2968186f7746d1f1a4fd5",
                     Ergonomics = 75,
                     FireModes = new string[] { "SingleFire" },
                     FireRate = 30,
                     HorizontalRecoil = 355,
-                    IconLink = "https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-icon.jpg",
+                    IconLink = "https://assets.tarkov.dev/5eb2968186f7746d1f1a4fd5-icon.jpg",
                     Id = "5e81c3cbac2bb513793cdc75",
-                    ImageLink = "https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-image.jpg",
+                    ImageLink = "https://assets.tarkov.dev/5eb2968186f7746d1f1a4fd5-image.jpg",
                     MarketLink = "https://tarkov.dev/item/colt-m1911a1-45-acp-pistol",
                     ModSlots = new ModSlot[]
                     {
@@ -833,6 +835,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     VerticalRecoil = 530,
                     Weight = 0.231,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/Colt_M1911A1_.45_ACP_pistol"
+                },
+                new RangedWeapon()
+                {
+                    Caliber = "Caliber26x75",
+                    CategoryId = "mainWeapon",
+                    Ergonomics = 51,
+                    FireModes = new string[] { "SingleFire" },
+                    FireRate = 30,
+                    HorizontalRecoil = 400,
+                    IconLink = "https://assets.tarkov.dev/624c0b3340357b5f566e8766-icon.jpg",
+                    Id = "624c0b3340357b5f566e8766",
+                    ImageLink = "https://assets.tarkov.dev/624c0b3340357b5f566e8766-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/rsp-30-reactive-signal-cartridge-yellow",
+                    Name = "RSP-30 reactive signal cartridge (Yellow)",
+                    ShortName = "Yellow",
+                    VerticalRecoil = 200,
+                    Weight = 0.6,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/RSP-30_reactive_signal_cartridge_(Yellow)"
                 },
                 new RangedWeapon()
                 {
@@ -1022,7 +1042,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         ],
         ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
         ""id"": ""5c1d0c5f86f7744bb2683cf0"",
-        ""imageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
+        ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
         ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
         ""name"": ""TerraGroup Labs keycard (Blue)"",
         ""properties"": {
@@ -1116,7 +1136,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         ],
         ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
         ""id"": ""5c1d0c5f86f7744bb2683cf0"",
-        ""imageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
+        ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
         ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
         ""name"": ""TerraGroup Labs keycard (Blue)"",
         ""properties"": {
@@ -1207,7 +1227,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         ],
         ""iconLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg"",
         ""id"": ""5ab8ebf186f7742d8b372e80"",
-        ""imageLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg"",
+        ""inspectImageLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg"",
         ""link"": ""https://tarkov.dev/item/sso-attack-2-raid-backpack"",
         ""name"": ""SSO Attack 2 raid backpack"",
         ""properties"": {
