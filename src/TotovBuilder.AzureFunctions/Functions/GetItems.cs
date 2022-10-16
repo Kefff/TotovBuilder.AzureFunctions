@@ -1,9 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
@@ -13,33 +17,40 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetItems
     {
         /// <summary>
-        /// Data fetcher.
+        /// Azure Functions configuration reader.
         /// </summary>
-        private readonly IDataFetcher DataFetcher;
+        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+
+        /// <summary>
+        /// Items fetcher.
+        /// </summary>
+        private readonly IItemsFetcher ItemsFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetItems"/> class.
         /// </summary>
-        /// <param name="dataFetcher">Data fetcher.</param>
-        public GetItems(IDataFetcher dataFetcher)
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="itemsFetcher">Items fetcher.</param>
+        public GetItems(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IItemsFetcher itemsFetcher)
         {
-            DataFetcher = dataFetcher;
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            ItemsFetcher = itemsFetcher;
         }
 
         /// <summary>
         /// Gets the items to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <param name="logger">Logger.</param>
         /// <returns>Items.</returns>
         [FunctionName("GetItems")]
 #pragma warning disable IDE0060 // Remove unused parameter
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "items")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            string response = await DataFetcher.Fetch(DataType.Items);
+            await AzureFunctionsConfigurationReader.Load();
+            IEnumerable<Item> items = await ItemsFetcher.Fetch() ?? Array.Empty<Item>();
 
-            return new OkObjectResult(response);
+            return new OkObjectResult(items);
         }
     }
 }

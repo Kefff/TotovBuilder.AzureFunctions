@@ -1,8 +1,9 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
 using TotovBuilder.AzureFunctions.Abstractions;
-using TotovBuilder.AzureFunctions.Utils;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Fetchers;
 
 [assembly: FunctionsStartup(typeof(TotovBuilder.AzureFunctions.Startup))]
 
@@ -22,12 +23,24 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddApplicationInsightsTelemetry();
 
             builder.Services.AddHttpClient();
-
-            builder.Services.AddSingleton<IMarketDataFetcher, MarketDataFetcher>();
-            builder.Services.AddSingleton<IBlobDataFetcher, BlobDataFetcher>();
+            
+            builder.Services.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
+            builder.Services.AddSingleton<IAzureFunctionsConfigurationReader, AzureFunctionsConfigurationReader>();
+            builder.Services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
+            builder.Services.AddSingleton<IAzureFunctionsConfigurationWrapper, AzureFunctionsConfigurationWrapper>();
+            builder.Services.AddSingleton<IBartersFetcher, BartersFetcher>();
+            builder.Services.AddSingleton<IBlobFetcher, BlobFetcher>();
             builder.Services.AddSingleton<ICache, Cache>();
-            builder.Services.AddSingleton<IConfigurationReader, ConfigurationReader>();
-            builder.Services.AddSingleton<IDataFetcher, DataFetcher>();
+            builder.Services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
+            builder.Services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
+            builder.Services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
+            builder.Services.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
+            builder.Services.AddSingleton<IItemsFetcher, ItemsFetcher>();
+            builder.Services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
+            builder.Services.AddSingleton<IPricesFetcher, PricesFetcher>();
+            builder.Services.AddSingleton<IQuestsFetcher, QuestsFetcher>();
+            builder.Services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
+            builder.Services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
         }
     }
 }

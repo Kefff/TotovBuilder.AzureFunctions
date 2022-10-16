@@ -1,15 +1,16 @@
 {
-    "version": "2.0",
-    "logging": {
-        "applicationInsights": {
-            "samplingSettings": {
-                "isEnabled": true
-            }
-        },
-        "logLevel": {
-            "default": "Error",
-            "TotovBuilder.AzureFunctions.Functions": "Information",
-            "TotovBuilder.AzureFunctions.Utils": "Information"
-        }
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true
+      }
+    },
+    "logLevel": {
+      "default": "Error",
+      "TotovBuilder.AzureFunctions": "Information",
+      "TotovBuilder.AzureFunctions.Functions": "Information",
+      "TotovBuilder.AzureFunctions.Fetchers": "Information"
     }
+  }
 }

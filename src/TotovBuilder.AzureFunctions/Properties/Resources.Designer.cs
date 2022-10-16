@@ -63,7 +63,48 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while fetching &quot;{0}&quot; blob from Azure Blob storage : {1}.
+        ///   Looks up a localized string similar to Error while deserializing API response to type &quot;{0}&quot; :
+        ///{1}.
+        /// </summary>
+        internal static string ApiResponseDeserializationError {
+            get {
+                return ResourceManager.GetString("ApiResponseDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing armor penetrations :
+        ///{0}.
+        /// </summary>
+        internal static string ArmorPenetrationsDeserializationError {
+            get {
+                return ResourceManager.GetString("ArmorPenetrationsDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing Azure Functions configuration :
+        ///{0}.
+        /// </summary>
+        internal static string AzureFunctionsConfigurationDeserializationError {
+            get {
+                return ResourceManager.GetString("AzureFunctionsConfigurationDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing barter :
+        ///{0}.
+        /// </summary>
+        internal static string BarterDeserializationError {
+            get {
+                return ResourceManager.GetString("BarterDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while fetching &quot;{0}&quot; blob from Azure Blob storage :
+        ///{1}.
         /// </summary>
         internal static string BlobFetchingError {
             get {
@@ -72,43 +113,44 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Market data fetching..
+        ///   Looks up a localized string similar to Error while deserializing changelog :
+        ///{0}.
         /// </summary>
-        internal static string EndMarketDataFetching {
+        internal static string ChangelogDeserializationError {
             get {
-                return ResourceManager.GetString("EndMarketDataFetching", resourceCulture);
+                return ResourceManager.GetString("ChangelogDeserializationError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Static data fetching..
+        ///   Looks up a localized string similar to {0} - End : Fetching..
         /// </summary>
-        internal static string EndStaticDataFetching {
+        internal static string EndFetching {
             get {
-                return ResourceManager.GetString("EndStaticDataFetching", resourceCulture);
+                return ResourceManager.GetString("EndFetching", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Waiting for previous market data fetching to finish..
+        ///   Looks up a localized string similar to {0} - End : Waiting for previous fetching to finish..
         /// </summary>
-        internal static string EndWaitingPreviousMarketDataFetching {
+        internal static string EndWaitingForPreviousFetching {
             get {
-                return ResourceManager.GetString("EndWaitingPreviousMarketDataFetching", resourceCulture);
+                return ResourceManager.GetString("EndWaitingForPreviousFetching", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End : Waiting for previous static data fetching to finish..
+        ///   Looks up a localized string similar to {0} - Fetched from cache..
         /// </summary>
-        internal static string EndWaitingPreviousStaticDataFetching {
+        internal static string FetchedFromCache {
             get {
-                return ResourceManager.GetString("EndWaitingPreviousStaticDataFetching", resourceCulture);
+                return ResourceManager.GetString("FetchedFromCache", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Fetching delay exceeded..
+        ///   Looks up a localized string similar to {0} Fetching delay exceeded..
         /// </summary>
         internal static string FetchingDelayExceeded {
             get {
@@ -117,11 +159,50 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid &quot;{0}&quot; cache..
+        ///   Looks up a localized string similar to {0} - Error while fetching data from the API :
+        ///{1}..
+        /// </summary>
+        internal static string FetchingError {
+            get {
+                return ResourceManager.GetString("FetchingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Invalid API query :
+        ///{1}.
+        /// </summary>
+        internal static string InvalidApiQuery {
+            get {
+                return ResourceManager.GetString("InvalidApiQuery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Invalid API response data :
+        ///{1}.
+        /// </summary>
+        internal static string InvalidApiResponseData {
+            get {
+                return ResourceManager.GetString("InvalidApiResponseData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Invalid cache..
         /// </summary>
         internal static string InvalidCache {
             get {
                 return ResourceManager.GetString("InvalidCache", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid configuration..
+        /// </summary>
+        internal static string InvalidConfiguration {
+            get {
+                return ResourceManager.GetString("InvalidConfiguration", resourceCulture);
             }
         }
         
@@ -135,24 +216,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid market API response : {0}.
-        /// </summary>
-        internal static string InvalidMarketApiResponse {
-            get {
-                return ResourceManager.GetString("InvalidMarketApiResponse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid market API response data..
-        /// </summary>
-        internal static string InvalidMarketApiResponseData {
-            get {
-                return ResourceManager.GetString("InvalidMarketApiResponseData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid &quot;{0}&quot; string configuration value..
         /// </summary>
         internal static string InvalidStringConfigurationValue {
@@ -162,85 +225,109 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Market data fetched from cache..
-        /// </summary>
-        internal static string MarketDataFetchedFromCache {
-            get {
-                return ResourceManager.GetString("MarketDataFetchedFromCache", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error while fetching data from the market API : {0}..
-        /// </summary>
-        internal static string MarketDataFetchingError {
-            get {
-                return ResourceManager.GetString("MarketDataFetchingError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Market data fetching response :
+        ///   Looks up a localized string similar to Error while deserializing item category :
         ///{0}.
         /// </summary>
-        internal static string MarketDataFetchingResponse {
+        internal static string ItemCategoryDeserializationError {
             get {
-                return ResourceManager.GetString("MarketDataFetchingResponse", resourceCulture);
+                return ResourceManager.GetString("ItemCategoryDeserializationError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Market data fetching response data :
+        ///   Looks up a localized string similar to Item category &quot;{0}&quot; is not implemented..
+        /// </summary>
+        internal static string ItemCategoryNotImplemented {
+            get {
+                return ResourceManager.GetString("ItemCategoryNotImplemented", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing item :
         ///{0}.
         /// </summary>
-        internal static string MarketDataFetchingResponseData {
+        internal static string ItemDeserializationError {
             get {
-                return ResourceManager.GetString("MarketDataFetchingResponseData", resourceCulture);
+                return ResourceManager.GetString("ItemDeserializationError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Start : Market data fetching..
+        ///   Looks up a localized string similar to Error while deserializing item missing properties :
+        ///{0}.
         /// </summary>
-        internal static string StartMarketDataFetching {
+        internal static string ItemMissingPropertiesDeserializationError {
             get {
-                return ResourceManager.GetString("StartMarketDataFetching", resourceCulture);
+                return ResourceManager.GetString("ItemMissingPropertiesDeserializationError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Start : Static data fetching..
+        ///   Looks up a localized string similar to Error while deserializing preset :
+        ///{0}.
         /// </summary>
-        internal static string StartStaticDataFetching {
+        internal static string PresetDeserializationError {
             get {
-                return ResourceManager.GetString("StartStaticDataFetching", resourceCulture);
+                return ResourceManager.GetString("PresetDeserializationError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Start : Waiting for previous market data fetching to finish..
+        ///   Looks up a localized string similar to Error while deserializing price :
+        ///{0}.
         /// </summary>
-        internal static string StartWaitingPreviousMarketDataFetching {
+        internal static string PriceDeserializationError {
             get {
-                return ResourceManager.GetString("StartWaitingPreviousMarketDataFetching", resourceCulture);
+                return ResourceManager.GetString("PriceDeserializationError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Start : Waiting for previous static data fetching to finish..
+        ///   Looks up a localized string similar to Error while deserializing quest :
+        ///{0}.
         /// </summary>
-        internal static string StartWaitingPreviousStaticDataFetching {
+        internal static string QuestDeserializationError {
             get {
-                return ResourceManager.GetString("StartWaitingPreviousStaticDataFetching", resourceCulture);
+                return ResourceManager.GetString("QuestDeserializationError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Static data fetched from cache..
+        ///   Looks up a localized string similar to {0} - Start : Fetching..
         /// </summary>
-        internal static string StaticDataFetchedFromCache {
+        internal static string StartFetching {
             get {
-                return ResourceManager.GetString("StaticDataFetchedFromCache", resourceCulture);
+                return ResourceManager.GetString("StartFetching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Start : Waiting for previous fetching to finish..
+        /// </summary>
+        internal static string StartWaitingForPreviousFetching {
+            get {
+                return ResourceManager.GetString("StartWaitingForPreviousFetching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing Tarkov values :
+        ///{0}.
+        /// </summary>
+        internal static string TarkovValuesDeserializationError {
+            get {
+                return ResourceManager.GetString("TarkovValuesDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while deserializing website configuration :
+        ///{0}.
+        /// </summary>
+        internal static string WebsiteConfigurationDeserializationError {
+            get {
+                return ResourceManager.GetString("WebsiteConfigurationDeserializationError", resourceCulture);
             }
         }
     }

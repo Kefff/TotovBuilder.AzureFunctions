@@ -15,20 +15,19 @@ using TotovBuilder.AzureFunctions.Abstractions;
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
     /// <summary>
-    /// Represents tests on the <see cref="GetItemCategories"/> class.
+    /// Represents tests on the <see cref="GetItems"/> class.
     /// </summary>
-    public class GetItemCategoriesTest
+    public class GetItemsTest
     {
         [Fact]
         public async Task Run_ShouldFetchData()
         {
             // Arrange
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Items));
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
-
-            GetItemCategories function = new GetItemCategories(azureFunctionsConfigurationReaderMock.Object, itemCategoriesFetcherMock.Object);
+            GetItems function = new GetItems(azureFunctionsConfigurationReaderMock.Object, itemsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
@@ -36,7 +35,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().Be(TestData.ItemCategories);
+            ((OkObjectResult)result).Value.Should().Be(TestData.Items);
         }
 
         [Fact]
@@ -44,11 +43,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         {
             // Arrange
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(null));
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(null));
-
-            GetItemCategories function = new GetItemCategories(azureFunctionsConfigurationReaderMock.Object, itemCategoriesFetcherMock.Object);
+            GetItems function = new GetItems(azureFunctionsConfigurationReaderMock.Object, itemsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
@@ -56,7 +54,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<ItemCategory>());
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<Item>());
         }
     }
 }

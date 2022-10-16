@@ -7,14 +7,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model.Builds;
+using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
     /// <summary>
-    /// Represents an Azure function that returns presets to the caller.
+    /// Represents an Azure function that returns quests to the caller.
     /// </summary>
-    public class GetPresets
+    public class GetQuests
     {
         /// <summary>
         /// Azure Functions configuration reader.
@@ -22,35 +22,35 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
-        /// Presets fetcher.
+        /// Quests fetcher.
         /// </summary>
-        private readonly IPresetsFetcher PresetsFetcher;
+        private readonly IQuestsFetcher QuestsFetcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GetPresets"/> class.
+        /// Initializes a new instance of the <see cref="GetQuests"/> class.
         /// </summary>
         /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
-        /// <param name="presetsFetcher">Presets fetcher.</param>
-        public GetPresets(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IPresetsFetcher presetsFetcher)
+        /// <param name="questsFetcher">Quests fetcher.</param>
+        public GetQuests(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IQuestsFetcher questsFetcher)
         {
             AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
-            PresetsFetcher = presetsFetcher;
+            QuestsFetcher = questsFetcher;
         }
 
         /// <summary>
-        /// Gets the presets to return to the caller.
+        /// Gets the quests to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <returns>Presets.</returns>
-        [FunctionName("GetPresets")]
+        /// <returns>Prices.</returns>
+        [FunctionName("GetQuests")]
 #pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "presets")] HttpRequest httpRequest)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "quests")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
+            IEnumerable<Quest> quests = await QuestsFetcher.Fetch() ?? Array.Empty<Quest>();
 
-            return new OkObjectResult(presets);
+            return new OkObjectResult(quests);
         }
     }
 }

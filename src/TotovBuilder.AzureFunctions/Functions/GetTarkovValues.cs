@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,14 +5,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model.Builds;
+using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
     /// <summary>
-    /// Represents an Azure function that returns presets to the caller.
+    /// Represents an Azure function that returns values related to Tarkov gameplay to the caller.
     /// </summary>
-    public class GetPresets
+    public class GetTarkovValues
     {
         /// <summary>
         /// Azure Functions configuration reader.
@@ -22,35 +20,35 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
-        /// Presets fetcher.
+        /// Tarkov values fetcher.
         /// </summary>
-        private readonly IPresetsFetcher PresetsFetcher;
+        private readonly ITarkovValuesFetcher TarkovValuesFetcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GetPresets"/> class.
+        /// Initializes a new instance of the <see cref="GetTarkovValues"/> class.
         /// </summary>
         /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
-        /// <param name="presetsFetcher">Presets fetcher.</param>
-        public GetPresets(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IPresetsFetcher presetsFetcher)
+        /// <param name="changelogFetcher">Tarkov values fetcher.</param>
+        public GetTarkovValues(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ITarkovValuesFetcher changelogFetcher)
         {
             AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
-            PresetsFetcher = presetsFetcher;
+            TarkovValuesFetcher = changelogFetcher;
         }
 
         /// <summary>
-        /// Gets the presets to return to the caller.
+        /// Gets values related to Tarkov gameplay to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <returns>Presets.</returns>
-        [FunctionName("GetPresets")]
+        /// <returns>Values related to Tarkov gameplay.</returns>
+        [FunctionName("GetTarkovValues")]
 #pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "presets")] HttpRequest httpRequest)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tarkovvalues")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
+            TarkovValues tarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
 
-            return new OkObjectResult(presets);
+            return new OkObjectResult(tarkovValues);
         }
     }
 }

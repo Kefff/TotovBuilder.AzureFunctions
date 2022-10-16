@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,14 +8,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model.Builds;
+using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
     /// <summary>
-    /// Represents an Azure function that returns presets to the caller.
+    /// Represents an Azure function that returns the changelog to the caller.
     /// </summary>
-    public class GetPresets
+    public class GetChangelog
     {
         /// <summary>
         /// Azure Functions configuration reader.
@@ -22,35 +23,35 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
-        /// Presets fetcher.
+        /// Changelog fetcher.
         /// </summary>
-        private readonly IPresetsFetcher PresetsFetcher;
+        private readonly IChangelogFetcher ChangelogFetcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GetPresets"/> class.
+        /// Initializes a new instance of the <see cref="GetChangelog"/> class.
         /// </summary>
         /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
-        /// <param name="presetsFetcher">Presets fetcher.</param>
-        public GetPresets(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IPresetsFetcher presetsFetcher)
+        /// <param name="changelogFetcher">Changelog fetcher.</param>
+        public GetChangelog(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IChangelogFetcher changelogFetcher)
         {
             AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
-            PresetsFetcher = presetsFetcher;
+            ChangelogFetcher = changelogFetcher;
         }
 
         /// <summary>
-        /// Gets the presets to return to the caller.
+        /// Gets the changelog to return to the caller.
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
-        /// <returns>Presets.</returns>
-        [FunctionName("GetPresets")]
+        /// <returns>Changelog.</returns>
+        [FunctionName("GetChangelog")]
 #pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "presets")] HttpRequest httpRequest)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequest httpRequest)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
+            IEnumerable<ChangelogEntry> changelog = await ChangelogFetcher.Fetch() ?? Array.Empty<ChangelogEntry>();
 
-            return new OkObjectResult(presets);
+            return new OkObjectResult(changelog);
         }
     }
 }

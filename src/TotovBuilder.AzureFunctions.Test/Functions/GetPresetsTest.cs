@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
-using TotovBuilder.Model.Items;
+using TotovBuilder.Model.Builds;
 using Xunit;
 using TotovBuilder.Model.Test;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -15,9 +15,9 @@ using TotovBuilder.AzureFunctions.Abstractions;
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
     /// <summary>
-    /// Represents tests on the <see cref="GetItemCategories"/> class.
+    /// Represents tests on the <see cref="GetPresets"/> class.
     /// </summary>
-    public class GetItemCategoriesTest
+    public class GetPresetsTest
     {
         [Fact]
         public async Task Run_ShouldFetchData()
@@ -25,10 +25,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Arrange
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<InventoryItem>?>(TestData.Presets));
 
-            GetItemCategories function = new GetItemCategories(azureFunctionsConfigurationReaderMock.Object, itemCategoriesFetcherMock.Object);
+            GetPresets function = new GetPresets(azureFunctionsConfigurationReaderMock.Object, presetsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
@@ -36,7 +36,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().Be(TestData.ItemCategories);
+            ((OkObjectResult)result).Value.Should().Be(TestData.Presets);
         }
 
         [Fact]
@@ -45,10 +45,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Arrange
             Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(null));
+            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<InventoryItem>?>(null));
 
-            GetItemCategories function = new GetItemCategories(azureFunctionsConfigurationReaderMock.Object, itemCategoriesFetcherMock.Object);
+            GetPresets function = new GetPresets(azureFunctionsConfigurationReaderMock.Object, presetsFetcherMock.Object);
 
             // Act
             IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
@@ -56,7 +56,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<ItemCategory>());
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<InventoryItem>());
         }
     }
 }

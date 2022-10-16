@@ -117,66 +117,105 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ApiResponseDeserializationError" xml:space="preserve">
+    <value>Error while deserializing API response to type "{0}" :
+{1}</value>
+  </data>
+  <data name="ArmorPenetrationsDeserializationError" xml:space="preserve">
+    <value>Error while deserializing armor penetrations :
+{0}</value>
+  </data>
+  <data name="AzureFunctionsConfigurationDeserializationError" xml:space="preserve">
+    <value>Error while deserializing Azure Functions configuration :
+{0}</value>
+  </data>
+  <data name="BarterDeserializationError" xml:space="preserve">
+    <value>Error while deserializing barter :
+{0}</value>
+  </data>
   <data name="BlobFetchingError" xml:space="preserve">
-    <value>Error while fetching "{0}" blob from Azure Blob storage : {1}</value>
+    <value>Error while fetching "{0}" blob from Azure Blob storage :
+{1}</value>
   </data>
-  <data name="EndMarketDataFetching" xml:space="preserve">
-    <value>End : Market data fetching.</value>
+  <data name="ChangelogDeserializationError" xml:space="preserve">
+    <value>Error while deserializing changelog :
+{0}</value>
   </data>
-  <data name="EndStaticDataFetching" xml:space="preserve">
-    <value>End : Static data fetching.</value>
+  <data name="EndFetching" xml:space="preserve">
+    <value>{0} - End : Fetching.</value>
   </data>
-  <data name="EndWaitingPreviousMarketDataFetching" xml:space="preserve">
-    <value>End : Waiting for previous market data fetching to finish.</value>
+  <data name="EndWaitingForPreviousFetching" xml:space="preserve">
+    <value>{0} - End : Waiting for previous fetching to finish.</value>
   </data>
-  <data name="EndWaitingPreviousStaticDataFetching" xml:space="preserve">
-    <value>End : Waiting for previous static data fetching to finish.</value>
+  <data name="FetchedFromCache" xml:space="preserve">
+    <value>{0} - Fetched from cache.</value>
   </data>
   <data name="FetchingDelayExceeded" xml:space="preserve">
-    <value>Fetching delay exceeded.</value>
+    <value>{0} Fetching delay exceeded.</value>
+  </data>
+  <data name="FetchingError" xml:space="preserve">
+    <value>{0} - Error while fetching data from the API :
+{1}.</value>
+  </data>
+  <data name="InvalidApiQuery" xml:space="preserve">
+    <value>{0} - Invalid API query :
+{1}</value>
+  </data>
+  <data name="InvalidApiResponseData" xml:space="preserve">
+    <value>{0} - Invalid API response data :
+{1}</value>
   </data>
   <data name="InvalidCache" xml:space="preserve">
-    <value>Invalid "{0}" cache.</value>
+    <value>{0} - Invalid cache.</value>
+  </data>
+  <data name="InvalidConfiguration" xml:space="preserve">
+    <value>Invalid configuration.</value>
   </data>
   <data name="InvalidIntegerConfigurationValue" xml:space="preserve">
     <value>Invalid "{0}" integer configuration value.</value>
   </data>
-  <data name="InvalidMarketApiResponse" xml:space="preserve">
-    <value>Invalid market API response : {0}</value>
-  </data>
-  <data name="InvalidMarketApiResponseData" xml:space="preserve">
-    <value>Invalid market API response data.</value>
-  </data>
   <data name="InvalidStringConfigurationValue" xml:space="preserve">
     <value>Invalid "{0}" string configuration value.</value>
   </data>
-  <data name="MarketDataFetchedFromCache" xml:space="preserve">
-    <value>Market data fetched from cache.</value>
-  </data>
-  <data name="MarketDataFetchingError" xml:space="preserve">
-    <value>Error while fetching data from the market API : {0}.</value>
-  </data>
-  <data name="MarketDataFetchingResponse" xml:space="preserve">
-    <value>Market data fetching response :
+  <data name="ItemCategoryDeserializationError" xml:space="preserve">
+    <value>Error while deserializing item category :
 {0}</value>
   </data>
-  <data name="MarketDataFetchingResponseData" xml:space="preserve">
-    <value>Market data fetching response data :
+  <data name="ItemCategoryNotImplemented" xml:space="preserve">
+    <value>Item category "{0}" is not implemented.</value>
+  </data>
+  <data name="ItemDeserializationError" xml:space="preserve">
+    <value>Error while deserializing item :
 {0}</value>
   </data>
-  <data name="StartMarketDataFetching" xml:space="preserve">
-    <value>Start : Market data fetching.</value>
+  <data name="ItemMissingPropertiesDeserializationError" xml:space="preserve">
+    <value>Error while deserializing item missing properties :
+{0}</value>
   </data>
-  <data name="StartStaticDataFetching" xml:space="preserve">
-    <value>Start : Static data fetching.</value>
+  <data name="PresetDeserializationError" xml:space="preserve">
+    <value>Error while deserializing preset :
+{0}</value>
   </data>
-  <data name="StartWaitingPreviousMarketDataFetching" xml:space="preserve">
-    <value>Start : Waiting for previous market data fetching to finish.</value>
+  <data name="PriceDeserializationError" xml:space="preserve">
+    <value>Error while deserializing price :
+{0}</value>
   </data>
-  <data name="StartWaitingPreviousStaticDataFetching" xml:space="preserve">
-    <value>Start : Waiting for previous static data fetching to finish.</value>
+  <data name="QuestDeserializationError" xml:space="preserve">
+    <value>Error while deserializing quest :
+{0}</value>
   </data>
-  <data name="StaticDataFetchedFromCache" xml:space="preserve">
-    <value>Static data fetched from cache.</value>
+  <data name="StartFetching" xml:space="preserve">
+    <value>{0} - Start : Fetching.</value>
+  </data>
+  <data name="StartWaitingForPreviousFetching" xml:space="preserve">
+    <value>{0} - Start : Waiting for previous fetching to finish.</value>
+  </data>
+  <data name="TarkovValuesDeserializationError" xml:space="preserve">
+    <value>Error while deserializing Tarkov values :
+{0}</value>
+  </data>
+  <data name="WebsiteConfigurationDeserializationError" xml:space="preserve">
+    <value>Error while deserializing website configuration :
+{0}</value>
   </data>
 </root>
