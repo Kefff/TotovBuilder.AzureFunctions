@@ -10,28 +10,22 @@ namespace TotovBuilder.AzureFunctions
     public class AzureFunctionsConfigurationWrapper : IAzureFunctionsConfigurationWrapper
     {
         /// <inheritdoc/>
-        public AzureFunctionsConfiguration Values { get; set; } = new AzureFunctionsConfiguration();
-
-        /// <summary>
-        /// Fake loading task used to make services dependant on this configuration wait.
-        /// </summary>
-        private readonly Task LoadingTask = new Task(() => { });
-
-        /// <summary>
-        /// In
-        /// </summary>
-        /// <returns></returns>
-        public bool IsLoaded()
-        {
-            return LoadingTask.IsCompleted;
-        }
+        public Task? LoadingTask { get; private set; } = null;
 
         /// <inheritdoc/>
-        public Task SetLoaded()
+        public AzureFunctionsConfiguration Values { get; set; } = new AzureFunctionsConfiguration();
+
+        /// <inheritdoc/>
+        public Task EndLoading()
         {
-            LoadingTask.Start();
+            LoadingTask!.Start();
 
             return LoadingTask;
+        }
+
+        public void StartLoading()
+        {
+            LoadingTask = new Task(() => { });
         }
     }
 }
