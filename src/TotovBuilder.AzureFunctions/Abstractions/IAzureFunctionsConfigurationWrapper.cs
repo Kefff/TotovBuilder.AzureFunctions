@@ -10,19 +10,23 @@ namespace TotovBuilder.AzureFunctions.Abstractions
     public interface IAzureFunctionsConfigurationWrapper
     {
         /// <summary>
+        /// Fake loading task used to make services dependant on this configuration wait.
+        /// </summary>
+        Task? LoadingTask { get; }
+
+        /// <summary>
         /// Azure Functions configuration.
         /// </summary>
         AzureFunctionsConfiguration Values { get; set; }
 
         /// <summary>
-        /// Indicates whether the Azure Functions configuration is loaded.
-        /// </summary>
-        /// <returns><c>true</c> when the Azure Functions configuration is loaded; otherwise <c>false</c>.</returns>
-        bool IsLoaded();
-
-        /// <summary>
         /// Marks the Azure Functions configuration as loaded.
         /// </summary>
-        Task SetLoaded();
+        Task EndLoading();
+
+        /// <summary>
+        /// Marks the Azure Functions configuration as being loaded.
+        /// </summary>
+        void StartLoading();
     }
 }

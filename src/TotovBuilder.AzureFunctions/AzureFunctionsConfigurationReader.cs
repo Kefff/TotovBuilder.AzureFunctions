@@ -52,10 +52,14 @@ namespace TotovBuilder.AzureFunctions
         /// </summary>
         public async Task Load()
         {
-            if (AzureFunctionsConfigurationWrapper.IsLoaded())
+            if (AzureFunctionsConfigurationWrapper.LoadingTask != null)
             {
+                await AzureFunctionsConfigurationWrapper.LoadingTask;
+
                 return;
             }
+
+            AzureFunctionsConfigurationWrapper.StartLoading();
 
             // Temporary configuration for the fetcher to be able to get the configuration blob.
             // Will be replaced by the complete configuration once it is loaded.
@@ -67,7 +71,7 @@ namespace TotovBuilder.AzureFunctions
             };
 
             AzureFunctionsConfigurationWrapper.Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
-            await AzureFunctionsConfigurationWrapper.SetLoaded();
+            await AzureFunctionsConfigurationWrapper.EndLoading();
         }
 
         ///// <summary>
