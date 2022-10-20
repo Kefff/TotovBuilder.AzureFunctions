@@ -104,7 +104,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
           ""normalizedName"": ""prapor""
         },
         ""taskUnlock"": {
-          ""id"": ""59675d6c86f7740a842fc482""
+          ""id"": ""59675d6c86f7740a842fc482"",
+          ""name"": ""Ice Cream Cones"",
+          ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Ice_Cream_Cones""
         }
       }
     ]
@@ -145,7 +147,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ItemId = "545cdb794bdc2d3a198b456a",
                     Merchant = "prapor",
                     MerchantLevel = 1,
-                    QuestId = "59675d6c86f7740a842fc482"
+                    Quest = new Quest()
+                    {
+                        Id = "59675d6c86f7740a842fc482",
+                        Name = "Ice Cream Cones",
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/Ice_Cream_Cones"
+                    }
                 }
             });
         }

@@ -8,6 +8,7 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using Xunit;
 
@@ -61,7 +62,12 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                     ItemId = "57dc2fa62459775949412633",
                     Merchant = "prapor",
                     MerchantLevel = 1,
-                    QuestId = "5936d90786f7742b1420ba5b",
+                    Quest = new Quest()
+                    {
+                        Id = "5936d90786f7742b1420ba5b",
+                        Name = "Debut",
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/Debut",
+                    },
                     Value = 24605,
                     ValueInMainCurrency = 24605
                 },
@@ -99,7 +105,12 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                     ItemId = "57dc2fa62459775949412633",
                     Merchant = "prapor",
                     MerchantLevel = 1,
-                    QuestId = "5936d90786f7742b1420ba5b",
+                    Quest = new Quest()
+                    {
+                        Id = "5936d90786f7742b1420ba5b",
+                        Name = "Debut",
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/Debut"
+                    },
                     Value = 24605,
                     ValueInMainCurrency = 24605
                 },

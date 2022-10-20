@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Mocks\**" />
     <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="Mocks\**" />
     <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="Mocks\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
 
@@ -33,10 +36,6 @@
     <ProjectReference Include="..\..\..\TotovBuilder.Model\src\TotovBuilder.Model.Test\TotovBuilder.Model.Test.csproj" />
     <ProjectReference Include="..\..\..\TotovBuilder.Model\src\TotovBuilder.Model\TotovBuilder.Model.csproj" />
     <ProjectReference Include="..\TotovBuilder.AzureFunctions\TotovBuilder.AzureFunctions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Mocks\" />
   </ItemGroup>
 
 </Project>

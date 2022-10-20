@@ -15,6 +15,7 @@ using TotovBuilder.Model.Test;
 using static System.Text.Json.JsonElement;
 using System.Text.Json;
 using TotovBuilder.Model.Configuration;
+using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -32,7 +33,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
             azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
@@ -43,26 +44,26 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(async () =>
                 {
                     await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.QuestsJson) };
+                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) };
                 });
             
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(TestData.Prices);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
             _ = apiFetcher.Fetch();
-            IEnumerable<Quest>? result = await apiFetcher.Fetch();
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Quests);
+            result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>()), Times.Once);
         }
 
         [Fact]
@@ -74,7 +75,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
             azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
@@ -85,17 +86,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(true);
-            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(TestData.Prices);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Quest>? result = await apiFetcher.Fetch();
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Quests);
+            result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
-            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -108,7 +109,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
             azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
@@ -116,7 +117,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.QuestsJson) }));
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) }));
             
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
@@ -127,13 +128,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Quest>? result = await apiFetcher.Fetch();
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Quests);
+            result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Never);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>()), Times.Once);
         }
 
         [Fact]
@@ -151,17 +152,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             });
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(TestData.Prices);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Quest>? result = await apiFetcher.Fetch();
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Quests);
+            result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
-            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -174,7 +175,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
             azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 1
             });
@@ -192,17 +193,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(TestData.Prices);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Quest>? result = await apiFetcher.Fetch();
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Quests);
+            result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -214,7 +215,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
@@ -228,17 +229,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
             
             Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(TestData.Quests);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(TestData.Prices);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Quest>? result = await apiFetcher.Fetch();
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Quests);
+            result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -257,7 +258,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
             azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiQuestsQuery = "{ tasks { id name wikiLink trader { normalizedName } } }",
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
@@ -272,18 +273,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             
             Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>())).Returns(() => null);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(() => null);
 
             ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(loggerMock.Object, httpClientWrapperFactoryMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
 
             // Act
-            IEnumerable<Quest>? result = await apiFetcher.Fetch();
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
 
             // Assert
             result.Should().BeNull();
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
-            cacheMock.Verify(m => m.Get<IEnumerable<Quest>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Quest>>()), Times.Never);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>()), Times.Never);
         }
 
         [Theory]
@@ -416,7 +417,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             }
         }
 
-        public class ApiFetcherImplementation : ApiFetcher<IEnumerable<Quest>>
+        public class ApiFetcherImplementation : ApiFetcher<IEnumerable<Price>>
         {
             protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiQuestsQuery;
 
@@ -447,9 +448,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 return TryDeserializeString(jsonElement, propertyName, out value);
             }
 
-            protected override Task<Result<IEnumerable<Quest>>> DeserializeData(string responseContent)
+            protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
             {
-                return Task.FromResult(Result.Ok(TestData.Quests.AsEnumerable()));
+                return Task.FromResult(Result.Ok(TestData.Prices.AsEnumerable()));
             }
         }
     }
