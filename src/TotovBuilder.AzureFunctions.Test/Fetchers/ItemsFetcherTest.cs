@@ -188,6 +188,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new Ammunition()
                 {
+                    AccuracyPercentageModifier = 0,
+                    ArmorDamagePercentage = 0.34,
+                    Caliber = "Caliber545x39",
+                    CategoryId = "ammunition",
+                    DurabilityBurnPercentageModifier = -0.2,
+                    FleshDamage = 65,
+                    FragmentationChancePercentage = 0.1,
+                    HeavyBleedingPercentageChance = 0,
+                    IconLink = "https://assets.tarkov.dev/56dff4ecd2720b5f5a8b4568-icon.jpg",
+                    Id = "56dff4ecd2720b5f5a8b4568",
+                    ImageLink = "https://assets.tarkov.dev/56dff4ecd2720b5f5a8b4568-image.jpg",
+                    LightBleedingPercentageChance = 0,
+                    MarketLink = "https://tarkov.dev/item/545x39mm-us-gs",
+                    MaxStackableAmount = 60,
+                    Name = "5.45x39mm US gs",
+                    PenetrationPower = 15,
+                    Projectiles = 1,
+                    RecoilPercentageModifier = -0.25,
+                    ShortName = "US",
+                    Subsonic = true,
+                    Tracer = false,
+                    Velocity = 303,
+                    Weight = 0.01,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/5.45x39mm_US_gs"
+                },
+                new Ammunition()
+                {
                     CategoryId = "ammunition",
                     Id = "testAmmunition",
                 },

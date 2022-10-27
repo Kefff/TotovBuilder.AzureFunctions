@@ -38,7 +38,6 @@ namespace TotovBuilder.AzureFunctions
             builder.Services.AddSingleton<IItemsFetcher, ItemsFetcher>();
             builder.Services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
             builder.Services.AddSingleton<IPricesFetcher, PricesFetcher>();
-            builder.Services.AddSingleton<IQuestsFetcher, QuestsFetcher>();
             builder.Services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
             builder.Services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
         }

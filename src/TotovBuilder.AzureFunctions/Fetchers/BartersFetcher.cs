@@ -7,6 +7,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -49,11 +50,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     string merchant = barterJson.GetProperty("trader").GetProperty("normalizedName").GetString();
                     int merchantLevel = barterJson.GetProperty("level").GetInt32();
 
-                    JsonElement questJson = barterJson.GetProperty("taskUnlock");
+                    Quest? quest = null;
+                    JsonElement taskUnlockJson = barterJson.GetProperty("taskUnlock");
 
-                    if (!TryDeserializeString(questJson, "id", out string questId))
+                    if (taskUnlockJson.ValueKind != JsonValueKind.Null)
                     {
-                        questId = string.Empty;
+                        quest = new Quest()
+                        {
+                            Id = taskUnlockJson.GetProperty("id").GetString(),
+                            Name = taskUnlockJson.GetProperty("name").GetString(),
+                            WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()
+                        };
                     }
 
                     foreach (JsonElement baterItemJson in barterJson.GetProperty("requiredItems").EnumerateArray())
@@ -75,7 +82,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             ItemId = itemJson.GetProperty("item").GetProperty("id").GetString(),
                             Merchant = merchant,
                             MerchantLevel = merchantLevel,
-                            QuestId = questId
+                            Quest = quest
                         };
 
                         if (quantity > 1)

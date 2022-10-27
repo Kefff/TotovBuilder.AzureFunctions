@@ -7,6 +7,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -62,7 +63,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
                         };
 
-                        if (priceJson.GetProperty("vendor").TryGetProperty("trader", out JsonElement traderJson))
+                        JsonElement vendorJson = priceJson.GetProperty("vendor");
+
+                        if (vendorJson.TryGetProperty("trader", out JsonElement traderJson))
                         {
                             price.Merchant = traderJson.GetProperty("normalizedName").GetString();
                         }
@@ -71,7 +74,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString();
                         }
 
-                        if (priceJson.GetProperty("vendor").TryGetProperty("minTraderLevel", out JsonElement minTraderLevelJson))
+                        if (vendorJson.TryGetProperty("minTraderLevel", out JsonElement minTraderLevelJson))
                         {
                             int minTraderLevel = minTraderLevelJson.GetInt32();
 
@@ -81,9 +84,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             }
                         }
 
-                        if (priceJson.GetProperty("vendor").TryGetProperty("taskUnlock", out JsonElement taskUnlockJson) && taskUnlockJson.ValueKind != JsonValueKind.Null)
+                        if (vendorJson.TryGetProperty("taskUnlock", out JsonElement taskUnlockJson) && taskUnlockJson.ValueKind != JsonValueKind.Null)
                         {
-                            price.QuestId = taskUnlockJson.GetProperty("id").GetString();
+                            price.Quest = new Quest()
+                            {
+                                Id = taskUnlockJson.GetProperty("id").GetString(),
+                                Name = taskUnlockJson.GetProperty("name").GetString(),
+                                WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()
+                            };
                         }
 
                         prices.Add(price);

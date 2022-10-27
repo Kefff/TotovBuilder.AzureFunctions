@@ -130,7 +130,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.ArmorPenetrations = ArmorPenetrations.FirstOrDefault(ac => ac.AmmunitionId == ammunition.Id)?.Values ?? Array.Empty<double>(); // TODO : OBTAIN FROM WIKI
                 //ammunition.Blinding = ; // TODO : MISSING FROM API
                 ammunition.Caliber = propertiesJson.GetProperty("caliber").GetString();
-                ammunition.DurabilityBurnPercentageModifier = propertiesJson.GetProperty("durabilityBurnFactor").GetDouble() - 1;
+                ammunition.DurabilityBurnPercentageModifier = Math.Round(propertiesJson.GetProperty("durabilityBurnFactor").GetDouble() - 1, 2);
                 ammunition.FleshDamage = propertiesJson.GetProperty("damage").GetDouble();
                 ammunition.FragmentationChancePercentage = propertiesJson.GetProperty("fragmentationChance").GetDouble();
                 ammunition.HeavyBleedingPercentageChance = propertiesJson.GetProperty("heavyBleedModifier").GetDouble();
@@ -141,6 +141,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.RecoilPercentageModifier = propertiesJson.GetProperty("recoilModifier").GetDouble();
                 ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
+
+                ammunition.Subsonic = ammunition.Velocity <= 340;
 
                 if (ammunition.RecoilPercentageModifier > 1)
                 {
