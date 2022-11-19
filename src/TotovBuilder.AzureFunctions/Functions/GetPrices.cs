@@ -58,7 +58,10 @@ namespace TotovBuilder.AzureFunctions.Functions
             await AzureFunctionsConfigurationReader.Load();
 
             IEnumerable<Price> prices = await PricesFetcher.Fetch() ?? Array.Empty<Price>();
-            IEnumerable<Price> barters = await BartersFetcher.Fetch() ?? Array.Empty<Price>();
+            List<Price> barters = (await BartersFetcher.Fetch())?.ToList() ?? new List<Price>();
+
+            // Ignoring barters that require the same item as the one obtained to avoid price calculation infinite loops
+            barters.RemoveAll(b => b.BarterItems.Any(bi => bi.ItemId == b.ItemId));
 
             return new OkObjectResult(prices.Concat(barters).OrderBy(p => p.ItemId));
         }

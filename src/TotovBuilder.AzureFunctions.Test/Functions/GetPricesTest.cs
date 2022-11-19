@@ -153,6 +153,80 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         }
 
         [Fact]
+        public async Task Run_WithBartersRequiringObtainedItem_ShouldIgnoreThoseBarters()
+        {
+            // Arrange
+            List<Price> barters = new List<Price>() // Not using TestData.Barters here because this tests modifies the list making other tests fail
+            {
+                new Price()
+                {
+                    BarterItems = new BarterItem[]
+                    {
+                        new BarterItem()
+                        {
+                            ItemId = "545cdb794bdc2d3a198b456a",
+                            Quantity = 2
+                        }
+                    },
+                    CurrencyName = "barter",
+                    ItemId = "545cdb794bdc2d3a198b456a",
+                    Merchant = "mechanic",
+                    MerchantLevel = 3
+                },
+                new Price()
+                {
+                    BarterItems = new BarterItem[]
+                    {
+                        new BarterItem()
+                        {
+                            ItemId = "5448be9a4bdc2dfd2f8b456a",
+                            Quantity = 1
+                        }
+                    },
+                    CurrencyName = "barter",
+                    ItemId = "545cdb794bdc2d3a198b456a",
+                    Merchant = "mechanic",
+                    MerchantLevel = 2
+                }
+            };
+
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+
+            Mock<IBartersFetcher> bartersFetcherMock = new Mock<IBartersFetcher>();
+            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(barters));
+
+            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(null));
+
+            GetPrices function = new GetPrices(azureFunctionsConfigurationReaderMock.Object, bartersFetcherMock.Object, pricesFetcherMock.Object);
+
+            // Act
+            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+
+            // Assert
+            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
+            result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)result).Value.Should().BeEquivalentTo(new List<Price>()
+            {
+                new Price()
+                {
+                    BarterItems = new BarterItem[]
+                    {
+                        new BarterItem()
+                        {
+                            ItemId = "5448be9a4bdc2dfd2f8b456a",
+                            Quantity = 1
+                        }
+                    },
+                    CurrencyName = "barter",
+                    ItemId = "545cdb794bdc2d3a198b456a",
+                    Merchant = "mechanic",
+                    MerchantLevel = 2
+                }
+            });
+        }
+
+        [Fact]
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
