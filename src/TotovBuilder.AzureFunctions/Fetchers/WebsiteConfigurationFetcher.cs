@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -15,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class WebsiteConfigurationFetcher : StaticDataFetcher<WebsiteConfiguration>, IWebsiteConfigurationFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationWrapper.Values.AzureWebsiteConfigurationBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureWebsiteConfigurationBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.WebsiteConfiguration;
@@ -25,13 +23,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        public WebsiteConfigurationFetcher(ILogger<WebsiteConfigurationFetcher> logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
-            : base(logger, blobDataFetcher, azureFunctionsConfigurationWrapper, cache)
+        public WebsiteConfigurationFetcher(ILogger<WebsiteConfigurationFetcher> logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+            : base(logger, blobDataFetcher, azureFunctionsConfigurationReader, cache)
         {
         }
-        
+
         /// <inheritdoc/>
         protected override Task<Result<WebsiteConfiguration>> DeserializeData(string responseContent)
         {

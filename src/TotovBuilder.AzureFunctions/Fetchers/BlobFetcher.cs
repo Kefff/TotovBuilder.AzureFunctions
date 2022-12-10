@@ -1,10 +1,7 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
 using FluentResults;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
@@ -20,7 +17,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Azure Functions configuration wrapper.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
+        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
         /// Logger.
@@ -31,10 +28,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="BlobFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
-        public BlobFetcher(ILogger<BlobFetcher> logger, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper)
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
+        public BlobFetcher(ILogger<BlobFetcher> logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
         {
-            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper;
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
             Logger = logger;
         }
 
@@ -51,8 +48,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Blob value.</returns>
         private Result<string> ExecuteFetch(string blobName)
         {
-            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageConnectionString)
-                || string.IsNullOrWhiteSpace(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageContainerName))
+            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationReader.Values.AzureBlobStorageConnectionString)
+                || string.IsNullOrWhiteSpace(AzureFunctionsConfigurationReader.Values.AzureBlobStorageContainerName))
             {
                 string error = Properties.Resources.InvalidConfiguration;
                 Logger.LogError(error);
@@ -64,15 +61,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                CloudStorageAccount cloudBlobAccount = CloudStorageAccount.Parse(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageConnectionString);
-                CloudBlobClient cloudBlobClient = cloudBlobAccount.CreateCloudBlobClient();
-                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(AzureFunctionsConfigurationWrapper.Values.AzureBlobStorageContainerName);
-                CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(blobName);
+                BlobContainerClient blobContainerClient = new(AzureFunctionsConfigurationReader.Values.AzureBlobStorageConnectionString, AzureFunctionsConfigurationReader.Values.AzureBlobStorageContainerName);
+                BlockBlobClient blockBlobClient = blobContainerClient.GetBlockBlobClient(blobName);
 
-                using MemoryStream memoryStream = new MemoryStream();
-                Task fetchTask = cloudBlockBlob.DownloadToStreamAsync(memoryStream);
+                using MemoryStream memoryStream = new();
+                Task fetchTask = blockBlobClient.DownloadToAsync(memoryStream);
 
-                if (!fetchTask.Wait(AzureFunctionsConfigurationWrapper.Values.FetchTimeout * 1000))
+                if (!fetchTask.Wait(AzureFunctionsConfigurationReader.Values.FetchTimeout * 1000))
                 {
                     string error = Properties.Resources.FetchingDelayExceeded;
                     Logger.LogError(error);
@@ -82,7 +77,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 memoryStream.Flush();
                 memoryStream.Position = 0;
-                StreamReader streamReader = new StreamReader(memoryStream);
+                StreamReader streamReader = new(memoryStream);
                 blobData = streamReader.ReadToEnd();
             }
             catch (Exception e)

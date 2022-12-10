@@ -1,18 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Mocks\**" />
     <Compile Remove="TestResults\**" />
-    <EmbeddedResource Remove="Mocks\**" />
     <EmbeddedResource Remove="TestResults\**" />
-    <None Remove="Mocks\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
 

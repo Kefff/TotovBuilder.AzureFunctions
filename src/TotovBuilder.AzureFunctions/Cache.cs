@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -15,17 +13,17 @@ namespace TotovBuilder.AzureFunctions
         /// <summary>
         /// Policy for caching items.
         /// </summary>
-        private readonly MemoryCacheEntryOptions CachingOptions = new MemoryCacheEntryOptions() { Priority = CacheItemPriority.NeverRemove };
+        private readonly MemoryCacheEntryOptions CachingOptions = new() { Priority = CacheItemPriority.NeverRemove };
 
         /// <summary>
         /// Azure functions onfiguration wrapper;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
+        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
         /// Cache instance.
         /// </summary>
-        private readonly MemoryCache Instance = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+        private readonly MemoryCache Instance = new(Options.Create(new MemoryCacheOptions()));
         /// <summary>
         /// Logger.
         /// </summary>
@@ -34,31 +32,31 @@ namespace TotovBuilder.AzureFunctions
         /// <summary>
         /// Last storage date for each data types.
         /// </summary>
-        private readonly Dictionary<DataType, DateTime> LastStorageDates = new Dictionary<DataType, DateTime>();
+        private readonly Dictionary<DataType, DateTime> LastStorageDates = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Cache"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="configurationReader">Azure Functions configuration wrapper.</param>
-        public Cache(ILogger<Cache> logger, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper)
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        public Cache(ILogger<Cache> logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
         {
-            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper ;
+            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
             Logger = logger;
         }
- 
+
         /// <inheritdoc/>
         public T? Get<T>(DataType dataType)
             where T : class
         {
             if (!Instance.TryGetValue(dataType.ToString(), out T? value))
             {
-                Logger.LogError(string.Format(Properties.Resources.InvalidCache, dataType));
+                Logger.LogError(Properties.Resources.InvalidCache, dataType);
             }
-            
+
             return value;
         }
-        
+
         /// <inheritdoc/>
         public bool HasValidCache(DataType dataType)
         {
@@ -66,9 +64,9 @@ namespace TotovBuilder.AzureFunctions
             {
                 return false;
             }
-            
+
             TimeSpan durationSinceLastFetch = DateTime.Now - lastStorageDate;
-            int cacheDuration = dataType == DataType.Prices ? AzureFunctionsConfigurationWrapper.Values.PriceCacheDuration : AzureFunctionsConfigurationWrapper.Values.CacheDuration;
+            int cacheDuration = dataType == DataType.Prices ? AzureFunctionsConfigurationReader.Values.PriceCacheDuration : AzureFunctionsConfigurationReader.Values.CacheDuration;
 
             return durationSinceLastFetch.TotalSeconds <= cacheDuration;
         }

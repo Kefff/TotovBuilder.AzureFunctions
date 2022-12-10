@@ -21,21 +21,21 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnAzureFunctionsConfiguration()
         {
             // Arrange
-            Mock<ILogger<AzureFunctionsConfigurationFetcher>> loggerMock = new Mock<ILogger<AzureFunctionsConfigurationFetcher>>();
+            Mock<ILogger<AzureFunctionsConfigurationFetcher>> loggerMock = new();
 
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            Mock<IBlobFetcher> blobDataFetcherMock = new();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
+            Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
+            AzureFunctionsConfigurationFetcher fetcher = new(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             AzureFunctionsConfiguration? result = await fetcher.Fetch();
@@ -45,25 +45,25 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }
 
         [Fact]
-        public async void Fetch_WithInvalidData_ShouldReturnNull()
+        public async Task Fetch_WithInvalidData_ShouldReturnNull()
         {
             // Arrange
-            Mock<ILogger<AzureFunctionsConfigurationFetcher>> loggerMock = new Mock<ILogger<AzureFunctionsConfigurationFetcher>>();
+            Mock<ILogger<AzureFunctionsConfigurationFetcher>> loggerMock = new();
 
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            Mock<IBlobFetcher> blobDataFetcherMock = new();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
+            Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<AzureFunctionsConfiguration>(It.IsAny<DataType>())).Returns(value: null);
 
-            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
+            AzureFunctionsConfigurationFetcher fetcher = new(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             AzureFunctionsConfiguration? result = await fetcher.Fetch();

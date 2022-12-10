@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using TotovBuilder.Model.Builds;
+﻿using TotovBuilder.Model.Builds;
 
 namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
 {

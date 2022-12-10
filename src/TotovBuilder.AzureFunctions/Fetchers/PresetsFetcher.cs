@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -17,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PresetsFetcher : StaticDataFetcher<IEnumerable<InventoryItem>>, IPresetsFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationWrapper.Values.AzurePresetsBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzurePresetsBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Presets;
@@ -27,17 +23,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        public PresetsFetcher(ILogger<PresetsFetcher> logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
-            : base(logger, blobDataFetcher, azureFunctionsConfigurationWrapper, cache)
+        public PresetsFetcher(ILogger<PresetsFetcher> logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+            : base(logger, blobDataFetcher, azureFunctionsConfigurationReader, cache)
         {
         }
 
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
         {
-            List<InventoryItem> presets = new List<InventoryItem>();
+            List<InventoryItem> presets = new();
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement inventoryItemJson in presetsJson.EnumerateArray())
@@ -63,14 +59,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized <see cref="InventoryItem"/>.</returns>
         private InventoryItem DeserializeInventoryItem(JsonElement inventoryItemJson)
         {
-            InventoryItem inventoryItem = new InventoryItem()
+            InventoryItem inventoryItem = new()
             {
                 IgnorePrice = inventoryItemJson.GetProperty("ignorePrice").GetBoolean(),
                 ItemId = inventoryItemJson.GetProperty("itemId").GetString(),
                 Quantity = inventoryItemJson.GetProperty("quantity").GetDouble()
             };
 
-            List<InventoryItem> content = new List<InventoryItem>();
+            List<InventoryItem> content = new();
 
             foreach (JsonElement contentInventoryItemJson in inventoryItemJson.GetProperty("content").EnumerateArray())
             {
@@ -79,7 +75,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             inventoryItem.Content = content.ToArray();
 
-            List<InventoryItemModSlot> modSlots = new List<InventoryItemModSlot>();
+            List<InventoryItemModSlot> modSlots = new();
 
             foreach (JsonElement modSlotJson in inventoryItemJson.GetProperty("modSlots").EnumerateArray())
             {
@@ -98,7 +94,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserilized <see cref="InventoryItemModSlot"/>.</returns>
         private InventoryItemModSlot DeserializeInventoryModSlot(JsonElement inventoryModSlotJson)
         {
-            InventoryItemModSlot inventoryModSlot = new InventoryItemModSlot()
+            InventoryItemModSlot inventoryModSlot = new()
             {
                 Item = DeserializeInventoryItem(inventoryModSlotJson.GetProperty("item")),
                 ModSlotName = inventoryModSlotJson.GetProperty("modSlotName").GetString()

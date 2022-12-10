@@ -1,7 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-
-namespace TotovBuilder.AzureFunctions.Abstractions
+﻿namespace TotovBuilder.AzureFunctions.Abstractions
 {
     /// <summary>
     /// Provides the functionalities of an HTTP client wrapper.

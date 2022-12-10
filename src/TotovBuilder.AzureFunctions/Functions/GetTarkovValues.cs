@@ -1,8 +1,5 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Configuration;
@@ -20,6 +17,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
+        /// HTTP response data factory.
+        /// </summary>
+        private readonly IHttpResponseDataFactory HttpResponseDataFactory;
+
+        /// <summary>
         /// Tarkov values fetcher.
         /// </summary>
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
@@ -28,10 +30,14 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// Initializes a new instance of the <see cref="GetTarkovValues"/> class.
         /// </summary>
         /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="changelogFetcher">Tarkov values fetcher.</param>
-        public GetTarkovValues(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ITarkovValuesFetcher changelogFetcher)
+        public GetTarkovValues(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+            IHttpResponseDataFactory httpResponseDataFactory,
+            ITarkovValuesFetcher changelogFetcher)
         {
             AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            HttpResponseDataFactory = httpResponseDataFactory;
             TarkovValuesFetcher = changelogFetcher;
         }
 
@@ -40,15 +46,13 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
         /// <returns>Values related to Tarkov gameplay.</returns>
-        [FunctionName("GetTarkovValues")]
-#pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tarkovvalues")] HttpRequest httpRequest)
-#pragma warning restore IDE0060 // Remove unused parameter
+        [Function("GetTarkovValues")]
+        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tarkovvalues")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
             TarkovValues tarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
 
-            return new OkObjectResult(tarkovValues);
+            return await HttpResponseDataFactory.CreateResponse(httpRequest, tarkovValues);
         }
     }
 }

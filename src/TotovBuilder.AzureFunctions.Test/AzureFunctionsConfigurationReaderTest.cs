@@ -19,20 +19,18 @@ namespace TotovBuilder.AzureFunctions.Test
         public async Task Load_ShouldLoadConfiguration()
         {
             // Arrange
-            Mock<ILogger<AzureFunctionsConfigurationReader>> loggerMock = new Mock<ILogger<AzureFunctionsConfigurationReader>>();
+            Mock<ILogger<AzureFunctionsConfigurationReader>> loggerMock = new();
 
-            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new Mock<IAzureFunctionsConfigurationFetcher>();
+            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new();
             azureFunctionsConfigurationFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<AzureFunctionsConfiguration?>(TestData.AzureFunctionsConfiguration));
 
-            AzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper = new AzureFunctionsConfigurationWrapper();
-
             // Act
-            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new AzureFunctionsConfigurationReader(loggerMock.Object, azureFunctionsConfigurationWrapper, azureFunctionsConfigurationFetcherMock.Object);
+            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new(loggerMock.Object, azureFunctionsConfigurationFetcherMock.Object);
             await azureFunctionsConfigurationReader.Load();
             await azureFunctionsConfigurationReader.Load();
 
             // Assert
-            azureFunctionsConfigurationWrapper.Values.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
+            azureFunctionsConfigurationReader.Values.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
             azureFunctionsConfigurationFetcherMock.Verify(m => m.Fetch(), Times.Once);
         }
 
@@ -40,16 +38,13 @@ namespace TotovBuilder.AzureFunctions.Test
         public void Load_WithoutConfigurationData_ShouldThrow()
         {
             // Arrange
-            Mock<ILogger<AzureFunctionsConfigurationReader>> loggerMock = new Mock<ILogger<AzureFunctionsConfigurationReader>>();
+            Mock<ILogger<AzureFunctionsConfigurationReader>> loggerMock = new();
 
-            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new Mock<IAzureFunctionsConfigurationFetcher>();
+            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new();
             azureFunctionsConfigurationFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<AzureFunctionsConfiguration?>(null));
 
-            AzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper = new AzureFunctionsConfigurationWrapper();
-
-            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new AzureFunctionsConfigurationReader(
+            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new(
                 loggerMock.Object,
-                azureFunctionsConfigurationWrapper,
                 azureFunctionsConfigurationFetcherMock.Object);
 
             // Act

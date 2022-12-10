@@ -7,10 +7,10 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.Model.Items;
-using Xunit;
-using TotovBuilder.Model.Test;
 using TotovBuilder.Model.Configuration;
+using TotovBuilder.Model.Items;
+using TotovBuilder.Model.Test;
+using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -23,21 +23,21 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnItemCategories()
         {
             // Arrange
-            Mock<ILogger<ItemCategoriesFetcher>> loggerMock = new Mock<ILogger<ItemCategoriesFetcher>>();
+            Mock<ILogger<ItemCategoriesFetcher>> loggerMock = new();
 
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureItemCategoriesBlobName = "item-categories.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            Mock<IBlobFetcher> blobDataFetcherMock = new();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ItemCategoriesJson)));
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
+            Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            ItemCategoriesFetcher fetcher = new ItemCategoriesFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
+            ItemCategoriesFetcher fetcher = new(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<ItemCategory>? result = await fetcher.Fetch();
@@ -47,18 +47,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }
 
         [Fact]
-        public async void Fetch_WithInvalidData_ShouldReturnNull()
+        public async Task Fetch_WithInvalidData_ShouldReturnNull()
         {
             // Arrange
-            Mock<ILogger<ItemCategoriesFetcher>> loggerMock = new Mock<ILogger<ItemCategoriesFetcher>>();
+            Mock<ILogger<ItemCategoriesFetcher>> loggerMock = new();
 
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
+            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureItemCategoriesBlobName = "item-categories.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
+            Mock<IBlobFetcher> blobDataFetcherMock = new();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
@@ -75,11 +75,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 ]
 ")));
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
+            Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<ItemCategory>>(It.IsAny<DataType>())).Returns(value: null);
 
-            ItemCategoriesFetcher fetcher = new ItemCategoriesFetcher(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationWrapperMock.Object, cacheMock.Object);
+            ItemCategoriesFetcher fetcher = new(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
 
             // Act
             IEnumerable<ItemCategory>? result = await fetcher.Fetch();

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace TotovBuilder.AzureFunctions
@@ -21,7 +20,7 @@ namespace TotovBuilder.AzureFunctions
                 stringToFormat, "((?'M1L1'^[A-Z])(?'M1R'[A-Z]+$))|(?'M2'[ ][a-zA-Z])|(?'M3'^[a-z])",
                 m =>
                 {
-                    StringBuilder result = new StringBuilder();
+                    StringBuilder result = new();
 
                     foreach (Group? group in m.Groups.Cast<Group?>())
                     {

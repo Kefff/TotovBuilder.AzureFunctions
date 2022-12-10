@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -18,8 +14,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PricesFetcher : ApiFetcher<IEnumerable<Price>>, IPricesFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiPricesQuery;
-        
+        protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiPricesQuery;
+
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Prices;
 
@@ -28,17 +24,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        public PricesFetcher(ILogger<PricesFetcher> logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
-            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationWrapper, cache)
+        public PricesFetcher(ILogger<PricesFetcher> logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
         {
         }
-        
+
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Price> prices = new List<Price>();
+            List<Price> prices = new();
 
             JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -55,7 +51,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             continue;
                         }
 
-                        Price price = new Price()
+                        Price price = new()
                         {
                             CurrencyName = priceJson.GetProperty("currency").GetString(),
                             ItemId = itemJson.GetProperty("id").GetString(),

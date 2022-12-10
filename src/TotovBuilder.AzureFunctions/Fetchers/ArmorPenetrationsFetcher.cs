@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -17,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ArmorPenetrationsFetcher : StaticDataFetcher<IEnumerable<ArmorPenetration>>, IArmorPenetrationsFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationWrapper.Values.AzureArmorPenetrationsBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureArmorPenetrationsBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.ArmorPenetrations;
@@ -27,13 +23,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
-        public ArmorPenetrationsFetcher(ILogger<ArmorPenetrationsFetcher> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
-            : base(logger, blobFetcher, azureFunctionsConfigurationWrapper, cache)
+        public ArmorPenetrationsFetcher(ILogger<ArmorPenetrationsFetcher> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+            : base(logger, blobFetcher, azureFunctionsConfigurationReader, cache)
         {
         }
-        
+
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<ArmorPenetration>>> DeserializeData(string responseContent)
         {

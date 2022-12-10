@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -15,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class TarkovValuesFetcher : StaticDataFetcher<TarkovValues>, ITarkovValuesFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationWrapper.Values.AzureTarkovValuesBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureTarkovValuesBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.TarkovValues;
@@ -25,13 +23,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration reader.</param>
+        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
         /// <param name="cache">Cache.</param>
-        public TarkovValuesFetcher(ILogger<TarkovValuesFetcher> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
-            : base(logger, blobFetcher, azureFunctionsConfigurationWrapper, cache)
+        public TarkovValuesFetcher(ILogger<TarkovValuesFetcher> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+            : base(logger, blobFetcher, azureFunctionsConfigurationReader, cache)
         {
         }
-        
+
         /// <inheritdoc/>
         protected override Task<Result<TarkovValues>> DeserializeData(string responseContent)
         {
