@@ -40,7 +40,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 missingItemProperties = JsonSerializer.Deserialize<IEnumerable<ItemMissingProperties>>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
-                });
+                })!;
             }
             catch (Exception e)
             {

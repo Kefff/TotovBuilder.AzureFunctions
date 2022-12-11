@@ -43,7 +43,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 try
                 {
                     List<BarterItem> barterItems = new();
-                    string merchant = barterJson.GetProperty("trader").GetProperty("normalizedName").GetString();
+                    string merchant = barterJson.GetProperty("trader").GetProperty("normalizedName").GetString()!;
                     int merchantLevel = barterJson.GetProperty("level").GetInt32();
 
                     Quest? quest = null;
@@ -53,9 +53,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     {
                         quest = new Quest()
                         {
-                            Id = taskUnlockJson.GetProperty("id").GetString(),
-                            Name = taskUnlockJson.GetProperty("name").GetString(),
-                            WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()
+                            Id = taskUnlockJson.GetProperty("id").GetString()!,
+                            Name = taskUnlockJson.GetProperty("name").GetString()!,
+                            WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()!
                         };
                     }
 
@@ -63,7 +63,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     {
                         barterItems.Add(new BarterItem()
                         {
-                            ItemId = baterItemJson.GetProperty("item").GetProperty("id").GetString(),
+                            ItemId = baterItemJson.GetProperty("item").GetProperty("id").GetString()!,
                             Quantity = baterItemJson.GetProperty("quantity").GetInt32()
                         });
                     }
@@ -75,7 +75,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                         {
                             BarterItems = barterItems.ToArray(),
                             CurrencyName = "barter",
-                            ItemId = itemJson.GetProperty("item").GetProperty("id").GetString(),
+                            ItemId = itemJson.GetProperty("item").GetProperty("id").GetString()!,
                             Merchant = merchant,
                             MerchantLevel = merchantLevel,
                             Quest = quest

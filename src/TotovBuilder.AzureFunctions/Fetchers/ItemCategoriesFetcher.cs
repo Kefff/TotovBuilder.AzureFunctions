@@ -38,7 +38,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IEnumerable<ItemCategory> itemCategories = JsonSerializer.Deserialize<IEnumerable<ItemCategory>>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
-                });
+                })!;
 
                 return Task.FromResult(Result.Ok(itemCategories));
             }

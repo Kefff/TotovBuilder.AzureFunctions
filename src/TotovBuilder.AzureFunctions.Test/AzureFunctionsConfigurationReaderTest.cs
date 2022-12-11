@@ -22,11 +22,17 @@ namespace TotovBuilder.AzureFunctions.Test
             Mock<ILogger<AzureFunctionsConfigurationReader>> loggerMock = new();
 
             Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new();
-            azureFunctionsConfigurationFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<AzureFunctionsConfiguration?>(TestData.AzureFunctionsConfiguration));
+            azureFunctionsConfigurationFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(async () =>
+                {
+                    await Task.Delay(1000);
+                    return TestData.AzureFunctionsConfiguration;
+                });
 
             // Act
             AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new(loggerMock.Object, azureFunctionsConfigurationFetcherMock.Object);
-            await azureFunctionsConfigurationReader.Load();
+            _ = azureFunctionsConfigurationReader.Load();
             await azureFunctionsConfigurationReader.Load();
 
             // Assert

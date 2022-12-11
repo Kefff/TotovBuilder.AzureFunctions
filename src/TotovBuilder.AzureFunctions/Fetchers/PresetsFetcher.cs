@@ -62,7 +62,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             InventoryItem inventoryItem = new()
             {
                 IgnorePrice = inventoryItemJson.GetProperty("ignorePrice").GetBoolean(),
-                ItemId = inventoryItemJson.GetProperty("itemId").GetString(),
+                ItemId = inventoryItemJson.GetProperty("itemId").GetString()!,
                 Quantity = inventoryItemJson.GetProperty("quantity").GetDouble()
             };
 
@@ -97,7 +97,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             InventoryItemModSlot inventoryModSlot = new()
             {
                 Item = DeserializeInventoryItem(inventoryModSlotJson.GetProperty("item")),
-                ModSlotName = inventoryModSlotJson.GetProperty("modSlotName").GetString()
+                ModSlotName = inventoryModSlotJson.GetProperty("modSlotName").GetString()!
             };
 
             return inventoryModSlot;

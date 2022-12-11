@@ -26,8 +26,9 @@ namespace TotovBuilder.AzureFunctions
 
         /// <summary>
         /// Loading task.
+        /// Used to avoid launching multiple loading operations at the same time.
         /// </summary>
-        private Task? LoadingTask = null;
+        private Task LoadingTask = Task.CompletedTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFunctionsConfigurationInitializer"/> class.
@@ -40,19 +41,6 @@ namespace TotovBuilder.AzureFunctions
         {
             AzureFunctionsConfigurationFetcher = azureFunctionsConfigurationFetcher;
             Logger = logger;
-        }
-
-        /// <summary>
-        /// Loads the Azure Functions configuration.
-        /// </summary>
-        public async Task Load()
-        {
-            if (LoadingTask != null)
-            {
-                await LoadingTask;
-
-                return;
-            }
 
             // Temporary configuration for the fetcher to be able to get the configuration blob.
             // Will be replaced by the complete configuration once it is loaded.
@@ -62,22 +50,29 @@ namespace TotovBuilder.AzureFunctions
                 AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
                 AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
             };
+        }
 
-            LoadingTask = Fetch();
+        /// <summary>
+        /// Loads the Azure Functions configuration.
+        /// </summary>
+        public async Task Load()
+        {
+            if (!LoadingTask.IsCompleted)
+            {
+                await LoadingTask;
+
+                return;
+            }
+
+            LoadingTask = Task.Run(async () =>
+            {
+                Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
+            });
             await LoadingTask;
         }
 
         /// <inheritdoc/>
         public AzureFunctionsConfiguration Values { get; set; } = new AzureFunctionsConfiguration();
-
-        /// <summary>
-        /// Fetches the configuration.
-        /// </summary>
-        /// <exception cref="Exception">Invalid configuration exception when no configuration is fetched.</exception>
-        private async Task Fetch()
-        {
-            Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
-        }
 
         /// <summary>
         /// Reads a string value from the configuration.

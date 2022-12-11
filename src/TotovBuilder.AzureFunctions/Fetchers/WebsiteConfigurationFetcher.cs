@@ -40,7 +40,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 azureFunctionsConfiguration = JsonSerializer.Deserialize<WebsiteConfiguration>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
-                });
+                })!;
             }
             catch (Exception e)
             {

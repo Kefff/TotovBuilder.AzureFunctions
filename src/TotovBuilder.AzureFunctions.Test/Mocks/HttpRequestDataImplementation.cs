@@ -3,19 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
 using Microsoft.Azure.Functions.Worker.Http;
-using Moq;
 
 namespace TotovBuilder.AzureFunctions.Test.Mocks
 {
     public class HttpRequestDataImplementation : HttpRequestData
     {
-        public static Mock<HttpRequestDataImplementation> CreateMock(object responseData)
-        {
-            Mock<HttpRequestDataImplementation> mock = new();
-
-            return mock;
-        }
-
         public HttpRequestDataImplementation() : base(FunctionContextImplementation.CreateMock().Object) { }
 
         public override HttpResponseData CreateResponse()

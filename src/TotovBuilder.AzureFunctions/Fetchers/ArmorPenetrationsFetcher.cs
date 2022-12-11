@@ -38,7 +38,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IEnumerable<ArmorPenetration> armorPenetrations = JsonSerializer.Deserialize<IEnumerable<ArmorPenetration>>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
-                });
+                })!;
 
                 return Task.FromResult(Result.Ok(armorPenetrations.AsEnumerable()));
             }
