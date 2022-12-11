@@ -15,9 +15,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class BlobFetcher : IBlobFetcher
     {
         /// <summary>
-        /// Azure Functions configuration wrapper.
+        /// Azure Functions configuration cache.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
 
         /// <summary>
         /// Logger.
@@ -28,10 +28,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="BlobFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
-        public BlobFetcher(ILogger<BlobFetcher> logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        public BlobFetcher(ILogger<BlobFetcher> logger, IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
             Logger = logger;
         }
 
@@ -48,8 +48,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Blob value.</returns>
         private Result<string> ExecuteFetch(string blobName)
         {
-            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationReader.Values.AzureBlobStorageConnectionString)
-                || string.IsNullOrWhiteSpace(AzureFunctionsConfigurationReader.Values.AzureBlobStorageContainerName))
+            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationCache.Values.AzureBlobStorageConnectionString)
+                || string.IsNullOrWhiteSpace(AzureFunctionsConfigurationCache.Values.AzureBlobStorageContainerName))
             {
                 string error = Properties.Resources.InvalidConfiguration;
                 Logger.LogError(error);
@@ -61,13 +61,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                BlobContainerClient blobContainerClient = new(AzureFunctionsConfigurationReader.Values.AzureBlobStorageConnectionString, AzureFunctionsConfigurationReader.Values.AzureBlobStorageContainerName);
+                BlobContainerClient blobContainerClient = new(AzureFunctionsConfigurationCache.Values.AzureBlobStorageConnectionString, AzureFunctionsConfigurationCache.Values.AzureBlobStorageContainerName);
                 BlockBlobClient blockBlobClient = blobContainerClient.GetBlockBlobClient(blobName);
 
                 using MemoryStream memoryStream = new();
                 Task fetchTask = blockBlobClient.DownloadToAsync(memoryStream);
 
-                if (!fetchTask.Wait(AzureFunctionsConfigurationReader.Values.FetchTimeout * 1000))
+                if (!fetchTask.Wait(AzureFunctionsConfigurationCache.Values.FetchTimeout * 1000))
                 {
                     string error = Properties.Resources.FetchingDelayExceeded;
                     Logger.LogError(error);

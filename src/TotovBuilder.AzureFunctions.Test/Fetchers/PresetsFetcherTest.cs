@@ -23,10 +23,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnPresets()
         {
             // Arrange
-            Mock<ILogger<PresetsFetcher>> loggerMock = new();
-
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzurePresetsBlobName = "presets.json"
             });
@@ -37,7 +35,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            PresetsFetcher fetcher = new(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            PresetsFetcher fetcher = new(
+                new Mock<ILogger<PresetsFetcher>>().Object,
+                blobDataFetcherMock.Object,
+                azureFunctionsConfigurationCacheMock.Object,
+                cacheMock.Object);
 
             // Act
             IEnumerable<InventoryItem>? result = await fetcher.Fetch();
@@ -50,10 +52,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldReturnOnlyValidData()
         {
             // Arrange
-            Mock<ILogger<PresetsFetcher>> loggerMock = new();
-
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
-            azureFunctionsConfigurationReaderMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzurePresetsBlobName = "presets.json"
             });
@@ -157,7 +157,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<InventoryItem>>(It.IsAny<DataType>())).Returns(value: null);
 
-            PresetsFetcher fetcher = new(loggerMock.Object, blobDataFetcherMock.Object, azureFunctionsConfigurationReaderMock.Object, cacheMock.Object);
+            PresetsFetcher fetcher = new(
+                new Mock<ILogger<PresetsFetcher>>().Object,
+                blobDataFetcherMock.Object,
+                azureFunctionsConfigurationCacheMock.Object,
+                cacheMock.Object);
 
             // Act
             IEnumerable<InventoryItem>? result = await fetcher.Fetch();

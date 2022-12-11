@@ -12,9 +12,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         where T : class
     {
         /// <summary>
-        /// Azure Functions configuration wrapper;
+        /// Azure Functions configuration cache;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        protected readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
 
         /// <summary>
         /// Name of the Azure Blob that stores the data.
@@ -51,13 +51,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache</param>
         /// <param name="cache">Cache.</param>
-        protected StaticDataFetcher(ILogger<StaticDataFetcher<T>> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
+        protected StaticDataFetcher(
+            ILogger<StaticDataFetcher<T>> logger,
+            IBlobFetcher blobFetcher,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            ICache cache)
         {
             BlobFetcher = blobFetcher;
             Cache = cache;
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
             Logger = logger;
         }
 

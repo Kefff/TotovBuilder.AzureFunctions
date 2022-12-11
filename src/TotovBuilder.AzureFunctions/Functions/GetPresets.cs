@@ -52,7 +52,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             await AzureFunctionsConfigurationReader.Load();
             IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
 
-            return await HttpResponseDataFactory.CreateResponse(httpRequest, presets);
+            return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, presets);
         }
     }
 }

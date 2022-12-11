@@ -10,38 +10,39 @@ namespace TotovBuilder.AzureFunctions
     /// </summary>
     public class Cache : ICache
     {
+
+        /// <summary>
+        /// Azure Functions configuration cache.
+        /// </summary>
+        private readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
+
         /// <summary>
         /// Policy for caching items.
         /// </summary>
         private readonly MemoryCacheEntryOptions CachingOptions = new() { Priority = CacheItemPriority.NeverRemove };
 
         /// <summary>
-        /// Azure functions onfiguration wrapper;
-        /// </summary>
-        protected readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
-
-        /// <summary>
         /// Cache instance.
         /// </summary>
         private readonly MemoryCache Instance = new(Options.Create(new MemoryCacheOptions()));
+
+        /// <summary>
+        /// Last storage date for each data types.
+        /// </summary>
+        private readonly Dictionary<DataType, DateTime> LastStorageDates = new();
         /// <summary>
         /// Logger.
         /// </summary>
         private readonly ILogger<Cache> Logger;
 
         /// <summary>
-        /// Last storage date for each data types.
-        /// </summary>
-        private readonly Dictionary<DataType, DateTime> LastStorageDates = new();
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Cache"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
-        public Cache(ILogger<Cache> logger, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader)
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        public Cache(ILogger<Cache> logger, IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
             Logger = logger;
         }
 
@@ -66,7 +67,9 @@ namespace TotovBuilder.AzureFunctions
             }
 
             TimeSpan durationSinceLastFetch = DateTime.Now - lastStorageDate;
-            int cacheDuration = dataType == DataType.Prices ? AzureFunctionsConfigurationReader.Values.PriceCacheDuration : AzureFunctionsConfigurationReader.Values.CacheDuration;
+            int cacheDuration = dataType == DataType.Prices
+                ? AzureFunctionsConfigurationCache.Values.PriceCacheDuration
+                : AzureFunctionsConfigurationCache.Values.CacheDuration;
 
             return durationSinceLastFetch.TotalSeconds <= cacheDuration;
         }

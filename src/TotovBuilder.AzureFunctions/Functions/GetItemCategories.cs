@@ -53,7 +53,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             await AzureFunctionsConfigurationReader.Load();
             IEnumerable<ItemCategory> itemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
 
-            return await HttpResponseDataFactory.CreateResponse(httpRequest, itemCategories);
+            return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, itemCategories);
         }
     }
 }

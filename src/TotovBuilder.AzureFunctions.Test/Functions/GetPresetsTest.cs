@@ -26,7 +26,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
             httpResponseDataFactoryMock
-                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
@@ -39,7 +39,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(It.IsAny<HttpRequestData>(), TestData.Presets));
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), TestData.Presets));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
             httpResponseDataFactoryMock
-                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
@@ -63,7 +63,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(It.IsAny<HttpRequestData>(), Array.Empty<InventoryItem>()));
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<InventoryItem>()));
         }
     }
 }

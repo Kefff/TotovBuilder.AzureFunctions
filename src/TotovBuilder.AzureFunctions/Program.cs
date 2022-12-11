@@ -14,6 +14,7 @@ IHost host = new HostBuilder()
         serviceCollection.AddHttpClient();
 
         serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
+        serviceCollection.AddSingleton<IAzureFunctionsConfigurationCache, AzureFunctionsConfigurationCache>();
         serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
         serviceCollection.AddSingleton<IAzureFunctionsConfigurationReader, AzureFunctionsConfigurationReader>();
         serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();

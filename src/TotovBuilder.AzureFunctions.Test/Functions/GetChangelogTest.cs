@@ -26,7 +26,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
             httpResponseDataFactoryMock
-                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IChangelogFetcher> changelogFetcherMock = new();
@@ -39,7 +39,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(It.IsAny<HttpRequestData>(), TestData.Changelog));
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), TestData.Changelog));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
             httpResponseDataFactoryMock
-                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IChangelogFetcher> changelogFetcherMock = new();
@@ -63,7 +63,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(It.IsAny<HttpRequestData>(), Array.Empty<ChangelogEntry>()));
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<ChangelogEntry>()));
         }
     }
 }

@@ -85,7 +85,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
             httpResponseDataFactoryMock
-                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IBartersFetcher> bartersFetcherMock = new();
@@ -105,7 +105,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(
                 It.IsAny<HttpRequestData>(),
                 It.Is<IEnumerable<Price>>(v => v.Should().BeEquivalentTo(
                     new Price[]
@@ -208,7 +208,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
             httpResponseDataFactoryMock
-                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IBartersFetcher> bartersFetcherMock = new();
@@ -228,7 +228,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(
                 It.IsAny<HttpRequestData>(),
                 It.Is<IEnumerable<Price>>(v => v.Should().BeEquivalentTo(
                         new Price[]
@@ -262,7 +262,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
             httpResponseDataFactoryMock
-                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IBartersFetcher> bartersFetcherMock = new();
@@ -282,7 +282,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(It.IsAny<HttpRequestData>(), Array.Empty<Item>()));
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<Item>()));
         }
     }
 }

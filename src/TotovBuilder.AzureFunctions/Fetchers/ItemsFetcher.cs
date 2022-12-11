@@ -16,7 +16,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ItemsFetcher : ApiFetcher<IEnumerable<Item>>, IItemsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiItemsQuery;
+        protected override string ApiQuery => AzureFunctionsConfigurationCache.Values.ApiItemsQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Items;
@@ -66,7 +66,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
         /// <param name="cache">Cache.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemMissingPropertiesFetcher">Item missing properties fetcher.</param>
@@ -75,13 +75,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public ItemsFetcher(
             ILogger<ItemsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
             ICache cache,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemMissingPropertiesFetcher itemMissingPropertiesFetcher,
             IArmorPenetrationsFetcher armorPenetrationsFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher
-        ) : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
+        ) : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
         {
             ArmorPenetrationsFetcher = armorPenetrationsFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;

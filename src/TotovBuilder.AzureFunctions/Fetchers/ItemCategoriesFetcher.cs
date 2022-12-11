@@ -13,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ItemCategoriesFetcher : StaticDataFetcher<IEnumerable<ItemCategory>>, IItemCategoriesFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureItemCategoriesBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationCache.Values.AzureItemCategoriesBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.ItemCategories;
@@ -23,10 +23,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
         /// <param name="cache">Cache.</param>
-        public ItemCategoriesFetcher(ILogger<ItemCategoriesFetcher> logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
-            : base(logger, blobDataFetcher, azureFunctionsConfigurationReader, cache)
+        public ItemCategoriesFetcher(
+            ILogger<ItemCategoriesFetcher> logger,
+            IBlobFetcher blobDataFetcher,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            ICache cache)
+            : base(logger, blobDataFetcher, azureFunctionsConfigurationCache, cache)
         {
         }
 

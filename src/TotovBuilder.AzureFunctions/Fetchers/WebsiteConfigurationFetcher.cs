@@ -13,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class WebsiteConfigurationFetcher : StaticDataFetcher<WebsiteConfiguration>, IWebsiteConfigurationFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureWebsiteConfigurationBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationCache.Values.AzureWebsiteConfigurationBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.WebsiteConfiguration;
@@ -23,10 +23,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
         /// <param name="cache">Cache.</param>
-        public WebsiteConfigurationFetcher(ILogger<WebsiteConfigurationFetcher> logger, IBlobFetcher blobDataFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
-            : base(logger, blobDataFetcher, azureFunctionsConfigurationReader, cache)
+        public WebsiteConfigurationFetcher(
+            ILogger<WebsiteConfigurationFetcher> logger,
+            IBlobFetcher blobDataFetcher,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            ICache cache)
+            : base(logger, blobDataFetcher, azureFunctionsConfigurationCache, cache)
         {
         }
 

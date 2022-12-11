@@ -65,7 +65,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             // Ignoring barters that require the same item as the one obtained to avoid price calculation infinite loops
             barters.RemoveAll(b => b.BarterItems.Any(bi => bi.ItemId == b.ItemId));
 
-            return await HttpResponseDataFactory.CreateResponse(httpRequest, prices.Concat(barters).OrderBy(p => p.ItemId));
+            return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, prices.Concat(barters).OrderBy(p => p.ItemId));
         }
     }
 }

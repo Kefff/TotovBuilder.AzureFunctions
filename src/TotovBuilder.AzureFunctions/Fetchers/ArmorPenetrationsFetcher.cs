@@ -13,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ArmorPenetrationsFetcher : StaticDataFetcher<IEnumerable<ArmorPenetration>>, IArmorPenetrationsFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationReader.Values.AzureArmorPenetrationsBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationCache.Values.AzureArmorPenetrationsBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.ArmorPenetrations;
@@ -23,10 +23,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
         /// <param name="cache">Cache.</param>
-        public ArmorPenetrationsFetcher(ILogger<ArmorPenetrationsFetcher> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
-            : base(logger, blobFetcher, azureFunctionsConfigurationReader, cache)
+        public ArmorPenetrationsFetcher(
+            ILogger<ArmorPenetrationsFetcher> logger,
+            IBlobFetcher blobFetcher,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            ICache cache)
+            : base(logger, blobFetcher, azureFunctionsConfigurationCache, cache)
         {
         }
 

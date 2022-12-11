@@ -53,7 +53,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             await AzureFunctionsConfigurationReader.Load();
             IEnumerable<ChangelogEntry> changelog = await ChangelogFetcher.Fetch() ?? Array.Empty<ChangelogEntry>();
 
-            return await HttpResponseDataFactory.CreateResponse(httpRequest, changelog);
+            return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, changelog);
         }
     }
 }

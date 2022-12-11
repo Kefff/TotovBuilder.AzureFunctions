@@ -15,6 +15,11 @@ namespace TotovBuilder.AzureFunctions
         private const string AzureFunctionsConfigurationBlobNameKey = "TOTOVBUILDER_AzureFunctionsConfigurationBlobName";
 
         /// <summary>
+        /// Azure Functions configuration cache.
+        /// </summary>
+        private readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
+
+        /// <summary>
         /// Azure Functions configuration fetcher.
         /// </summary>
         private readonly IAzureFunctionsConfigurationFetcher AzureFunctionsConfigurationFetcher;
@@ -37,14 +42,16 @@ namespace TotovBuilder.AzureFunctions
         /// <param name="azureFunctionsConfigurationFetcher">Azure Functions configuration fetcher.</param>
         public AzureFunctionsConfigurationReader(
             ILogger<AzureFunctionsConfigurationReader> logger,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
             IAzureFunctionsConfigurationFetcher azureFunctionsConfigurationFetcher)
         {
+            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
             AzureFunctionsConfigurationFetcher = azureFunctionsConfigurationFetcher;
             Logger = logger;
 
             // Temporary configuration for the fetcher to be able to get the configuration blob.
             // Will be replaced by the complete configuration once it is loaded.
-            Values = new AzureFunctionsConfiguration()
+            AzureFunctionsConfigurationCache.Values = new AzureFunctionsConfiguration()
             {
                 AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey),
                 AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
@@ -66,13 +73,10 @@ namespace TotovBuilder.AzureFunctions
 
             LoadingTask = Task.Run(async () =>
             {
-                Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
+                AzureFunctionsConfigurationCache.Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
             });
             await LoadingTask;
         }
-
-        /// <inheritdoc/>
-        public AzureFunctionsConfiguration Values { get; set; } = new AzureFunctionsConfiguration();
 
         /// <summary>
         /// Reads a string value from the configuration.

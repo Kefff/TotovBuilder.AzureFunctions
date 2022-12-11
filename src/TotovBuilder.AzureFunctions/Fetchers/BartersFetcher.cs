@@ -14,7 +14,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class BartersFetcher : ApiFetcher<IEnumerable<Price>>, IBartersFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationReader.Values.ApiBartersQuery;
+        protected override string ApiQuery => AzureFunctionsConfigurationCache.Values.ApiBartersQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Barters;
@@ -24,10 +24,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
         /// <param name="cache">Cache.</param>
-        public BartersFetcher(ILogger<BartersFetcher> logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, ICache cache)
-            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationReader, cache)
+        public BartersFetcher(
+            ILogger<BartersFetcher> logger,
+            IHttpClientWrapperFactory httpClientWrapperFactory,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            ICache cache)
+            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
         {
         }
 
