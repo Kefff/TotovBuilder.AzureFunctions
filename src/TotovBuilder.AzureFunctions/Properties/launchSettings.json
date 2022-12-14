@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TotovBuilder.AzureFunctions": {
+      "commandName": "Project",
+      "commandLineArgs": "--verbose"
+    }
+  }
+}

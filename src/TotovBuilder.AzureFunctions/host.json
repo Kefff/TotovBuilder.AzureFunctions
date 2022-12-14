@@ -5,12 +5,6 @@
       "samplingSettings": {
         "isEnabled": true
       }
-    },
-    "logLevel": {
-      "default": "Error",
-      "TotovBuilder.AzureFunctions": "Information",
-      "TotovBuilder.AzureFunctions.Functions": "Information",
-      "TotovBuilder.AzureFunctions.Fetchers": "Information"
     }
   }
 }
