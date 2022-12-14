@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker.Http;
 using Moq;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
+using TotovBuilder.AzureFunctions.Test.Mocks;
 using TotovBuilder.Model.Builds;
-using Xunit;
 using TotovBuilder.Model.Test;
-using TotovBuilder.AzureFunctions.Abstractions;
+using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
@@ -23,40 +22,48 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
 
-            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
+            httpResponseDataFactoryMock
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
+                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
+
+            Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<InventoryItem>?>(TestData.Presets));
 
-            GetPresets function = new GetPresets(azureFunctionsConfigurationReaderMock.Object, presetsFetcherMock.Object);
+            GetPresets function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, presetsFetcherMock.Object);
 
             // Act
-            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+            HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().Be(TestData.Presets);
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), TestData.Presets));
         }
 
         [Fact]
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
 
-            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
+            httpResponseDataFactoryMock
+                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
+                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
+
+            Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<InventoryItem>?>(null));
 
-            GetPresets function = new GetPresets(azureFunctionsConfigurationReaderMock.Object, presetsFetcherMock.Object);
+            GetPresets function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, presetsFetcherMock.Object);
 
             // Act
-            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+            HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(Array.Empty<InventoryItem>());
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<InventoryItem>()));
         }
     }
 }

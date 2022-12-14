@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
@@ -19,20 +20,27 @@ namespace TotovBuilder.AzureFunctions.Test
         public async Task Load_ShouldLoadConfiguration()
         {
             // Arrange
-            Mock<ILogger<AzureFunctionsConfigurationReader>> loggerMock = new Mock<ILogger<AzureFunctionsConfigurationReader>>();
+            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new();
+            azureFunctionsConfigurationFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(async () =>
+                {
+                    await Task.Delay(1000);
+                    return TestData.AzureFunctionsConfiguration;
+                });
 
-            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new Mock<IAzureFunctionsConfigurationFetcher>();
-            azureFunctionsConfigurationFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<AzureFunctionsConfiguration?>(TestData.AzureFunctionsConfiguration));
-
-            AzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper = new AzureFunctionsConfigurationWrapper();
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache = new AzureFunctionsConfigurationCache();
 
             // Act
-            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new AzureFunctionsConfigurationReader(loggerMock.Object, azureFunctionsConfigurationWrapper, azureFunctionsConfigurationFetcherMock.Object);
-            await azureFunctionsConfigurationReader.Load();
+            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new(
+                new Mock<ILogger<AzureFunctionsConfigurationReader>>().Object,
+                azureFunctionsConfigurationCache,
+                azureFunctionsConfigurationFetcherMock.Object);
+            _ = azureFunctionsConfigurationReader.Load();
             await azureFunctionsConfigurationReader.Load();
 
             // Assert
-            azureFunctionsConfigurationWrapper.Values.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
+            azureFunctionsConfigurationCache.Values.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
             azureFunctionsConfigurationFetcherMock.Verify(m => m.Fetch(), Times.Once);
         }
 
@@ -40,16 +48,12 @@ namespace TotovBuilder.AzureFunctions.Test
         public void Load_WithoutConfigurationData_ShouldThrow()
         {
             // Arrange
-            Mock<ILogger<AzureFunctionsConfigurationReader>> loggerMock = new Mock<ILogger<AzureFunctionsConfigurationReader>>();
-
-            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new Mock<IAzureFunctionsConfigurationFetcher>();
+            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new();
             azureFunctionsConfigurationFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<AzureFunctionsConfiguration?>(null));
 
-            AzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper = new AzureFunctionsConfigurationWrapper();
-
-            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new AzureFunctionsConfigurationReader(
-                loggerMock.Object,
-                azureFunctionsConfigurationWrapper,
+            AzureFunctionsConfigurationReader azureFunctionsConfigurationReader = new(
+                new Mock<ILogger<AzureFunctionsConfigurationReader>>().Object,
+                new Mock<AzureFunctionsConfigurationCache>().Object,
                 azureFunctionsConfigurationFetcherMock.Object);
 
             // Act

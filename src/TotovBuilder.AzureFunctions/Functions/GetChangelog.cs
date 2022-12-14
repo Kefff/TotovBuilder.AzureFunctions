@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Configuration;
@@ -23,6 +17,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
 
         /// <summary>
+        /// HTTP response data factory.
+        /// </summary>
+        private readonly IHttpResponseDataFactory HttpResponseDataFactory;
+
+        /// <summary>
         /// Changelog fetcher.
         /// </summary>
         private readonly IChangelogFetcher ChangelogFetcher;
@@ -31,10 +30,15 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// Initializes a new instance of the <see cref="GetChangelog"/> class.
         /// </summary>
         /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="changelogFetcher">Changelog fetcher.</param>
-        public GetChangelog(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IChangelogFetcher changelogFetcher)
+        public GetChangelog(
+            IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+            IHttpResponseDataFactory httpResponseDataFactory,
+            IChangelogFetcher changelogFetcher)
         {
             AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            HttpResponseDataFactory = httpResponseDataFactory;
             ChangelogFetcher = changelogFetcher;
         }
 
@@ -43,15 +47,13 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
         /// <returns>Changelog.</returns>
-        [FunctionName("GetChangelog")]
-#pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequest httpRequest)
-#pragma warning restore IDE0060 // Remove unused parameter
+        [Function("GetChangelog")]
+        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
             IEnumerable<ChangelogEntry> changelog = await ChangelogFetcher.Fetch() ?? Array.Empty<ChangelogEntry>();
 
-            return new OkObjectResult(changelog);
+            return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, changelog);
         }
     }
 }

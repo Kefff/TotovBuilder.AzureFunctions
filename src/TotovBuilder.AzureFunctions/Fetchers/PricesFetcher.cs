@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -18,8 +14,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PricesFetcher : ApiFetcher<IEnumerable<Price>>, IPricesFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationWrapper.Values.ApiPricesQuery;
-        
+        protected override string ApiQuery => AzureFunctionsConfigurationCache.Values.ApiPricesQuery;
+
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Prices;
 
@@ -28,17 +24,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
         /// <param name="cache">Cache.</param>
-        public PricesFetcher(ILogger<PricesFetcher> logger, IHttpClientWrapperFactory httpClientWrapperFactory, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
-            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationWrapper, cache)
+        public PricesFetcher(
+            ILogger<PricesFetcher> logger,
+            IHttpClientWrapperFactory httpClientWrapperFactory,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            ICache cache)
+            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
         {
         }
-        
+
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Price> prices = new List<Price>();
+            List<Price> prices = new();
 
             JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -55,10 +55,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             continue;
                         }
 
-                        Price price = new Price()
+                        Price price = new()
                         {
-                            CurrencyName = priceJson.GetProperty("currency").GetString(),
-                            ItemId = itemJson.GetProperty("id").GetString(),
+                            CurrencyName = priceJson.GetProperty("currency").GetString()!,
+                            ItemId = itemJson.GetProperty("id").GetString()!,
                             Value = value,
                             ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
                         };
@@ -67,11 +67,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                         if (vendorJson.TryGetProperty("trader", out JsonElement traderJson))
                         {
-                            price.Merchant = traderJson.GetProperty("normalizedName").GetString();
+                            price.Merchant = traderJson.GetProperty("normalizedName").GetString()!;
                         }
                         else
                         {
-                            price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString();
+                            price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString()!;
                         }
 
                         if (vendorJson.TryGetProperty("minTraderLevel", out JsonElement minTraderLevelJson))
@@ -88,9 +88,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                         {
                             price.Quest = new Quest()
                             {
-                                Id = taskUnlockJson.GetProperty("id").GetString(),
-                                Name = taskUnlockJson.GetProperty("name").GetString(),
-                                WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()
+                                Id = taskUnlockJson.GetProperty("id").GetString()!,
+                                Name = taskUnlockJson.GetProperty("name").GetString()!,
+                                WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()!
                             };
                         }
 

@@ -63,16 +63,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while deserializing API response to type &quot;{0}&quot; :
-        ///{1}.
-        /// </summary>
-        internal static string ApiResponseDeserializationError {
-            get {
-                return ResourceManager.GetString("ApiResponseDeserializationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing armor penetrations :
         ///{0}.
         /// </summary>

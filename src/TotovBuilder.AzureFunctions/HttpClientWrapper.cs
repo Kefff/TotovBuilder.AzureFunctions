@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http;
-using System.Threading.Tasks;
 using TotovBuilder.AzureFunctions.Abstractions;
 
 namespace TotovBuilder.AzureFunctions

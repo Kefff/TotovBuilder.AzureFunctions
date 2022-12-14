@@ -4,9 +4,9 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
-using Xunit;
-using TotovBuilder.Model.Test;
 using TotovBuilder.Model.Configuration;
+using TotovBuilder.Model.Test;
+using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test
 {
@@ -19,11 +19,10 @@ namespace TotovBuilder.AzureFunctions.Test
         public void Get_WithoutCachedData_ShouldReturnNothing()
         {
             // Arrange
-            Mock<ILogger<Cache>> loggerMock = new Mock<ILogger<Cache>>();
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            Cache cache = new(
+                new Mock<ILogger<Cache>>().Object,
+                new Mock<IAzureFunctionsConfigurationCache>().Object);
 
-            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationWrapperMock.Object);
-            
             // Act
             IEnumerable<ChangelogEntry>? result = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
 
@@ -35,10 +34,9 @@ namespace TotovBuilder.AzureFunctions.Test
         public void Get_ShouldGetCachedData()
         {
             // Arrange
-            Mock<ILogger<Cache>> loggerMock = new Mock<ILogger<Cache>>();
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-
-            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationWrapperMock.Object);
+            Cache cache = new(
+                new Mock<ILogger<Cache>>().Object,
+                new Mock<IAzureFunctionsConfigurationCache>().Object);
             cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act
@@ -52,11 +50,10 @@ namespace TotovBuilder.AzureFunctions.Test
         public void HasValidCache_WithoutCachedData_ShouldReturnFalse()
         {
             // Arrange
-            Mock<ILogger<Cache>> loggerMock = new Mock<ILogger<Cache>>();
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
+            Cache cache = new(
+                new Mock<ILogger<Cache>>().Object,
+                new Mock<IAzureFunctionsConfigurationCache>().Object);
 
-            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationWrapperMock.Object);
-            
             // Act
             bool result = cache.HasValidCache(DataType.Changelog);
 
@@ -68,17 +65,18 @@ namespace TotovBuilder.AzureFunctions.Test
         [InlineData(DataType.Changelog, 3600, true)]
         [InlineData(DataType.Changelog, 1, false)]
         [InlineData(DataType.Prices, 3600, true)]
-        public async void HasValidCache_ShouldIndicatedWhetherTheCacheIsValid(DataType dataType, int cacheDuration, bool expected)
+        public async Task HasValidCache_ShouldIndicatedWhetherTheCacheIsValid(DataType dataType, int cacheDuration, bool expected)
         {
-            // Arrange            
-            Mock<ILogger<Cache>> loggerMock = new Mock<ILogger<Cache>>();
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-            azureFunctionsConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            // Arrange
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 CacheDuration = cacheDuration
             });
-            
-            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationWrapperMock.Object);
+
+            Cache cache = new(
+                new Mock<ILogger<Cache>>().Object,
+                azureFunctionsConfigurationCacheMock.Object);
             cache.Store(dataType, "Test");
 
             // Act
@@ -93,13 +91,12 @@ namespace TotovBuilder.AzureFunctions.Test
         public void Remove_ShouldRemoveCachedData()
         {
             // Arrange
-            Mock<ILogger<Cache>> loggerMock = new Mock<ILogger<Cache>>();
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-
-            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationWrapperMock.Object);
+            Cache cache = new(
+                new Mock<ILogger<Cache>>().Object,
+                new Mock<IAzureFunctionsConfigurationCache>().Object);
             cache.Store(DataType.Changelog, TestData.Changelog);
             IEnumerable<ChangelogEntry>? result1 = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
-            
+
             // Act
             cache.Remove(DataType.Changelog);
             IEnumerable<ChangelogEntry>? result2 = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
@@ -113,11 +110,11 @@ namespace TotovBuilder.AzureFunctions.Test
         public void Store_ShouldCacheData()
         {
             // Arrange
-            Mock<ILogger<Cache>> loggerMock = new Mock<ILogger<Cache>>();
-            Mock<IAzureFunctionsConfigurationWrapper> azureFunctionsConfigurationWrapperMock = new Mock<IAzureFunctionsConfigurationWrapper>();
-            
+            Cache cache = new(
+                new Mock<ILogger<Cache>>().Object,
+                new Mock<IAzureFunctionsConfigurationCache>().Object);
+
             // Act
-            Cache cache = new Cache(loggerMock.Object, azureFunctionsConfigurationWrapperMock.Object);
             cache.Store(DataType.Changelog, TestData.Changelog);
 
             // Act

@@ -1,7 +1,4 @@
-﻿using System.Threading.Tasks;
-using TotovBuilder.Model;
-
-namespace TotovBuilder.AzureFunctions.Abstractions
+﻿namespace TotovBuilder.AzureFunctions.Abstractions
 {
     /// <summary>
     /// Provides the functionalities of an Azure functions configuration reader.

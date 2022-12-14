@@ -1,12 +1,10 @@
-﻿using System.Threading.Tasks;
-
-namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
+﻿namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
 {
     /// <summary>
     /// Provides the functionalities of a base class for API fetchers.
     /// </summary>
     public interface IApiFetcher<T>
-        where T: class
+        where T : class
     {
         /// <summary>
         /// Fetches data from the API.

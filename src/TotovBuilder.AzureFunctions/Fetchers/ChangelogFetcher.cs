@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -17,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ChangelogFetcher : StaticDataFetcher<IEnumerable<ChangelogEntry>>, IChangelogFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationWrapper.Values.AzureChangelogBlobName;
+        protected override string AzureBlobName => AzureFunctionsConfigurationCache.Values.AzureChangelogBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Changelog;
@@ -27,13 +23,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Azure Functions configuration wrapper.</param>
+        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
         /// <param name="cache">Cache.</param>
-        public ChangelogFetcher(ILogger<ChangelogFetcher> logger, IBlobFetcher blobFetcher, IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper, ICache cache)
-            : base(logger, blobFetcher, azureFunctionsConfigurationWrapper, cache)
+        public ChangelogFetcher(
+            ILogger<ChangelogFetcher> logger,
+            IBlobFetcher blobFetcher,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            ICache cache)
+            : base(logger, blobFetcher, azureFunctionsConfigurationCache, cache)
         {
         }
-        
+
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<ChangelogEntry>>> DeserializeData(string responseContent)
         {
@@ -42,7 +42,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IEnumerable<ChangelogEntry> changelog = JsonSerializer.Deserialize<IEnumerable<ChangelogEntry>>(responseContent, new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
-                });
+                })!;
 
                 return Task.FromResult(Result.Ok(changelog.OrderByDescending(c => c.Date).AsEnumerable()));
             }

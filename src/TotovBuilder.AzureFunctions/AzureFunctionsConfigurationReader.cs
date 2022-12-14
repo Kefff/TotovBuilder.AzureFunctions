@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Configuration;
@@ -15,7 +13,12 @@ namespace TotovBuilder.AzureFunctions
         private const string AzureBlobStorageConnectionStringKey = "TOTOVBUILDER_AzureBlobStorageConnectionString";
         private const string AzureBlobStorageContainerNameKey = "TOTOVBUILDER_AzureBlobStorageContainerName";
         private const string AzureFunctionsConfigurationBlobNameKey = "TOTOVBUILDER_AzureFunctionsConfigurationBlobName";
-        
+
+        /// <summary>
+        /// Azure Functions configuration cache.
+        /// </summary>
+        private readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
+
         /// <summary>
         /// Azure Functions configuration fetcher.
         /// </summary>
@@ -27,24 +30,33 @@ namespace TotovBuilder.AzureFunctions
         private readonly ILogger<AzureFunctionsConfigurationReader> Logger;
 
         /// <summary>
-        /// Wrapper in which the readen Azure Functions configuration is stored.
+        /// Loading task.
+        /// Used to avoid launching multiple loading operations at the same time.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationWrapper AzureFunctionsConfigurationWrapper;
+        private Task LoadingTask = Task.CompletedTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFunctionsConfigurationInitializer"/> class.
         /// </summary>
         /// <param name="logger">Logger</param>
         /// <param name="azureFunctionsConfigurationFetcher">Azure Functions configuration fetcher.</param>
-        /// <param name="azureFunctionsConfigurationWrapper">Wrapper in which the readen Azure Functions configuration is stored.</param>
         public AzureFunctionsConfigurationReader(
             ILogger<AzureFunctionsConfigurationReader> logger,
-            IAzureFunctionsConfigurationWrapper azureFunctionsConfigurationWrapper,
+            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
             IAzureFunctionsConfigurationFetcher azureFunctionsConfigurationFetcher)
         {
-            AzureFunctionsConfigurationWrapper = azureFunctionsConfigurationWrapper;
+            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
             AzureFunctionsConfigurationFetcher = azureFunctionsConfigurationFetcher;
             Logger = logger;
+
+            // Temporary configuration for the fetcher to be able to get the configuration blob.
+            // Will be replaced by the complete configuration once it is loaded.
+            AzureFunctionsConfigurationCache.Values = new AzureFunctionsConfiguration()
+            {
+                AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey),
+                AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
+                AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
+            };
         }
 
         /// <summary>
@@ -52,50 +64,20 @@ namespace TotovBuilder.AzureFunctions
         /// </summary>
         public async Task Load()
         {
-            if (AzureFunctionsConfigurationWrapper.LoadingTask != null)
+            if (!LoadingTask.IsCompleted)
             {
-                await AzureFunctionsConfigurationWrapper.LoadingTask;
+                await LoadingTask;
 
                 return;
             }
 
-            AzureFunctionsConfigurationWrapper.StartLoading();
-
-            // Temporary configuration for the fetcher to be able to get the configuration blob.
-            // Will be replaced by the complete configuration once it is loaded.
-            AzureFunctionsConfigurationWrapper.Values = new AzureFunctionsConfiguration()
+            LoadingTask = Task.Run(async () =>
             {
-                AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey),
-                AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
-                AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
-            };
-
-            AzureFunctionsConfigurationWrapper.Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
-            await AzureFunctionsConfigurationWrapper.EndLoading();
+                AzureFunctionsConfigurationCache.Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
+            });
+            await LoadingTask;
         }
 
-        ///// <summary>
-        ///// Reads an integer value from the configuration.
-        ///// </summary>
-        ///// <param name="key">Key to read.</param>
-        ///// <returns>Value if the key is found; otherwise 0.</returns>
-        //private int ReadInt(string key)
-        //{
-        //    string stringValue = ReadString(key);
-
-        //    if (string.IsNullOrWhiteSpace(stringValue))
-        //    {
-        //        return 0;
-        //    }
-
-        //    if (!int.TryParse(stringValue, out int integerValue))
-        //    {
-        //        Logger.LogError(string.Format(Properties.Resources.InvalidIntegerConfigurationValue, key));
-        //    }
-            
-        //    return integerValue;
-        //}
-        
         /// <summary>
         /// Reads a string value from the configuration.
         /// </summary>
@@ -109,7 +91,7 @@ namespace TotovBuilder.AzureFunctions
             {
                 Logger.LogError(string.Format(Properties.Resources.InvalidStringConfigurationValue, key));
             }
-            
+
             return value ?? string.Empty;
         }
     }

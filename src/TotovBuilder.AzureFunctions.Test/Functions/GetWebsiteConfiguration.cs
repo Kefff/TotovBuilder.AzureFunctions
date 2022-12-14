@@ -1,14 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker.Http;
 using Moq;
+using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Functions;
-using Xunit;
-using TotovBuilder.Model.Test;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Test.Mocks;
 using TotovBuilder.Model.Configuration;
+using TotovBuilder.Model.Test;
+using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
 {
@@ -21,40 +22,56 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldFetchData()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
 
-            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new Mock<IWebsiteConfigurationFetcher>();
+            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
+            httpResponseDataFactoryMock
+                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
+
+            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<WebsiteConfiguration?>(TestData.WebsiteConfiguration));
 
-            GetWebsiteConfiguration function = new GetWebsiteConfiguration(azureFunctionsConfigurationReaderMock.Object, websiteConfigurationFetcherMock.Object);
+            GetWebsiteConfiguration function = new(
+                azureFunctionsConfigurationReaderMock.Object,
+                httpResponseDataFactoryMock.Object,
+                websiteConfigurationFetcherMock.Object);
 
             // Act
-            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+            HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(TestData.WebsiteConfiguration);
+            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(It.IsAny<HttpRequestData>(), TestData.WebsiteConfiguration));
         }
 
         [Fact]
         public async Task Run_WithoutData_ShouldReturnEmptyResponse()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new Mock<IAzureFunctionsConfigurationReader>();
+            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
 
-            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new Mock<IWebsiteConfigurationFetcher>();
+            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
+            httpResponseDataFactoryMock
+                .Setup(m => m.CreateResponse(It.IsAny<HttpRequestData>(), It.IsAny<object>()))
+                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
+
+            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<WebsiteConfiguration?>(null));
 
-            GetWebsiteConfiguration function = new GetWebsiteConfiguration(azureFunctionsConfigurationReaderMock.Object, websiteConfigurationFetcherMock.Object);
+            GetWebsiteConfiguration function = new(
+                azureFunctionsConfigurationReaderMock.Object,
+                httpResponseDataFactoryMock.Object,
+                websiteConfigurationFetcherMock.Object);
 
             // Act
-            IActionResult result = await function.Run(new Mock<HttpRequest>().Object);
+            HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
 
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)result).Value.Should().BeEquivalentTo(new WebsiteConfiguration());
+            httpResponseDataFactoryMock.Verify(m => m.CreateResponse(
+                It.IsAny<HttpRequestData>(),
+                It.Is<WebsiteConfiguration>(v => v.Should().BeEquivalentTo(new WebsiteConfiguration(), string.Empty, Array.Empty<object>()) != null)));
         }
     }
 }

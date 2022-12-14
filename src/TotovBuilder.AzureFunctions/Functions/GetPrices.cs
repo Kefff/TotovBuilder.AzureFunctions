@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Items;
@@ -28,6 +22,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IBartersFetcher BartersFetcher;
 
         /// <summary>
+        /// HTTP response data factory.
+        /// </summary>
+        private readonly IHttpResponseDataFactory HttpResponseDataFactory;
+
+        /// <summary>
         /// Prices fetcher.
         /// </summary>
         private readonly IPricesFetcher PricesFetcher;
@@ -36,11 +35,16 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// Initializes a new instance of the <see cref="GetPrices"/> class.
         /// </summary>
         /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="bartersFetcher">Barters fetcher.</param>
         /// <param name="pricesFetcher">Prices fetcher.</param>
-        public GetPrices(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader, IBartersFetcher bartersFetcher, IPricesFetcher pricesFetcher)
+        public GetPrices(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+            IHttpResponseDataFactory httpResponseDataFactory,
+            IBartersFetcher bartersFetcher,
+            IPricesFetcher pricesFetcher)
         {
             AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            HttpResponseDataFactory = httpResponseDataFactory;
             BartersFetcher = bartersFetcher;
             PricesFetcher = pricesFetcher;
         }
@@ -50,17 +54,18 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// </summary>
         /// <param name="httpRequest">HTTP request.</param>
         /// <returns>Prices.</returns>
-        [FunctionName("GetPrices")]
-#pragma warning disable IDE0060 // Remove unused parameter
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "prices")] HttpRequest httpRequest)
-#pragma warning restore IDE0060 // Remove unused parameter
+        [Function("GetPrices")]
+        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "prices")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
 
             IEnumerable<Price> prices = await PricesFetcher.Fetch() ?? Array.Empty<Price>();
-            IEnumerable<Price> barters = await BartersFetcher.Fetch() ?? Array.Empty<Price>();
+            List<Price> barters = (await BartersFetcher.Fetch())?.ToList() ?? new List<Price>();
 
-            return new OkObjectResult(prices.Concat(barters).OrderBy(p => p.ItemId));
+            // Ignoring barters that require the same item as the one obtained to avoid price calculation infinite loops
+            barters.RemoveAll(b => b.BarterItems.Any(bi => bi.ItemId == b.ItemId));
+
+            return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, prices.Concat(barters).OrderBy(p => p.ItemId));
         }
     }
 }
