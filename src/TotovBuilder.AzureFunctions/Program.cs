@@ -13,7 +13,8 @@ IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults(builder =>
     {
         // Application Insights configuration
-        // Cf https://github.com/Azure/azure-functions-dotnet-worker/issues/1182#issuecomment-1317230604
+        // Log levels readen from host.json
+        // Cf https://learn.microsoft.com/en-us/azure/azure-functions/configure-monitoring?tabs=v2#configure-categories
         builder
             .AddApplicationInsights()
             .AddApplicationInsightsLogger();
@@ -43,6 +44,7 @@ IHost host = new HostBuilder()
         serviceCollection.Configure<LoggerFilterOptions>(options =>
         {
             // Removing default filters that only allow warnings and errors to be logged
+            // Cf https://github.com/Azure/azure-functions-dotnet-worker/issues/1182#issuecomment-1317230604
             LoggerFilterRule? filtersToRemove = options.Rules.FirstOrDefault(rule =>
                 rule.ProviderName == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
 
@@ -51,16 +53,6 @@ IHost host = new HostBuilder()
                 options.Rules.Remove(filtersToRemove);
             }
         });
-    })
-    .ConfigureAppConfiguration((hostContext, config) =>
-    {
-        // Configuring the application using appsettings.json file
-        config.AddJsonFile("appsettings.json", optional: true);
-    })
-    .ConfigureLogging((hostingContext, logging) =>
-    {
-        // Making sure the configuration of the appsettings.json file is used
-        logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
     })
     .Build();
 

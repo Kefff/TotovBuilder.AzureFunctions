@@ -3,8 +3,15 @@
   "logging": {
     "applicationInsights": {
       "samplingSettings": {
-        "isEnabled": true
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 20,
+        "excludedTypes": "Request;Exception;Trace"
       }
+    },
+    "logLevel": {
+      "default": "Warning",
+      "Host.Results": "Information",
+      "TotovBuilder.AzureFunctions.Fetchers": "Information"
     }
   }
 }
