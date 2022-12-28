@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -19,7 +20,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     public class ChangelogFetcherTest
     {
         [Fact]
-        public async Task Fetch_ShouldReturnChangelog()
+        public async Task Fetch_ShouldReturn5LastChangelogs()
         {
             // Arrange
             Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
@@ -44,7 +45,99 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             IEnumerable<ChangelogEntry>? result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Changelog);
+            result.Should().BeEquivalentTo(new ChangelogEntry[]
+            {
+                new ChangelogEntry()
+                {
+                    Changes = new ChangelogChange[]
+                    {
+                        new ChangelogChange()
+                        {
+                            Language = "en",
+                            Text = "Added a thing."
+                        },
+                        new ChangelogChange()
+                        {
+                            Language = "fr",
+                            Text = "Ajout d'une chose."
+                        }
+                    },
+                    Date = new DateTime(2022, 1, 2),
+                    Version = "1.5.0",
+                },
+                new ChangelogEntry()
+                {
+                    Changes = new ChangelogChange[]
+                    {
+                        new ChangelogChange()
+                        {
+                            Language = "en",
+                            Text = "Added a thing."
+                        },
+                        new ChangelogChange()
+                        {
+                            Language = "fr",
+                            Text = "Ajout d'une chose."
+                        }
+                    },
+                    Date = new DateTime(2022, 1, 2),
+                    Version = "1.4.0",
+                },
+                new ChangelogEntry()
+                {
+                    Changes = new ChangelogChange[]
+                    {
+                        new ChangelogChange()
+                        {
+                            Language = "en",
+                            Text = "Added a thing."
+                        },
+                        new ChangelogChange()
+                        {
+                            Language = "fr",
+                            Text = "Ajout d'une chose."
+                        }
+                    },
+                    Date = new DateTime(2022, 1, 2),
+                    Version = "1.3.0",
+                },
+                new ChangelogEntry()
+                {
+                    Changes = new ChangelogChange[]
+                    {
+                        new ChangelogChange()
+                        {
+                            Language = "en",
+                            Text = "Added a thing."
+                        },
+                        new ChangelogChange()
+                        {
+                            Language = "fr",
+                            Text = "Ajout d'une chose."
+                        }
+                    },
+                    Date = new DateTime(2022, 1, 2),
+                    Version = "1.2.0",
+                },
+                new ChangelogEntry()
+                {
+                    Changes = new ChangelogChange[]
+                    {
+                        new ChangelogChange()
+                        {
+                            Language = "en",
+                            Text = "Added a thing."
+                        },
+                        new ChangelogChange()
+                        {
+                            Language = "fr",
+                            Text = "Ajout d'une chose."
+                        }
+                    },
+                    Date = new DateTime(2022, 1, 2),
+                    Version = "1.1.0",
+                }
+            });
         }
 
         [Fact]
