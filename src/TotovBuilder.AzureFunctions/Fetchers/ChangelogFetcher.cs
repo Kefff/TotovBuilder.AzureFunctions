@@ -44,7 +44,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     PropertyNameCaseInsensitive = true
                 })!;
 
-                return Task.FromResult(Result.Ok(changelog.OrderByDescending(c => c.Date).AsEnumerable()));
+                return Task.FromResult(Result.Ok(changelog.OrderByDescending(c => c.Date).Take(5).AsEnumerable()));
             }
             catch (Exception e)
             {

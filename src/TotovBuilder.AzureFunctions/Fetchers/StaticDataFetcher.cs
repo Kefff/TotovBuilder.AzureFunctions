@@ -42,7 +42,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private readonly ICache Cache;
 
         /// <summary>
-        /// Fake task used to avoid launching multiple fetch operations at the same time.
+        /// Fetching task.
+        /// Used to avoid launching multiple fetch operations at the same time.
         /// </summary>
         private Task FetchingTask = Task.CompletedTask;
 
@@ -79,29 +80,30 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Cache.Get<T>(DataType);
             }
 
-            if (Cache.HasValidCache(DataType))
+            T? result = null;
+
+            FetchingTask = Task.Run(async () =>
             {
-                T? cachedValue = Cache.Get<T>(DataType);
-                Logger.LogInformation(Properties.Resources.FetchedFromCache, DataType.ToString());
+                if (Cache.HasValidCache(DataType))
+                {
+                    result = Cache.Get<T>(DataType);
+                    Logger.LogInformation(Properties.Resources.FetchedFromCache, DataType.ToString());
 
-                return cachedValue;
-            }
+                    return;
+                }
 
-            T? result;
-            FetchingTask = new Task(() => { });
-            Result<T> fetchResult = await ExecuteFetch();
+                Result<T> fetchResult = await ExecuteFetch();
 
-            if (fetchResult.IsSuccess)
-            {
-                result = fetchResult.Value;
-                Cache.Store(DataType, result);
-            }
-            else
-            {
-                result = Cache.Get<T>(DataType);
-            }
-
-            FetchingTask.Start();
+                if (fetchResult.IsSuccess)
+                {
+                    result = fetchResult.Value;
+                    Cache.Store(DataType, result);
+                }
+                else
+                {
+                    result = Cache.Get<T>(DataType);
+                }
+            });
             await FetchingTask;
 
             return result;
