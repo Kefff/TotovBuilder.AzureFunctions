@@ -11,8 +11,8 @@
 namespace TotovBuilder.AzureFunctions.Properties {
     using System;
     using System.Diagnostics.CodeAnalysis;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -250,6 +250,16 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string ItemMissingPropertiesDeserializationError {
             get {
                 return ResourceManager.GetString("ItemMissingPropertiesDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while constructing preset &quot;{0}&quot; :
+        ///Cannot find a slot for items &quot;{1}&quot;..
+        /// </summary>
+        internal static string PresetContructionError {
+            get {
+                return ResourceManager.GetString("PresetContructionError", resourceCulture);
             }
         }
         

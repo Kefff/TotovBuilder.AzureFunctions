@@ -106,7 +106,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 deserializationTasks.Add(Task.Run(() => DeserializeData(itemJson, items)));
             }
 
-            return await Task.WhenAll(deserializationTasks).ContinueWith((t) => Result.Ok(items.AsEnumerable()));
+            await Task.WhenAll(deserializationTasks);
+
+            return Result.Ok(items.AsEnumerable());
         }
 
         /// <summary>
@@ -531,7 +533,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson))
             {
-                if (propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesWeapon")
+                if (propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesWeapon" && propertiesJson.EnumerateObject().Count() > 1)
                 {
                     // Presets sent by the API are ignored
                     rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString()!;
@@ -697,7 +699,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Ricochet chance.</returns>
         private string GetRicochetChance(double ricochetXValue)
         {
-            RicochetChance? ricochetChance = TarkovValues.RicochetChances.SingleOrDefault((rc) =>
+            RicochetChance? ricochetChance = TarkovValues.RicochetChances.FirstOrDefault((rc) =>
             {
                 // Forced to do this for code coverage
                 bool isGreaterThanMin = rc.XMinValue <= ricochetXValue;

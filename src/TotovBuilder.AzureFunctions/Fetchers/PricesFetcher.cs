@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
@@ -42,7 +41,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ILogger<PricesFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
-            ICache cache,            
+            ICache cache,
             ITarkovValuesFetcher tarkovValuesFetcher)
             : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
         {

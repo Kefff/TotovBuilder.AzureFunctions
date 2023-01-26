@@ -188,6 +188,10 @@
     <value>Error while deserializing item missing properties :
 {0}</value>
   </data>
+  <data name="PresetContructionError" xml:space="preserve">
+    <value>Error while constructing preset "{0}" :
+Cannot find a slot for items "{1}".</value>
+  </data>
   <data name="PresetDeserializationError" xml:space="preserve">
     <value>Error while deserializing preset :
 {0}</value>
