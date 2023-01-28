@@ -250,35 +250,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 string presetId = presetJson.GetProperty("id").GetString()!;
                 string baseItemId = propertiesJson.GetProperty("baseItem").GetProperty("id").GetString()!;
-                IRangedWeapon baseItem = (IRangedWeapon)Items.First(i => i is RangedWeapon && i.Id == baseItemId);
-                RangedWeapon presetItem = new()
+                IModdable baseItem = (IModdable)Items.First(i => i is IModdable && i.Id == baseItemId);
+                IModdable presetItem = baseItem switch
                 {
-                    Caliber = baseItem.Caliber,
-                    CategoryId = baseItem.CategoryId,
-                    ConflictingItemIds = baseItem.ConflictingItemIds,
-                    Ergonomics = baseItem.Ergonomics,
-                    FireModes = baseItem.FireModes,
-                    FireRate = baseItem.FireRate,
-                    HorizontalRecoil = baseItem.HorizontalRecoil,
-                    IconLink = presetJson.GetProperty("iconLink").GetString()!,
-                    Id = presetId,
-                    ImageLink = presetJson.GetProperty("inspectImageLink").GetString()!,
-                    MarketLink = presetJson.GetProperty("link").GetString()!,
-                    MaxStackableAmount = baseItem.MaxStackableAmount,
-                    ModSlots = baseItem.ModSlots,
-                    Name = presetJson.GetProperty("name").GetString()!,
-                    ShortName = presetJson.GetProperty("shortName").GetString()!,
-                    VerticalRecoil = baseItem.VerticalRecoil,
-                    Weight = baseItem.Weight,
-                    WikiLink = presetJson.GetProperty("wikiLink").GetString()!
+                    IArmorMod => DeserializeArmorModPreset(presetId, presetJson, (IArmorMod)baseItem),
+                    IHeadwear => DeserializeHeadwearPreset(presetId, presetJson, (IHeadwear)baseItem),
+                    IRangedWeapon => DeserializeRangedWeaponPreset(presetId, presetJson, propertiesJson, (IRangedWeapon)baseItem),
+                    IRangedWeaponMod => DeserializeRangedWeaponModPreset(presetId, presetJson, (IRangedWeaponMod)baseItem),
+                    IMod => DeserializeModPreset(presetId, presetJson, (IMod)baseItem),
+                    _ => throw new NotSupportedException(),
                 };
-
-                double moa = propertiesJson.GetProperty("moa").GetDouble();
-
-                if (moa > 0)
-                {
-                    presetItem.MinuteOfAngle = moa;
-                }
 
                 // TODO : NEED TO ADD THE PRESET TO THE LIST OF ITEMS
                 // THIS MEANS THAT THE PFETCHER SHOULD BE CALLED IN THE ITEMSFETCHER OR IT SHOULD EXIST A MECHANISM ON THE ITEMSFETCHER TO ADD A NEW ITEM AND STORE IT IN THE CACHE
@@ -307,6 +288,141 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Deserilizes the properties of a preset that are common between preset item categories.
+        /// </summary>
+        /// <typeparam name="T">Preset type.</typeparam>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="RangedWeapon"/> preset.</returns>
+        private static T DeserializeBasePresetProperties<T>(string presetId, JsonElement presetJson, IModdable baseItem)
+            where T: IModdable, new()
+        {
+            T preset = new()
+            {
+                CategoryId = baseItem.CategoryId,
+                ConflictingItemIds = baseItem.ConflictingItemIds,
+                IconLink = presetJson.GetProperty("iconLink").GetString()!,
+                Id = presetId,
+                ImageLink = presetJson.GetProperty("inspectImageLink").GetString()!,
+                MarketLink = presetJson.GetProperty("link").GetString()!,
+                MaxStackableAmount = baseItem.MaxStackableAmount,
+                ModSlots = baseItem.ModSlots,
+                Name = presetJson.GetProperty("name").GetString()!,
+                ShortName = presetJson.GetProperty("shortName").GetString()!,
+                Weight = baseItem.Weight,
+                WikiLink = presetJson.GetProperty("wikiLink").GetString()!
+            };
+
+            return preset;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="ArmorMod"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="ArmorMod"/> preset.</returns>
+        private static ArmorMod DeserializeArmorModPreset(string presetId, JsonElement presetJson, IArmorMod baseItem)
+        {
+            ArmorMod presetItem = DeserializeBasePresetProperties<ArmorMod>(presetId, presetJson, baseItem);
+
+            presetItem.ArmorClass = baseItem.ArmorClass;
+            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
+            presetItem.BlindnessProtectionPercentage = baseItem.BlindnessProtectionPercentage;
+            presetItem.Durability = baseItem.Durability;
+            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
+            presetItem.Material = baseItem.Material;
+            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
+            presetItem.RicochetChance = baseItem.RicochetChance;
+            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
+
+            return presetItem;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="Headwear"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="Headwear"/> preset.</returns>
+        private static Headwear DeserializeHeadwearPreset(string presetId, JsonElement presetJson, IHeadwear baseItem)
+        {
+            Headwear presetItem = DeserializeBasePresetProperties<Headwear>(presetId, presetJson, baseItem);
+
+            presetItem.ArmorClass = baseItem.ArmorClass;
+            presetItem.ArmoredAreas= baseItem.ArmoredAreas;
+            presetItem.BlocksHeadphones = baseItem.BlocksHeadphones;
+            presetItem.Deafening = baseItem.Deafening;
+            presetItem.Durability = baseItem.Durability;
+            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
+            presetItem.Material = baseItem.Material;
+            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
+            presetItem.RicochetChance = baseItem.RicochetChance;
+            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
+
+            return presetItem;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="Mod"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="Mod"/> preset.</returns>
+        private static Mod DeserializeModPreset(string presetId, JsonElement presetJson, IMod baseItem)
+        {
+            Mod presetItem = DeserializeBasePresetProperties<Mod>(presetId, presetJson, baseItem);
+
+            presetItem.ErgonomicsModifier= baseItem.ErgonomicsModifier;
+
+            return presetItem;
+        }
+
+        /// <summary>
+        /// Deserializes a <see cref="RangedWeapon"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="propertiesJson">Json element representing the properties of the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="RangedWeapon"/> preset.</returns>
+        private static RangedWeapon DeserializeRangedWeaponPreset(string presetId, JsonElement presetJson, JsonElement propertiesJson, IRangedWeapon baseItem)
+        {
+            RangedWeapon presetItem = DeserializeBasePresetProperties<RangedWeapon>(presetId, presetJson, baseItem);
+
+            presetItem.Caliber = baseItem.Caliber;
+            presetItem.Ergonomics = baseItem.Ergonomics;
+            presetItem.FireModes = baseItem.FireModes;
+            presetItem.FireRate = baseItem.FireRate;
+            presetItem.HorizontalRecoil = baseItem.HorizontalRecoil;
+            presetItem.VerticalRecoil = baseItem.VerticalRecoil;
+            presetItem.MinuteOfAngle = propertiesJson.GetProperty("moa").GetDouble();
+
+            return presetItem;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="RangedWeaponMod"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="RangedWeaponMod"/> preset.</returns>
+        private static RangedWeaponMod DeserializeRangedWeaponModPreset(string presetId, JsonElement presetJson, IRangedWeaponMod baseItem)
+        {
+            RangedWeaponMod presetItem = DeserializeBasePresetProperties<RangedWeaponMod>(presetId, presetJson, baseItem);
+
+            presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
+            presetItem.RecoilPercentageModifier = baseItem.RecoilPercentageModifier;
+
+            return presetItem;
         }
     }
 }

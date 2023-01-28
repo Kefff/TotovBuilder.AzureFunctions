@@ -119,16 +119,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             // Adding a price to the main currency item
-            Currency mainCurrency = TarkovValues.Currencies.First(c => c.MainCurrency);
-            prices.Add(new Price()
+            Currency? mainCurrency = TarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
+
+            if (mainCurrency != null)
             {
-                CurrencyName = mainCurrency.Name,
-                ItemId = mainCurrency.ItemId!,
-                Merchant = "prapor",
-                MerchantLevel = 1,
-                Value = 1,
-                ValueInMainCurrency = 1
-            });
+                prices.Add(new Price()
+                {
+                    CurrencyName = mainCurrency.Name,
+                    ItemId = mainCurrency.ItemId!,
+                    Merchant = "prapor",
+                    MerchantLevel = 1,
+                    Value = 1,
+                    ValueInMainCurrency = 1
+                });
+            }
 
             return Result.Ok(prices.AsEnumerable());
         }

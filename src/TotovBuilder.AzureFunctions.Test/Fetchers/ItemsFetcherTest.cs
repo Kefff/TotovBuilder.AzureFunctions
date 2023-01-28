@@ -440,7 +440,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ArmorClass = 0,
                     ArmoredAreas = Array.Empty<string>(),
                     CategoryId = "headwear",
-                    Deafening = string.Empty,
+                    Deafening = "None",
                     Durability = 0,
                     ErgonomicsPercentageModifier = 0,
                     IconLink = "https://assets.tarkov.dev/5bd073c986f7747f627e796c-icon.jpg",
@@ -461,6 +461,31 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     CategoryId = "headwear",
                     Id = "testHeadwear",
+                },
+                new Headwear()
+                {
+                    CategoryId = "headwear",
+                    Deafening = "None",
+                    IconLink = "https://assets.tarkov.dev/5a16bb52fcdbcb001a3b00dc-icon.jpg",
+                    Id = "5a16bb52fcdbcb001a3b00dc",
+                    ImageLink = "https://assets.tarkov.dev/5a16bb52fcdbcb001a3b00dc-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/wilcox-skull-lock-head-mount",
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5a16b8a9fcdbcb00165aa6ca",
+                            },
+                            Name = "mod_nvg",
+                            Required = false // TODO : MISSING FROM API
+                        }
+                    },
+                    Name = "Wilcox Skull Lock head mount",
+                    ShortName = "Skull Lock",
+                    Weight = 0.5,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/Wilcox_Skull_Lock_head_mount"
                 },
                 new Item()
                 {
@@ -797,6 +822,66 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ShortName = "DPCSM",
                     Weight = 0.045,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/DeltaPoint_Cross_Slot_Mount_base"
+                },
+                new Mod()
+                {
+                    CategoryId = "mod",
+                    IconLink = "https://assets.tarkov.dev/5a16b8a9fcdbcb00165aa6ca-icon.jpg",
+                    Id = "5a16b8a9fcdbcb00165aa6ca",
+                    ImageLink = "https://assets.tarkov.dev/5a16b8a9fcdbcb00165aa6ca-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/norotos-titanium-advanced-tactical-mount",
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5c0695860db834001b735461",
+                                "5a16b93dfcdbcbcae6687261",
+                                "5c11046cd174af02a012e42b"
+                            },
+                            Name = "mod_nvg"
+                        }
+                    },
+                    Name = "Norotos Titanium Advanced Tactical Mount",
+                    ShortName = "TATM",
+                    Weight = 0.07,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/Norotos_Titanium_Advanced_Tactical_Mount"
+                },
+                new Mod()
+                {
+                    CategoryId = "mod",
+                    IconLink = "https://assets.tarkov.dev/5a16b93dfcdbcbcae6687261-icon.jpg",
+                    Id = "5a16b93dfcdbcbcae6687261",
+                    ImageLink = "https://assets.tarkov.dev/5a16b93dfcdbcbcae6687261-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/anpvs-14-dual-dovetail-mount",
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "57235b6f24597759bf5a30f1"
+                            },
+                            Name = "mod_nvg"
+                        }
+                    },
+                    Name = "AN/PVS-14 Dual Dovetail Mount",
+                    ShortName = "DDT",
+                    Weight = 0.07,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AN/PVS-14_Dual_Dovetail_Mount"
+                },
+                new Mod()
+                {
+                    CategoryId = "mod",
+                    IconLink = "https://assets.tarkov.dev/57235b6f24597759bf5a30f1-icon.jpg",
+                    Id = "57235b6f24597759bf5a30f1",
+                    ImageLink = "https://assets.tarkov.dev/57235b6f24597759bf5a30f1-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/anpvs-14-night-vision-monocular",
+                    Name = "AN/PVS-14 Night Vision Monocular",
+                    ShortName = "PVS-14",
+                    Weight = 0.65,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AN/PVS-14_Night_Vision_Monocular"
                 },
                 new RangedWeapon()
                 {
@@ -1333,97 +1418,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ShortName = "6P26 Sb.7",
                     Weight = 0.136,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_dust_cover_(6P26_Sb.7)"
-                },
-                new RangedWeaponMod()
-                {
-                    CategoryId = "rangedWeaponMod",
-                    IconLink = "https://assets.tarkov.dev/59d36a0086f7747e673f3946-icon.jpg",
-                    Id = "59d36a0086f7747e673f3946",
-                    ImageLink = "https://assets.tarkov.dev/59d36a0086f7747e673f3946-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/aks-74u-gas-tube-6p26-sb1-2",
-                    ModSlots = new ModSlot[]
-                    {
-                        new ModSlot()
-                        {
-                            CompatibleItemIds = new string[]
-                            {
-                                "5d15ce51d7ad1a1eff619092",
-                                "5a957c3fa2750c00137fa5f7",
-                                "57dc32dc245977596d4ef3d3",
-                                "57ffa9f4245977728561e844"
-                            },
-                            Name = "mod_handguard"
-                        }
-                    },
-                    Name = "AKS-74U gas tube (6P26 Sb.1-2)",
-                    ShortName = "6P26 Sb.1-2",
-                    Weight = 0.03,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_gas_tube_(6P26_Sb.1-2)"
-                },
-                new RangedWeaponMod()
-                {
-                    CategoryId = "rangedWeaponMod",
-                    ErgonomicsModifier = 4,
-                    IconLink = "https://assets.tarkov.dev/57dc32dc245977596d4ef3d3-icon.jpg",
-                    Id = "57dc32dc245977596d4ef3d3",
-                    ImageLink = "https://assets.tarkov.dev/57dc32dc245977596d4ef3d3-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/aks-74u-wooden-handguard-6p26-sb6",
-                    Name = "AKS-74U wooden handguard (6P26 Sb.6)",
-                    ShortName = "6P26 Sb.6",
-                    Weight = 0.116,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_wooden_handguard_(6P26_Sb.6)"
-                },
-                new RangedWeaponMod()
-                {
-                    CategoryId = "rangedWeaponMod",
-                    ErgonomicsModifier = 6,
-                    IconLink = "https://assets.tarkov.dev/57e3dba62459770f0c32322b-icon.jpg",
-                    Id = "57e3dba62459770f0c32322b",
-                    ImageLink = "https://assets.tarkov.dev/57e3dba62459770f0c32322b-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/ak-bakelite-pistol-grip-6p4-sb9",
-                    Name = "AK bakelite pistol grip (6P4 Sb.9)",
-                    ShortName = "6P4 Sb.9",
-                    Weight = 0.07,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AK_bakelite_pistol_grip_(6P4_Sb.9)"
-                },
-                new RangedWeaponMod()
-                {
-                    CategoryId = "rangedWeaponMod",
-                    ErgonomicsModifier = 10,
-                    IconLink = "https://assets.tarkov.dev/57dc347d245977596754e7a1-icon.jpg",
-                    Id = "57dc347d245977596754e7a1",
-                    ImageLink = "https://assets.tarkov.dev/57dc347d245977596754e7a1-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/aks-74u-metal-skeleton-stock-6p26-sb5",
-                    ModSlots = new ModSlot[]
-                    {
-                        new ModSlot()
-                        {
-                            CompatibleItemIds = new string[]
-                            {
-                                "5a0c59791526d8dba737bba7"
-                            },
-                            Name = "mod_stock"
-                        }
-                    },
-                    Name = "AKS-74U metal skeleton stock (6P26 Sb.5)",
-                    RecoilPercentageModifier = -0.3,
-                    ShortName = "6P26 Sb.5",
-                    Weight = 0.218,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_metal_skeleton_stock_(6P26_Sb.5)"
-                },
-                new RangedWeaponMod()
-                {
-                    CategoryId = "rangedWeaponMod",
-                    ErgonomicsModifier = -2,
-                    IconLink = "https://assets.tarkov.dev/57dc324a24597759501edc20-icon.jpg",
-                    Id = "57dc324a24597759501edc20",
-                    ImageLink = "https://assets.tarkov.dev/57dc324a24597759501edc20-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/aks-74u-545x39-muzzle-brake-6p26-0-20",
-                    Name = "AKS-74U 5.45x39 muzzle brake (6P26 0-20)",
-                    RecoilPercentageModifier = -0.08,
-                    ShortName = "6P26 0-20",
-                    Weight = 0.1,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_5.45x39_muzzle_brake_(6P26_0-20)"
                 },
                 new RangedWeaponMod()
                 {
