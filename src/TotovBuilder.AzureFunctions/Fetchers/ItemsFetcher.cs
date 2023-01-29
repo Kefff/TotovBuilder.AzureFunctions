@@ -543,15 +543,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
                     rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
 
-                    JsonElement defaultPreset = propertiesJson.GetProperty("defaultPreset");
-
-                    if (defaultPreset.ValueKind == JsonValueKind.Object)
-                    {
-                        rangedWeapon.DefaultPresetId = propertiesJson.GetProperty("defaultPreset").GetProperty("id").GetString()!;
-                        rangedWeapon.IconLink = propertiesJson.GetProperty("defaultPreset").GetProperty("iconLink").GetString()!;
-                        rangedWeapon.ImageLink = propertiesJson.GetProperty("defaultPreset").GetProperty("inspectImageLink").GetString()!;
-                    }
-
                     List<ModSlot> modSlots = new();
                     modSlots.AddRange(ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.RangedWeaponChambers ?? Array.Empty<ModSlot>());
                     modSlots.AddRange(DeserializeModSlots(propertiesJson));

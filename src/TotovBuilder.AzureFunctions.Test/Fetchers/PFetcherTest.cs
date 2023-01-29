@@ -151,6 +151,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         private class NotSupportedItem : Item, IModdable
         {
             public string? DefaultPresetId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public bool IsPreset { get; set; }
             public ModSlot[] ModSlots { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
     }

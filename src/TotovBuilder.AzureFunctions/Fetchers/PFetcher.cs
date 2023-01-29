@@ -140,6 +140,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                         containedItems.Dequeue();
                     }
 
+                    // Trying to add the following items as mods or content (content should always be the following item of its container)
+                    // If not possible, we restart trying to add the following items as a mod from the topmost item
                     AddModSlots(inventoryItemModSlot.Item, moddableContainedItem, containedItems);
                     AddContent(inventoryItemModSlot.Item, containedItems);
                 }
@@ -148,11 +150,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 if (Items.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
                 {
-                    foreach (ModSlot alreadyPresentItemModSlot in alreadyPresentItem.ModSlots)
-                    {
-                        InventoryItemModSlot alreadyPresentItemInventoryModSlot = inventoryItemModSlot.Item.ModSlots.First(ms => ms.ModSlotName == alreadyPresentItemModSlot.Name);
-                        AddModSlotItem(alreadyPresentItemInventoryModSlot, alreadyPresentItemModSlot, containedItems);
-                    }
+                    AddModSlots(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
                 }
             }
         }
@@ -170,18 +168,24 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return;
             }
 
-            List<InventoryItemModSlot> inventoryItemModSlots = new();
+            List<InventoryItemModSlot> inventoryItemModSlots = new(inventoryItem.ModSlots);
 
             foreach (ModSlot modSlot in item.ModSlots)
             {
-                InventoryItemModSlot inventoryItemModSlot = new()
+                InventoryItemModSlot? inventoryItemModSlot = inventoryItemModSlots.FirstOrDefault(iims => iims.ModSlotName == modSlot.Name);
+                bool alreadyPreset = inventoryItemModSlot != null;
+
+                if (!alreadyPreset)
                 {
-                    ModSlotName = modSlot.Name
-                };
+                    inventoryItemModSlot = new()
+                    {
+                        ModSlotName = modSlot.Name
+                    };
+                }
 
-                AddModSlotItem(inventoryItemModSlot, modSlot, containedItems);
+                AddModSlotItem(inventoryItemModSlot!, modSlot, containedItems);
 
-                if (inventoryItemModSlot.Item != null)
+                if (!alreadyPreset && inventoryItemModSlot!.Item != null)
                 {
                     // Only adding modslots containing an item
                     inventoryItemModSlots.Add(inventoryItemModSlot);
@@ -205,12 +209,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ItemId = presetId
             };
 
-            AddModSlots(inventoryItem, baseItem, containedItems);
+            int tries = 1;
 
-            if (containedItems.Count > 0)
+            while (containedItems.Count > 0)
             {
-                Logger.LogError(string.Format(Properties.Resources.PresetContructionError, presetId, string.Join("\", \"", containedItems.Select(ci => ci.Item.Id))));
-                return null;
+                if (tries > 10)
+                {
+                    throw new Exception(string.Format(Properties.Resources.PresetContructionError, presetId, containedItems.Peek().Item.Id));
+                }
+
+                AddModSlots(inventoryItem, baseItem, containedItems);
+                tries++;
             }
 
             return inventoryItem;
@@ -299,7 +308,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="baseItem">Base item.</param>
         /// <returns>Deserialized <see cref="RangedWeapon"/> preset.</returns>
         private static T DeserializeBasePresetProperties<T>(string presetId, JsonElement presetJson, IModdable baseItem)
-            where T: IModdable, new()
+            where T : IModdable, new()
         {
             T preset = new()
             {
@@ -308,6 +317,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IconLink = presetJson.GetProperty("iconLink").GetString()!,
                 Id = presetId,
                 ImageLink = presetJson.GetProperty("inspectImageLink").GetString()!,
+                IsPreset = true,
                 MarketLink = presetJson.GetProperty("link").GetString()!,
                 MaxStackableAmount = baseItem.MaxStackableAmount,
                 ModSlots = baseItem.ModSlots,
@@ -356,7 +366,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             Headwear presetItem = DeserializeBasePresetProperties<Headwear>(presetId, presetJson, baseItem);
 
             presetItem.ArmorClass = baseItem.ArmorClass;
-            presetItem.ArmoredAreas= baseItem.ArmoredAreas;
+            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.BlocksHeadphones = baseItem.BlocksHeadphones;
             presetItem.Deafening = baseItem.Deafening;
             presetItem.Durability = baseItem.Durability;
@@ -380,7 +390,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             Mod presetItem = DeserializeBasePresetProperties<Mod>(presetId, presetJson, baseItem);
 
-            presetItem.ErgonomicsModifier= baseItem.ErgonomicsModifier;
+            presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
 
             return presetItem;
         }

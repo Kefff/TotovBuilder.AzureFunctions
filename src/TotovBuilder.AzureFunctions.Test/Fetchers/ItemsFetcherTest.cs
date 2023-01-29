@@ -887,14 +887,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Caliber = "Caliber545x39",
                     CategoryId = "mainWeapon",
-                    DefaultPresetId = "584147732459775a2b6d9f12",
                     Ergonomics = 44,
                     FireModes = new string[] { "SingleFire", "FullAuto" },
                     FireRate = 650,
                     HorizontalRecoil = 445,
-                    IconLink = "https://assets.tarkov.dev/584147732459775a2b6d9f12-icon.jpg",
+                    IconLink = "https://assets.tarkov.dev/57dc2fa62459775949412633-icon.jpg",
                     Id = "57dc2fa62459775949412633",
-                    ImageLink = "https://assets.tarkov.dev/584147732459775a2b6d9f12-image.jpg",
+                    ImageLink = "https://assets.tarkov.dev/57dc2fa62459775949412633-image.jpg",
                     MarketLink = "https://tarkov.dev/item/kalashnikov-aks-74u-545x39-assault-rifle",
                     ModSlots = new ModSlot[]
                     {
@@ -1011,14 +1010,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Caliber = "Caliber1143x23ACP",
                     CategoryId = "secondaryWeapon",
-                    DefaultPresetId = "5eb2968186f7746d1f1a4fd5",
                     Ergonomics = 75,
                     FireModes = new string[] { "SingleFire" },
                     FireRate = 30,
                     HorizontalRecoil = 355,
-                    IconLink = "https://assets.tarkov.dev/5eb2968186f7746d1f1a4fd5-icon.jpg",
+                    IconLink = "https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-icon.jpg",
                     Id = "5e81c3cbac2bb513793cdc75",
-                    ImageLink = "https://assets.tarkov.dev/5eb2968186f7746d1f1a4fd5-image.jpg",
+                    ImageLink = "https://assets.tarkov.dev/5e81c3cbac2bb513793cdc75-image.jpg",
                     MarketLink = "https://tarkov.dev/item/colt-m1911a1-45-acp-pistol",
                     ModSlots = new ModSlot[]
                     {
@@ -1137,21 +1135,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new RangedWeapon()
                 {
                     CategoryId = "secondaryWeapon",
-                    Id = "testRangedWeapon",
-                    DefaultPresetId = ""
+                    Id = "testRangedWeapon"
                 },
                 new RangedWeapon()
                 {
                     Caliber = "Caliber9x19PARA",
                     CategoryId = "mainWeapon",
-                    DefaultPresetId = "58dffca786f774083a256ab1",
                     Ergonomics = 40,
                     FireModes = new string[] { "SingleFire", "FullAuto" },
                     FireRate = 850,
                     HorizontalRecoil = 299,
-                    IconLink = "https://assets.tarkov.dev/58dffca786f774083a256ab1-icon.jpg",
+                    IconLink = "https://assets.tarkov.dev/58948c8e86f77409493f7266-icon.jpg",
                     Id = "58948c8e86f77409493f7266",
-                    ImageLink = "https://assets.tarkov.dev/58dffca786f774083a256ab1-image.jpg",
+                    ImageLink = "https://assets.tarkov.dev/58948c8e86f77409493f7266-image.jpg",
                     MarketLink = "https://tarkov.dev/item/sig-mpx-9x19-submachine-gun",
                     ModSlots = new ModSlot[]
                     {
