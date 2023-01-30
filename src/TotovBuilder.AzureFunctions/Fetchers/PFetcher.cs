@@ -72,8 +72,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Adds the first of a list of contained items as the content of an inventory item if possible.
         /// </summary>
         /// <param name="inventoryItem">Inventory item.</param>
+        /// <param name="itemId">Item Id.</param>
         /// <param name="containedItems">Contained item.</param>
-        private void AddContent(InventoryItem inventoryItem, Queue<PresetContainedItem> containedItems)
+        private void AddContent(InventoryItem inventoryItem, string itemId, Queue<PresetContainedItem> containedItems)
         {
             if (containedItems.Count == 0)
             {
@@ -90,8 +91,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 if (containedItem.Item is IAmmunition)
                 {
-                    if (Items.FirstOrDefault(i => i.Id == inventoryItem.ItemId) is IMagazine magazine
-                        && !magazine.AcceptedAmmunitionIds.Contains(containedItem.Item.Id))
+                    if (Items.FirstOrDefault(i => i.Id == itemId) is not IMagazine magazine
+                        || !magazine.AcceptedAmmunitionIds.Contains(containedItem.Item.Id))
                     {
                         return;
                     }
@@ -143,7 +144,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     // Trying to add the following items as mods or content (content should always be the following item of its container)
                     // If not possible, we restart trying to add the following items as a mod from the topmost item
                     AddModSlots(inventoryItemModSlot.Item, moddableContainedItem, containedItems);
-                    AddContent(inventoryItemModSlot.Item, containedItems);
+                    AddContent(inventoryItemModSlot.Item, inventoryItemModSlot.Item.ItemId, containedItems);
                 }
             }
             else
@@ -219,6 +220,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
 
                 AddModSlots(inventoryItem, baseItem, containedItems);
+                AddContent(inventoryItem, baseItem.Id, containedItems);
                 tries++;
             }
 
