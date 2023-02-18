@@ -26,6 +26,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
 
         /// <summary>
+        /// Cache.
+        /// </summary>
+        protected readonly ICache Cache;
+
+        /// <summary>
         /// Type of data handled.
         /// </summary>
         protected abstract DataType DataType { get; }
@@ -34,11 +39,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Logger.
         /// </summary>
         protected readonly ILogger<ApiFetcher<T>> Logger;
-
-        /// <summary>
-        /// Cache.
-        /// </summary>
-        private readonly ICache Cache;
 
         /// <summary>
         /// Fetching task.

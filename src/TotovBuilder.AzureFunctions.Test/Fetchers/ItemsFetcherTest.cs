@@ -216,6 +216,64 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     CategoryId = "ammunition",
                     Id = "testAmmunition",
                 },
+                new Ammunition()
+                {
+                    AccuracyPercentageModifier = 0.05,
+                    ArmorDamagePercentage = 0.55,
+                    ArmorPenetrations = Array.Empty<double>(), // TODO : OBTAIN FROM WIKI
+                    //Blinding = , // TODO : MISSING FROM API
+                    Caliber = "Caliber9x19PARA",
+                    CategoryId = "ammunition",
+                    DurabilityBurnPercentageModifier = 0.7,
+                    FleshDamage = 52,
+                    FragmentationChancePercentage = 0.05,
+                    HeavyBleedingPercentageChance = 0,
+                    IconLink = "https://assets.tarkov.dev/5efb0da7a29a85116f6ea05f-icon.webp",
+                    Id = "5efb0da7a29a85116f6ea05f",
+                    ImageLink = "https://assets.tarkov.dev/5efb0da7a29a85116f6ea05f-image.webp",
+                    LightBleedingPercentageChance = 0,
+                    MarketLink = "https://tarkov.dev/item/9x19mm-pbp-gzh",
+                    MaxStackableAmount = 50,
+                    Name = "9x19mm PBP gzh",
+                    PenetrationPower = 39,
+                    Projectiles = 1,
+                    RecoilPercentageModifier = 0.05,
+                    ShortName = "PBP",
+                    Subsonic = false,
+                    Tracer = false,
+                    Velocity = 560,
+                    Weight = 0.009,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/9x19mm_PBP_gzh"
+                },
+                new Ammunition()
+                {
+                    AccuracyPercentageModifier = -0.05,
+                    ArmorDamagePercentage = 0.33,
+                    ArmorPenetrations = Array.Empty<double>(), // TODO : OBTAIN FROM WIKI
+                    //Blinding = , // TODO : MISSING FROM API
+                    Caliber = "Caliber9x19PARA",
+                    CategoryId = "ammunition",
+                    DurabilityBurnPercentageModifier = 0.15,
+                    FleshDamage = 58,
+                    FragmentationChancePercentage = 0.15,
+                    HeavyBleedingPercentageChance = 0,
+                    IconLink = "https://assets.tarkov.dev/5c3df7d588a4501f290594e5-icon.webp",
+                    Id = "5c3df7d588a4501f290594e5",
+                    ImageLink = "https://assets.tarkov.dev/5c3df7d588a4501f290594e5-image.webp",
+                    LightBleedingPercentageChance = 0,
+                    MarketLink = "https://tarkov.dev/item/9x19mm-green-tracer",
+                    MaxStackableAmount = 50,
+                    Name = "9x19mm Green Tracer",
+                    PenetrationPower = 14,
+                    Projectiles = 1,
+                    RecoilPercentageModifier = -0.06,
+                    ShortName = "GT",
+                    Subsonic = false,
+                    Tracer = true,
+                    Velocity = 365,
+                    Weight = 0.006,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/9x19mm_Green_Tracer"
+                },
                 new Armor()
                 {
                     ArmorClass = 6,
@@ -275,19 +333,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     CategoryId = "armorMod",
                     Id = "testArmorMod",
-                },
-                new ArmorMod()
-                {
-                    CategoryId = "armorMod",
-                    IconLink = "https://assets.tarkov.dev/preset-face-shield-alone-icon.jpg",
-                    Id = "preset-face-shield-alone",
-                    ImageLink = "https://assets.tarkov.dev/preset-face-shield-alone-image.jpg",
-                    IsPreset = true,
-                    MarketLink = "https://tarkov.dev/item/preset-face-shield-alone",
-                    Name = "Face shield alone",
-                    ShortName = "FSA",
-                    Weight = 1.2,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-face-shield-alone"
                 },
                 new Container()
                 {
@@ -500,19 +545,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Weight = 0.5,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/Wilcox_Skull_Lock_head_mount"
                 },
-                new Headwear()
-                {
-                    CategoryId = "headwear",
-                    IconLink = "https://assets.tarkov.dev/5a3b898486f77467720a2f29-icon.webp",
-                    Id = "5a3b898486f77467720a2f29",
-                    ImageLink = "https://assets.tarkov.dev/5a3b898486f77467720a2f29-image.webp",
-                    IsPreset = true,
-                    MarketLink = "https://tarkov.dev/item/wilcox-skull-lock-head-mount-pvs-14",
-                    Name = "Wilcox Skull Lock head mount PVS-14",
-                    ShortName = "Skull Lock PVS-14",
-                    Weight = 1.29,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/Wilcox_Skull_Lock_head_mount"
-                },
                 new Item()
                 {
                     CategoryId = "armband",
@@ -672,19 +704,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ShortName = "MPX",
                     Weight = 0.17,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/MPX_9x19_30-round_magazine"
-                },
-                new Magazine()
-                {
-                    CategoryId = "magazine",
-                    IconLink = "https://assets.tarkov.dev/preset-magazine-alone-icon.jpg",
-                    Id = "preset-magazine-alone",
-                    ImageLink = "https://assets.tarkov.dev/preset-magazine-alone-image.jpg",
-                    IsPreset = true,
-                    MarketLink = "https://tarkov.dev/item/preset-magazine-alone",
-                    Name = "Magazine alone",
-                    ShortName = "MA",
-                    Weight = 0.16,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-magazine-alone"
                 },
                 new MeleeWeapon()
                 {
@@ -920,19 +939,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ShortName = "PVS-14",
                     Weight = 0.65,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/AN/PVS-14_Night_Vision_Monocular"
-                },
-                new Mod()
-                {
-                    CategoryId = "mod",
-                    IconLink = "https://assets.tarkov.dev/preset-ring-flashlight-icon.jpg",
-                    Id = "preset-ring-flashlight",
-                    ImageLink = "https://assets.tarkov.dev/preset-ring-flashlight-image.jpg",
-                    IsPreset = true,
-                    MarketLink = "https://tarkov.dev/item/preset-ring-flashlight",
-                    Name = "Ring + flashlight",
-                    ShortName = "PR+F",
-                    Weight = 0.205,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-ring-flashlight"
                 },
                 new RangedWeapon()
                 {
@@ -1284,45 +1290,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     VerticalRecoil = 60,
                     Weight = 0.64,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/SIG_MPX_9x19_submachine_gun"
-                },
-                new RangedWeapon()
-                {
-                    CategoryId = "mainWeapon",
-                    IconLink = "https://assets.tarkov.dev/618aaeb931ddad66c15eb7e9-icon.jpg",
-                    Id = "618aaeb931ddad66c15eb7e9",
-                    IsPreset = true,
-                    ImageLink = "https://assets.tarkov.dev/618aaeb931ddad66c15eb7e9-image.webp",
-                    MarketLink = "https://tarkov.dev/item/as-val-9x39-special-assault-rifle-kobra",
-                    Name = "AS VAL 9x39 special assault rifle Kobra",
-                    ShortName = "AS VAL Kobra",
-                    Weight = 3.085,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AS_VAL_9x39_special_assault_rifle"
-                },
-                new RangedWeapon()
-                {
-                    CategoryId = "mainWeapon",
-                    IconLink = "https://assets.tarkov.dev/5a8ae43686f774377b73cfb3-icon.jpg",
-                    Id = "5a8ae43686f774377b73cfb3",
-                    IsPreset = true,
-                    ImageLink = "https://assets.tarkov.dev/5a8ae43686f774377b73cfb3-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/sig-mpx-9x19-submachine-gun-mqb",
-                    Name = "SIG MPX 9x19 submachine gun MQB",
-                    ShortName = "MPX MQB",
-                    Weight = 3.87,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/SIG_MPX_9x19_submachine_gun"
-                },
-                new RangedWeapon()
-                {
-                    CategoryId = "secondaryWeapon",
-                    IconLink = "https://assets.tarkov.dev/5eb2968186f7746d1f1a4fd5-icon.webp",
-                    Id = "5eb2968186f7746d1f1a4fd5",
-                    IsPreset = true,
-                    ImageLink = "https://assets.tarkov.dev/5eb2968186f7746d1f1a4fd5-image.webp",
-                    MarketLink = "https://tarkov.dev/item/colt-m1911a1-45-acp-pistol-default",
-                    Name = "Colt M1911A1 .45 ACP pistol Default",
-                    ShortName = "M1911A1 Default",
-                    Weight = 1.214,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/Colt_M1911A1_.45_ACP_pistol"
                 },
                 new RangedWeaponMod()
                 {
@@ -1918,19 +1885,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ShortName = "MPX 2x",
                     Weight = 0.033,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/MPX_double_latch_charging_handle"
-                },
-                new RangedWeaponMod()
-                {
-                    CategoryId = "rangedWeaponMod",
-                    IconLink = "https://assets.tarkov.dev/preset-gas-tube-handguard-icon.jpg",
-                    Id = "preset-gas-tube-handguard",
-                    ImageLink = "https://assets.tarkov.dev/preset-gas-tube-handguard-image.jpg",
-                    IsPreset = true,
-                    MarketLink = "https://tarkov.dev/item/preset-gas-tube-handguard",
-                    Name = "Gas tube + handguard",
-                    ShortName = "PGT+H",
-                    Weight = 0.146,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-gas-tube-handguard"
                 },
                 new Vest()
                 {

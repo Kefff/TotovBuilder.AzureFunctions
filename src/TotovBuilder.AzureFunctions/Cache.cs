@@ -82,11 +82,15 @@ namespace TotovBuilder.AzureFunctions
         }
 
         /// <inheritdoc/>
-        public void Store<T>(DataType dataType, T data)
+        public void Store<T>(DataType dataType, T data, bool updatedStorageDate = true)
             where T : class
         {
             Instance.Set(dataType.ToString(), data, CachingOptions);
-            LastStorageDates[dataType] = DateTime.Now;
+
+            if (updatedStorageDate)
+            {
+                LastStorageDates[dataType] = DateTime.Now;
+            }
         }
     }
 }

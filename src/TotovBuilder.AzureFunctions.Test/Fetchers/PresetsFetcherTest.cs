@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -63,10 +64,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            IEnumerable<InventoryItem>? result = await fetcher.Fetch();
+            IEnumerable<InventoryItem>? result = (await fetcher.Fetch())?.OrderBy(p => p.ItemId);
 
             // Assert
-            result.Should().BeEquivalentTo(hasItems ? TestData.Presets : Array.Empty<InventoryItem>());
+            IEnumerable<InventoryItem> expected = TestData.Presets.OrderBy(i => i.ItemId);
+            result.Should().BeEquivalentTo(hasItems ? expected : Array.Empty<InventoryItem>());
         }
 
         [Fact]
