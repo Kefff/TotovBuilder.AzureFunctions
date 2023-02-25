@@ -98,7 +98,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             }
                         }
 
-                        if (vendorJson.TryGetProperty("taskUnlock", out JsonElement taskUnlockJson) && taskUnlockJson.ValueKind != JsonValueKind.Null)
+                        if (TryDeserializeObject(vendorJson, "taskUnlock", out JsonElement taskUnlockJson))
                         {
                             price.Quest = new Quest()
                             {

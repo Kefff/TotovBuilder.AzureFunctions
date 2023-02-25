@@ -51,9 +51,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     int merchantLevel = barterJson.GetProperty("level").GetInt32();
 
                     Quest? quest = null;
-                    JsonElement taskUnlockJson = barterJson.GetProperty("taskUnlock");
 
-                    if (taskUnlockJson.ValueKind != JsonValueKind.Null)
+                    if (TryDeserializeObject(barterJson, "taskUnlock", out JsonElement taskUnlockJson))
                     {
                         quest = new Quest()
                         {

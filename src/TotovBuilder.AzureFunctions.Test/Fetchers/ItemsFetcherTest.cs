@@ -334,6 +334,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     CategoryId = "armorMod",
                     Id = "testArmorMod",
                 },
+                new ArmorMod()
+                {
+                    ArmorClass = 3,
+                    ArmoredAreas = new string[]
+                    {
+                        "Eyes",
+                        "Jaws"
+                    },
+                    BaseItemId = "5a16b7e1fcdbcb00165aa6c9",
+                    BlindnessProtectionPercentage = 0.1,
+                    CategoryId = "armorMod",
+                    Durability = 40,
+                    ErgonomicsPercentageModifier = -0.08,
+                    IconLink = "https://assets.tarkov.dev/preset-face-shield-alone-icon.jpg",
+                    Id = "preset-face-shield-alone",
+                    ImageLink = "https://assets.tarkov.dev/preset-face-shield-alone-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/preset-face-shield-alone",
+                    Material = "Glass",
+                    //ModSlots = new ModSlot[], // TODO : MISSING FROM API
+                    MovementSpeedPercentageModifier = 0,
+                    Name = "Face shield alone",
+                    //RicochetChance = , // TODO : MISSING FROM API
+                    ShortName = "FSA",
+                    TurningSpeedPercentageModifier = -0.08,
+                    Weight = 1.2,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-face-shield-alone",
+                },
                 new Container()
                 {
                     Capacity = 35,
@@ -542,6 +569,31 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     },
                     Name = "Wilcox Skull Lock head mount",
                     ShortName = "Skull Lock",
+                    Weight = 0.5,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/Wilcox_Skull_Lock_head_mount"
+                },
+                new Headwear()
+                {
+                    BaseItemId = "5a16bb52fcdbcb001a3b00dc",
+                    CategoryId = "headwear",
+                    IconLink = "https://assets.tarkov.dev/5a3b898486f77467720a2f29-icon.webp",
+                    Id = "5a3b898486f77467720a2f29",
+                    ImageLink = "https://assets.tarkov.dev/5a3b898486f77467720a2f29-image.webp",
+                    MarketLink = "https://tarkov.dev/item/wilcox-skull-lock-head-mount-pvs-14",
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5a16b8a9fcdbcb00165aa6ca",
+                            },
+                            Name = "mod_nvg",
+                            Required = false // TODO : MISSING FROM API
+                        }
+                    },
+                    Name = "Wilcox Skull Lock head mount PVS-14",
+                    ShortName = "Skull Lock PVS-14",
                     Weight = 0.5,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/Wilcox_Skull_Lock_head_mount"
                 },
@@ -940,10 +992,38 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Weight = 0.65,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/AN/PVS-14_Night_Vision_Monocular"
                 },
+                new Mod()
+                {
+                    BaseItemId = "57d17e212459775a1179a0f5",
+                    CategoryId = "mod",
+                    ErgonomicsModifier = -1,
+                    IconLink = "https://assets.tarkov.dev/preset-ring-flashlight-icon.jpg",
+                    Id = "preset-ring-flashlight",
+                    ImageLink = "https://assets.tarkov.dev/preset-ring-flashlight-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/preset-ring-flashlight",
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "59d790f486f77403cb06aec6",
+                                "57d17c5e2459775a5c57d17d"
+                            },
+                            Name = "mod_flashlight",
+                            Required = false // TODO : MISSING FROM API
+                        }
+                    },
+                    Name = "Ring + flashlight",
+                    ShortName = "PR+F",
+                    Weight = 0.085,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-ring-flashlight"
+                },
                 new RangedWeapon()
                 {
                     Caliber = "Caliber545x39",
                     CategoryId = "mainWeapon",
+                    DefaultPresetId = "584147732459775a2b6d9f12",
                     Ergonomics = 44,
                     FireModes = new string[] { "SingleFire", "FullAuto" },
                     FireRate = 650,
@@ -1067,6 +1147,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Caliber = "Caliber1143x23ACP",
                     CategoryId = "secondaryWeapon",
+                    DefaultPresetId = "5eb2968186f7746d1f1a4fd5",
                     Ergonomics = 75,
                     FireModes = new string[] { "SingleFire" },
                     FireRate = 30,
@@ -1198,6 +1279,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Caliber = "Caliber9x19PARA",
                     CategoryId = "mainWeapon",
+                    DefaultPresetId = "58dffca786f774083a256ab1",
                     Ergonomics = 40,
                     FireModes = new string[] { "SingleFire", "FullAuto" },
                     FireRate = 850,
@@ -1287,6 +1369,237 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     },
                     Name = "SIG MPX 9x19 submachine gun",
                     ShortName = "MPX",
+                    VerticalRecoil = 60,
+                    Weight = 0.64,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/SIG_MPX_9x19_submachine_gun"
+                },
+                new RangedWeapon()
+                {
+                    BaseItemId = "57dc2fa62459775949412633",
+                    Caliber = "Caliber545x39",
+                    CategoryId = "mainWeapon",
+                    Ergonomics = 44,
+                    FireModes = new string[] { "SingleFire", "FullAuto" },
+                    FireRate = 650,
+                    HorizontalRecoil = 445,
+                    IconLink = "https://assets.tarkov.dev/584147732459775a2b6d9f12-icon.webp",
+                    Id = "584147732459775a2b6d9f12",
+                    ImageLink = "https://assets.tarkov.dev/584147732459775a2b6d9f12-image.webp",
+                    MarketLink = "https://tarkov.dev/item/kalashnikov-aks-74u-545x39-assault-rifle-default",
+                    MinuteOfAngle = 3.44,
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5f6341043ada5942720e2dc5",
+                                "6087e663132d4d12c81fd96b",
+                                "5beec8ea0db834001a6f9dbf",
+                                "5649ad3f4bdc2df8348b4585",
+                                "5649ade84bdc2d1b2b8b4587",
+                                "59e62cc886f77440d40b52a1",
+                                "5a0071d486f77404e23a12b2",
+                                "57e3dba62459770f0c32322b",
+                                "5cf54404d7f00c108840b2ef",
+                                "5e2192a498a36665e8337386",
+                                "5b30ac585acfc433000eb79c",
+                                "59e6318286f77444dd62c4cc",
+                                "5cf50850d7f00c056e24104c",
+                                "5cf508bfd7f00c056e24104e",
+                                "5947f92f86f77427344a76b1",
+                                "5947fa2486f77425b47c1a9b",
+                                "5c6bf4aa2e2216001219b0ae",
+                                "5649ae4a4bdc2d1b2b8b4588",
+                                "5998517986f7746017232f7e",
+                                "623c3be0484b5003161840dc",
+                                "628c9ab845c59e5b80768a81",
+                                "628a664bccaab13006640e47"
+                            },
+                            Name = "mod_pistol_grip",
+                            Required = false // TODO : MISSING FROM API
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "59ecc28286f7746d7a68aa8c",
+                                "5ab626e4d8ce87272e4c6e43",
+                                "57dc347d245977596754e7a1"
+                            },
+                            Name = "mod_stock",
+                            Required = false // TODO : MISSING FROM API
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "6130ca3fd92c473c77020dbd",
+                                "5648ac824bdc2ded0b8b457d"
+                            },
+                            Name = "mod_charge",
+                            Required = false // TODO : MISSING FROM API
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "564ca9df4bdc2d35148b4569",
+                                "564ca99c4bdc2d16268b4589",
+                                "55d480c04bdc2d1d4e8b456a",
+                                "5cbdaf89ae9215000e5b9c94",
+                                "55d481904bdc2d8c2f8b456a",
+                                "55d482194bdc2d1d4e8b456b",
+                                "55d4837c4bdc2d1d4e8b456c",
+                                "5aaa4194e5b5b055d06310a5",
+                                "5bed61680db834001d2c45ab",
+                                "5bed625c0db834001c062946"
+                            },
+                            Name = "mod_magazine",
+                            Required = false // TODO : MISSING FROM API
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5ac72e945acfc43f3b691116",
+                                "5ac7655e5acfc40016339a19",
+                                "5649aa744bdc2ded0b8b457e",
+                                "5f633f791b231926f2329f13",
+                                "5943eeeb86f77412d6384f6b",
+                                "5cc9a96cd7f00c011c04e04a",
+                                "615d8f5dd92c473c770212ef",
+                                "5649ab884bdc2ded0b8b457f",
+                                "57dc324a24597759501edc20",
+                                "59bffc1f86f77435b128b872",
+                                "593d493f86f7745e6b2ceb22",
+                                "564caa3d4bdc2d17108b458e",
+                                "57ffb0e42459777d047111c5"
+                            },
+                            Name = "mod_muzzle",
+                            Required = false // TODO : MISSING FROM API
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "57dc334d245977597164366f",
+                                "5839a7742459773cf9693481"
+                            },
+                            Name = "mod_reciever",
+                            Required = false // TODO : MISSING FROM API
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "59d36a0086f7747e673f3946"
+                            },
+                            Name = "mod_gas_block",
+                            Required = false // TODO : MISSING FROM API
+                        }
+                    },
+                    Name = "Kalashnikov AKS-74U 5.45x39 assault rifle Default",
+                    ShortName = "AKS-74U Default",
+                    VerticalRecoil = 141,
+                    Weight = 1.809,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/Kalashnikov_AKS-74U_5.45x39_assault_rifle"
+                },
+                new RangedWeapon()
+                {
+                    BaseItemId = "58948c8e86f77409493f7266",
+                    Caliber = "Caliber9x19PARA",
+                    CategoryId = "mainWeapon",
+                    Ergonomics = 40,
+                    FireModes = new string[] { "SingleFire", "FullAuto" },
+                    FireRate = 850,
+                    HorizontalRecoil = 299,
+                    IconLink = "https://assets.tarkov.dev/5a8ae43686f774377b73cfb3-icon.webp",
+                    Id = "5a8ae43686f774377b73cfb3",
+                    ImageLink = "https://assets.tarkov.dev/5a8ae43686f774377b73cfb3-image.webp",
+                    MarketLink = "https://tarkov.dev/item/sig-mpx-9x19-submachine-gun-mqb",
+                    MinuteOfAngle = 6.19,
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "55d4b9964bdc2d1d4e8b456e",
+                                "571659bb2459771fb2755a12",
+                                "602e71bd53a60014f9705bfa",
+                                "6113c3586c780c1e710c90bc",
+                                "6113cc78d3a39d50044c065a",
+                                "6113cce3d92c473c770200c7",
+                                "5cc9bcaed7f00c011c04e179",
+                                "5bb20e18d4351e00320205d5",
+                                "5bb20e0ed4351e3bac1212dc",
+                                "6193dcd0f8ee7e52e4210a28",
+                                "5d025cc1d7ad1a53845279ef",
+                                "5c6d7b3d2e221600114c9b7d",
+                                "57c55efc2459772d2c6271e7",
+                                "57af48872459771f0b2ebf11",
+                                "57c55f092459772d291a8463",
+                                "57c55f112459772d28133310",
+                                "57c55f172459772d27602381",
+                                "5a339805c4a2826c6e06d73d",
+                                "55802f5d4bdc2dac148b458f",
+                                "5d15cf3bd7ad1a67e71518b2",
+                                "59db3a1d86f77429e05b4e92",
+                                "5fbcbd6c187fea44d52eda14",
+                                "59db3acc86f7742a2c4ab912",
+                                "59db3b0886f77429d72fb895",
+                                "615d8faecabb9b7ad90f4d5d",
+                                "5b07db875acfc40dc528a5f6",
+                                "5894a51286f77426d13baf02"
+                            },
+                            Name = "mod_pistol_grip"
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5c5db6742e2216000f1b2852",
+                                "5c5db6552e2216001026119d",
+                                "5894a05586f774094708ef75",
+                                "5c5db6652e221600113fba51"
+                            },
+                            Name = "mod_magazine"
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5894a5b586f77426d2590767"
+                            },
+                            Name = "mod_reciever"
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "58ac1bf086f77420ed183f9f",
+                                "5894a13e86f7742405482982",
+                                "5fbcc429900b1d5091531dd7",
+                                "5fbcc437d724d907e2077d5c",
+                                "5c5db6ee2e221600113fba54",
+                                "5c5db6f82e2216003a0fe914"
+                            },
+                            Name = "mod_stock"
+                        },
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5c5db6b32e221600102611a0",
+                                "58949edd86f77409483e16a9",
+                                "58949fac86f77409483e16aa"
+                            },
+                            Name = "mod_charge"
+                        }
+                    },
+                    Name = "SIG MPX 9x19 submachine gun MQB",
+                    ShortName = "MPX MQB",
                     VerticalRecoil = 60,
                     Weight = 0.64,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/SIG_MPX_9x19_submachine_gun"
@@ -1885,6 +2198,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ShortName = "MPX 2x",
                     Weight = 0.033,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/MPX_double_latch_charging_handle"
+                },
+                new RangedWeaponMod()
+                {
+                    BaseItemId = "59d36a0086f7747e673f3946",
+                    CategoryId = "rangedWeaponMod",
+                    IconLink = "https://assets.tarkov.dev/preset-gas-tube-handguard-icon.jpg",
+                    Id = "preset-gas-tube-handguard",
+                    ImageLink = "https://assets.tarkov.dev/preset-gas-tube-handguard-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/preset-gas-tube-handguard",
+                    ModSlots = new ModSlot[]
+                    {
+                        new ModSlot()
+                        {
+                            CompatibleItemIds = new string[]
+                            {
+                                "5d15ce51d7ad1a1eff619092",
+                                "5a957c3fa2750c00137fa5f7",
+                                "57dc32dc245977596d4ef3d3",
+                                "57ffa9f4245977728561e844"
+                            },
+                            Name = "mod_handguard"
+                        }
+                    },
+                    Name = "Gas tube + handguard",
+                    ShortName = "PGT+H",
+                    Weight = 0.03,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-gas-tube-handguard"
                 },
                 new Vest()
                 {

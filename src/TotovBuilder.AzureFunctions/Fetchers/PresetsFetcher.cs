@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Linq.Expressions;
 using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -55,18 +54,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = new();
             ConcurrentBag<InventoryItem> presets = new();
-            ConcurrentBag<Item> presetItems = new();
             Items = await ItemsFetcher.Fetch() ?? Array.Empty<Item>();
 
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in presetsJson.EnumerateArray())
             {
-                deserializationTasks.Add(Task.Run(() => DeserializeData(itemJson, presets, presetItems)));
+                deserializationTasks.Add(Task.Run(() => DeserializeData(itemJson, presets)));
             }
-
+            
             await Task.WhenAll(deserializationTasks);
-            AddPresetsToItemsList(presetItems);
 
             return Result.Ok(presets.AsEnumerable());
         }
@@ -83,13 +80,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 return;
             }
-            
-            PresetContainedItem containedItem = containedItems.Peek();
 
-            if (containedItem.Item is IModdable)
-            {
-                return;
-            }
+            PresetContainedItem containedItem = containedItems.Peek();
 
             if (containedItem.Item is IAmmunition
                 && item is IMagazine magazine
@@ -115,10 +107,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 // If the previous item is also ammunition of the same caliber, adding the quantity to the previous item because we only support
                 // one ammunition type per magazine
                 inventoryItem.Quantity += containedItem.Quantity;
+
                 containedItems.Dequeue();
                 AddContent(inventoryItem, item, containedItems); // Continuing adding content while contained items are not moddable
             }
-            else if (item is not IMagazine
+            else if (containedItem.Item is not IModdable
+                && item is not IMagazine
                 && item is IContainer)
             {
                 InventoryItem containedInventoryItem = new()
@@ -127,11 +121,18 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     Quantity = containedItem.Quantity
                 };
                 inventoryItem.Content = inventoryItem.Content.Append(containedInventoryItem).ToArray();
+
                 containedItems.Dequeue();
                 AddContent(containedInventoryItem, containedItem.Item, containedItems); // Continuing adding content while contained items are not moddable
             }
         }
 
+        /// <summary>
+        /// Adds a contained item to an inventory item if possible.
+        /// </summary>
+        /// <param name="inventoryItem">Inventory item.</param>
+        /// <param name="item">Item corresponding to the inventory item.</param>
+        /// <param name="containedItems">Contained items.</param>
         private void AddItem(InventoryItem inventoryItem, IItem item, Queue<PresetContainedItem> containedItems)
         {
             if (containedItems.Count == 0)
@@ -161,41 +162,39 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             PresetContainedItem containedItem = containedItems.Peek();
 
-            if (containedItem.Item is not IModdable containedModdable)
+            if (containedItem.Item is IModdable containedModdable)
             {
-                return;
-            }
-
-            if (inventoryItemModSlot.Item == null)
-            {
-                if (!modSlot.CompatibleItemIds.Any(ci => ci == containedModdable.Id))
+                if (inventoryItemModSlot.Item == null)
                 {
-                    return;
-                }
+                    if (!modSlot.CompatibleItemIds.Any(ci => ci == containedModdable.Id))
+                    {
+                        return;
+                    }
 
-                inventoryItemModSlot.Item = new InventoryItem()
-                {
-                    ItemId = containedModdable.Id
-                };
+                    inventoryItemModSlot.Item = new InventoryItem()
+                    {
+                        ItemId = containedModdable.Id
+                    };
 
-                if (containedItem.Quantity > 1)
-                {
-                    containedItem.Quantity--;
+                    if (containedItem.Quantity > 1)
+                    {
+                        containedItem.Quantity--;
+                    }
+                    else
+                    {
+                        containedItems.Dequeue();
+                    }
+
+                    // Trying to add the following items as mods or content (content should always be the following item of its container)
+                    // If not possible, we restart trying to add the following items as a mod from the topmost item
+                    AddItem(inventoryItemModSlot.Item, containedModdable, containedItems);
                 }
                 else
                 {
-                    containedItems.Dequeue();
-                }
-
-                // Trying to add the following items as mods or content (content should always be the following item of its container)
-                // If not possible, we restart trying to add the following items as a mod from the topmost item
-                AddItem(inventoryItemModSlot.Item, containedModdable, containedItems);
-            }
-            else
-            {
-                if (Items.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
-                {
-                    AddModSlots(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
+                    if (Items.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
+                    {
+                        AddModSlots(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
+                    }
                 }
             }
         }
@@ -246,31 +245,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Adds preset items to the cached items list.
-        /// </summary>
-        /// <param name="presetItems">Preset items.</param>
-        private void AddPresetsToItemsList(IEnumerable<Item> presetItems)
-        {
-            IEnumerable<Item>? cachedItems = Cache.Get<IEnumerable<Item>>(DataType.Items);
-
-            if (cachedItems == null)
-            {
-                return;
-            }
-
-            List<Item> items = new(cachedItems);
-            items.AddRange(presetItems);
-            Cache.Store(DataType.Items, items);
-        }
-
-        /// <summary>
         /// Constructs a preset based on its base item and contained items.
         /// </summary>
         /// <param name="presetId">ID of the preset.</param>
         /// <param name="baseItem">Base item.</param>
         /// <param name="containedItems">Contained items.</param>
         /// <returns>Preset.</returns>
-        private InventoryItem? ConstructPreset(string presetId, IModdable baseItem, Queue<PresetContainedItem> containedItems)
+        private InventoryItem ConstructPreset(string presetId, IModdable baseItem, Queue<PresetContainedItem> containedItems)
         {
             InventoryItem inventoryItem = new()
             {
@@ -283,7 +264,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 if (tries > 10)
                 {
-                    throw new Exception(string.Format(Properties.Resources.PresetContructionError, presetId, containedItems.Peek().Item.Id));
+                    Logger.LogError(string.Format(Properties.Resources.PresetContructionError, presetId, containedItems.Peek().Item.Id));
+                    break;
                 }
 
                 AddItem(inventoryItem, baseItem, containedItems);
@@ -298,17 +280,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="presetsJson">Json element representing the preset to deserialize.</param>
         /// <param name="presets">List of presets the deserialized preset will be stored into.</param>
-        /// <param name="presetItems">List of preset items the item corresponding to the deserializes preset will be stored into.</param>
-        private void DeserializeData(JsonElement presetsJson, ConcurrentBag<InventoryItem> presets, ConcurrentBag<Item> presetItems)
+        private void DeserializeData(JsonElement presetsJson, ConcurrentBag<InventoryItem> presets)
         {
             try
             {
-                DeserializedPreset? deserializedPreset = DeserializeData(presetsJson);
+                InventoryItem? preset = DeserializePresetData(presetsJson);
 
-                if (deserializedPreset != null)
+                if (preset != null)
                 {
-                    presets.Add(deserializedPreset.InventoryItem);
-                    presetItems.Add(deserializedPreset.Item);
+                    presets.Add(preset);
                 }
             }
             catch (Exception e)
@@ -323,233 +303,37 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="presetJson">Json element representing the preset to deserialize.</param>
         /// <returns>Deserialized preset.</returns>
-        private DeserializedPreset? DeserializeData(JsonElement presetJson)
+        private InventoryItem? DeserializePresetData(JsonElement presetJson)
         {
-            if (TryDeserializeObject(presetJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
+            string presetId = presetJson.GetProperty("id").GetString()!;
+
+            if (Items.FirstOrDefault(i => i.Id == presetId) is not IModdable presetItem
+                || Items.FirstOrDefault(i => i.Id == presetItem?.BaseItemId) is not IModdable baseItem)
             {
-                string presetId = presetJson.GetProperty("id").GetString()!;
-                string baseItemId = propertiesJson.GetProperty("baseItem").GetProperty("id").GetString()!;
-                IModdable? baseItem = Items.FirstOrDefault(i => i is IModdable && i.Id == baseItemId) as IModdable;
-
-                if (baseItem == null)
-                {
-                    // Case of the "customdogtags12345678910" preset that has a base item that is not moddable
-                    return null;
-                }
-
-                IModdable presetItem = baseItem switch
-                {
-                    IArmorMod => DeserializeArmorModPreset(presetId, presetJson, (IArmorMod)baseItem),
-                    IHeadwear => DeserializeHeadwearPreset(presetId, presetJson, (IHeadwear)baseItem),
-                    IRangedWeapon => DeserializeRangedWeaponPreset(presetId, presetJson, propertiesJson, (IRangedWeapon)baseItem),
-                    IRangedWeaponMod => DeserializeRangedWeaponModPreset(presetId, presetJson, (IRangedWeaponMod)baseItem),
-                    IMod => DeserializeModPreset(presetId, presetJson, (IMod)baseItem),
-                    _ => throw new NotSupportedException(),
-                };
-
-                Queue<PresetContainedItem> containedItems = new();
-
-                foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
-                {
-                    string containedItemId = containedItemJson.GetProperty("item").GetProperty("id").GetString()!;
-
-                    if (containedItemId == baseItemId)
-                    {
-                        // Skipping the first item which is the base item
-                        continue;
-                    }
-
-                    Item containedItem = Items.First(i => i.Id == containedItemId);
-                    int quantity = containedItemJson.GetProperty("quantity").GetInt32();
-
-                    containedItems.Enqueue(new PresetContainedItem(containedItem, quantity));
-                }
-
-                InventoryItem? preset = ConstructPreset(presetId, baseItem, containedItems);
-
-                return preset != null ? new DeserializedPreset(preset, (Item)presetItem) : null;
+                return null;
             }
 
-            return null;
-        }
+            Queue<PresetContainedItem> containedItems = new();
 
-        /// <summary>
-        /// Deserilizes the properties of a preset that are common between preset item categories.
-        /// </summary>
-        /// <typeparam name="T">Preset type.</typeparam>
-        /// <param name="presetId">Preset ID.</param>
-        /// <param name="presetJson">JSON element representing the preset.</param>
-        /// <param name="baseItem">Base item.</param>
-        /// <returns>Deserialized <see cref="RangedWeapon"/> preset.</returns>
-        private static T DeserializeBasePresetProperties<T>(string presetId, JsonElement presetJson, IModdable baseItem)
-            where T : IModdable, new()
-        {
-            T preset = new()
+            foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
             {
-                CategoryId = baseItem.CategoryId,
-                ConflictingItemIds = baseItem.ConflictingItemIds,
-                IconLink = presetJson.GetProperty("iconLink").GetString()!,
-                Id = presetId,
-                ImageLink = presetJson.GetProperty("inspectImageLink").GetString()!,
-                IsPreset = true,
-                MarketLink = presetJson.GetProperty("link").GetString()!,
-                MaxStackableAmount = baseItem.MaxStackableAmount,
-                ModSlots = baseItem.ModSlots,
-                Name = presetJson.GetProperty("name").GetString()!,
-                ShortName = presetJson.GetProperty("shortName").GetString()!,
-                Weight = baseItem.Weight,
-                WikiLink = presetJson.GetProperty("wikiLink").GetString()!
-            };
+                string containedItemId = containedItemJson.GetProperty("item").GetProperty("id").GetString()!;
+
+                if (containedItemId == baseItem.Id)
+                {
+                    // Skipping the first item which is the base item
+                    continue;
+                }
+
+                Item containedItem = Items.First(i => i.Id == containedItemId);
+                int quantity = containedItemJson.GetProperty("quantity").GetInt32();
+
+                containedItems.Enqueue(new PresetContainedItem(containedItem, quantity));
+            }
+
+            InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
 
             return preset;
-        }
-
-        /// <summary>
-        /// Deserializes an <see cref="ArmorMod"/> preset.
-        /// </summary>
-        /// <param name="presetId">Preset ID.</param>
-        /// <param name="presetJson">JSON element representing the preset.</param>
-        /// <param name="baseItem">Base item.</param>
-        /// <returns>Deserialized <see cref="ArmorMod"/> preset.</returns>
-        private static ArmorMod DeserializeArmorModPreset(string presetId, JsonElement presetJson, IArmorMod baseItem)
-        {
-            ArmorMod presetItem = DeserializeBasePresetProperties<ArmorMod>(presetId, presetJson, baseItem);
-
-            presetItem.ArmorClass = baseItem.ArmorClass;
-            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
-            presetItem.BlindnessProtectionPercentage = baseItem.BlindnessProtectionPercentage;
-            presetItem.Durability = baseItem.Durability;
-            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
-            presetItem.Material = baseItem.Material;
-            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
-            presetItem.RicochetChance = baseItem.RicochetChance;
-            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
-
-            return presetItem;
-        }
-
-        /// <summary>
-        /// Deserializes an <see cref="Headwear"/> preset.
-        /// </summary>
-        /// <param name="presetId">Preset ID.</param>
-        /// <param name="presetJson">JSON element representing the preset.</param>
-        /// <param name="baseItem">Base item.</param>
-        /// <returns>Deserialized <see cref="Headwear"/> preset.</returns>
-        private static Headwear DeserializeHeadwearPreset(string presetId, JsonElement presetJson, IHeadwear baseItem)
-        {
-            Headwear presetItem = DeserializeBasePresetProperties<Headwear>(presetId, presetJson, baseItem);
-
-            presetItem.ArmorClass = baseItem.ArmorClass;
-            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
-            presetItem.BlocksHeadphones = baseItem.BlocksHeadphones;
-            presetItem.Deafening = baseItem.Deafening;
-            presetItem.Durability = baseItem.Durability;
-            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
-            presetItem.Material = baseItem.Material;
-            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
-            presetItem.RicochetChance = baseItem.RicochetChance;
-            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
-
-            return presetItem;
-        }
-
-        /// <summary>
-        /// Deserializes an <see cref="Mod"/> preset.
-        /// </summary>
-        /// <param name="presetId">Preset ID.</param>
-        /// <param name="presetJson">JSON element representing the preset.</param>
-        /// <param name="baseItem">Base item.</param>
-        /// <returns>Deserialized <see cref="Mod"/> preset.</returns>
-        private static Mod DeserializeModPreset(string presetId, JsonElement presetJson, IMod baseItem)
-        {
-            Mod presetItem = DeserializeBasePresetProperties<Mod>(presetId, presetJson, baseItem);
-
-            presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
-
-            return presetItem;
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="RangedWeapon"/> preset.
-        /// </summary>
-        /// <param name="presetId">Preset ID.</param>
-        /// <param name="presetJson">JSON element representing the preset.</param>
-        /// <param name="propertiesJson">Json element representing the properties of the preset.</param>
-        /// <param name="baseItem">Base item.</param>
-        /// <returns>Deserialized <see cref="RangedWeapon"/> preset.</returns>
-        private RangedWeapon DeserializeRangedWeaponPreset(string presetId, JsonElement presetJson, JsonElement propertiesJson, IRangedWeapon baseItem)
-        {
-            RangedWeapon presetItem = DeserializeBasePresetProperties<RangedWeapon>(presetId, presetJson, baseItem);
-
-            presetItem.Caliber = baseItem.Caliber;
-            presetItem.FireModes = baseItem.FireModes;
-            presetItem.FireRate = baseItem.FireRate;
-
-            if (TryDeserializeDouble(propertiesJson, "ergonomics", out double ergonomics))
-            {
-                presetItem.Ergonomics = ergonomics;
-            }
-
-            if (TryDeserializeDouble(propertiesJson, "moa", out double moa))
-            {
-                presetItem.MinuteOfAngle = moa;
-            }
-
-            if (TryDeserializeDouble(propertiesJson, "recoilHorizontal", out double horizontalRecoil))
-            {
-                presetItem.HorizontalRecoil = horizontalRecoil;
-            }
-
-            if (TryDeserializeDouble(propertiesJson, "recoilVertical", out double verticalRecoil))
-            {
-                presetItem.VerticalRecoil = verticalRecoil;
-            }
-
-            return presetItem;
-        }
-
-        /// <summary>
-        /// Deserializes an <see cref="RangedWeaponMod"/> preset.
-        /// </summary>
-        /// <param name="presetId">Preset ID.</param>
-        /// <param name="presetJson">JSON element representing the preset.</param>
-        /// <param name="baseItem">Base item.</param>
-        /// <returns>Deserialized <see cref="RangedWeaponMod"/> preset.</returns>
-        private static RangedWeaponMod DeserializeRangedWeaponModPreset(string presetId, JsonElement presetJson, IRangedWeaponMod baseItem)
-        {
-            RangedWeaponMod presetItem = DeserializeBasePresetProperties<RangedWeaponMod>(presetId, presetJson, baseItem);
-
-            presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
-            presetItem.RecoilPercentageModifier = baseItem.RecoilPercentageModifier;
-
-            return presetItem;
-        }
-
-        /// <summary>
-        /// Represents the result of a preset deserialization.
-        /// </summary>
-        private class DeserializedPreset
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="DeserializedPreset"/> class.
-            /// </summary>
-            /// <param name="preset">Preset.</param>
-            /// <param name="presetItem">Preset item.</param>
-            public DeserializedPreset(InventoryItem preset, Item presetItem)
-            {
-                InventoryItem = preset;
-                Item = presetItem;
-            }
-
-            /// <summary>
-            /// Deserialized preset in the form of an <see cref="InventoryItem"/>.
-            /// </summary>
-            public InventoryItem InventoryItem { get; private set; }
-
-            /// <summary>
-            /// <see cref="Item"/> corresponding to the deserialized preset.
-            /// </summary>
-            public Item Item { get; private set; }
         }
     }
 }
