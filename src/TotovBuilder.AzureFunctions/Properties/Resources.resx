@@ -188,6 +188,12 @@
     <value>Error while deserializing item missing properties :
 {0}</value>
   </data>
+  <data name="ItemNotFound" xml:space="preserve">
+    <value>Item "{0}" not found.</value>
+  </data>
+  <data name="ItemNotModdable" xml:space="preserve">
+    <value>Item "{0}" is not moddable.</value>
+  </data>
   <data name="PresetContructionError" xml:space="preserve">
     <value>Error while constructing preset "{0}" :
 Cannot find a slot for items "{1}".</value>

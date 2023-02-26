@@ -108,11 +108,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             await Task.WhenAll(deserializationTasks);
+            deserializationTasks.Clear();
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
             {
                 deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Preset, itemJson, items)));
             }
+
+            await Task.WhenAll(deserializationTasks);
 
             return Result.Ok(items.AsEnumerable());
         }
@@ -547,10 +550,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            string error = Properties.Resources.ItemCategoryNotImplemented;
-            Logger.LogError(error);
-
-            throw new NotImplementedException(error);
+            throw new NotImplementedException(Properties.Resources.ItemCategoryNotImplemented);
         }
 
         /// <summary>

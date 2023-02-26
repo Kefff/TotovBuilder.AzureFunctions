@@ -98,47 +98,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         ""containsItems"": [
             {
             ""item"": {
-                ""id"": ""not-supported-item""
+                ""id"": ""5a16b7e1fcdbcb00165aa6c9""
             },
             ""quantity"": 1
             }
         ],
-        ""iconLink"": ""https://assets.tarkov.dev/preset-not-supported-item-icon.jpg"",
-        ""id"": ""preset-not-supported-item"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/preset-not-supported-item-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/preset-not-supported-item"",
-        ""name"": ""Not moddable item"",
-        ""properties"": {
-            ""baseItem"": {
-            ""id"": ""not-supported-item""
-            },
-            ""moa"": null
-        },
-        ""shortName"": ""NSI"",
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/preset-not-supported-item""
-      },
-      {
-        ""containsItems"": [
-          {
-            ""item"": {
-              ""id"": ""5a16b7e1fcdbcb00165aa6c9""
-            },
-            ""quantity"": 1
-          }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/preset-item-without-properties-icon.jpg"",
-        ""id"": ""preset-item-without-properties"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/preset-item-without-properties-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/preset-item-without-properties"",
-        ""name"": ""Item without properties"",
-        ""properties"": {
-          ""baseItem"": {
-            ""id"": ""item-without-properties""
-          },
-          ""moa"": null
-        },
-        ""shortName"": ""IWP"",
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/preset-item-without-properties""
+        ""id"": ""preset-not-existing""
       },
       {
         ""containsItems"": [
@@ -149,19 +114,40 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ""quantity"": 1
             }
         ],
-        ""iconLink"": ""https://assets.tarkov.dev/preset-face-shield-alone-icon.jpg"",
-        ""id"": ""preset-face-shield-alone"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/preset-face-shield-alone-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/preset-face-shield-alone"",
-        ""name"": ""Face shield alone"",
-        ""properties"": {
-            ""baseItem"": {
-            ""id"": ""5a16b7e1fcdbcb00165aa6c9""
+        ""id"": ""preset-not-moddable""
+      },
+      {
+        ""containsItems"": [
+            {
+            ""item"": {
+                ""id"": ""base-item-not-existing""
             },
-            ""moa"": null
-        },
-        ""shortName"": ""FSA"",
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/preset-face-shield-alone""
+            ""quantity"": 1
+            }
+        ],
+        ""id"": ""preset-with-base-item-not-existing""
+      },
+      {
+        ""containsItems"": [
+            {
+            ""item"": {
+                ""id"": ""base-item-not-moddable""
+            },
+            ""quantity"": 1
+            }
+        ],
+        ""id"": ""preset-with-base-item-not-moddable""
+      },
+      {
+        ""containsItems"": [
+            {
+            ""item"": {
+                ""id"": ""5a16b7e1fcdbcb00165aa6c9""
+            },
+            ""quantity"": 1
+            }
+        ],
+        ""id"": ""preset-face-shield-alone""
       }
     ]
   }
@@ -177,9 +163,23 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IItemsFetcher> itemsFetcherMock = new();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(new List<Item>(TestData.Items)
             {
-                new NotSupportedItem()
+                new Item()
                 {
-                    Id = "not-supported-item"
+                    Id = "preset-not-moddable"
+                },
+                new Mod()
+                {
+                    BaseItemId = "base-item-not-existing",
+                    Id = "preset-with-base-item-not-existing"
+                },
+                new Mod()
+                {
+                    BaseItemId = "base-item-not-moddable",
+                    Id = "preset-with-base-item-not-moddable"
+                },
+                new Item()
+                {
+                    Id = "base-item-not-moddable"
                 }
             }));
 
@@ -393,19 +393,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
               ""quantity"": 30
             }
         ],
-        ""iconLink"": ""https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg"",
-        ""id"": ""preset-non-magazine-item-with-ammunition"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg"",
-        ""link"": ""https://tarkov.dev/item/preset-non-magazine-item-with-ammunition"",
-        ""name"": ""Non magazine with ammunition"",
-        ""properties"": {
-            ""baseItem"": {
-            ""id"": ""57dc324a24597759501edc20""
-            },
-            ""moa"": null
-        },
-        ""shortName"": ""NMWA"",
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/preset-non-magazine-item-with-ammunition""
+        ""id"": ""preset-non-magazine-item-with-ammunition""
       }
     ]
   }

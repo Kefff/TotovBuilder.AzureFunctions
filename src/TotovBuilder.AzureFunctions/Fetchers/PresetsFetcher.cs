@@ -307,10 +307,27 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             string presetId = presetJson.GetProperty("id").GetString()!;
 
-            if (Items.FirstOrDefault(i => i.Id == presetId) is not IModdable presetItem
-                || Items.FirstOrDefault(i => i.Id == presetItem?.BaseItemId) is not IModdable baseItem)
+            Item? presetItem = Items.FirstOrDefault(i => i.Id == presetId);
+
+            if (presetItem == null)
             {
-                return null;
+                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, presetId));
+            }
+            else if (presetItem is not IModdable)
+            {
+                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotModdable, presetId));
+            }
+
+            string baseItemId = ((IModdable)presetItem).BaseItemId!;
+            Item? baseItem = Items.FirstOrDefault(i => i.Id == baseItemId);
+
+            if (baseItem == null)
+            {
+                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, baseItemId));
+            }
+            else if (baseItem is not IModdable)
+            {
+                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotModdable, baseItemId));
             }
 
             Queue<PresetContainedItem> containedItems = new();
@@ -331,7 +348,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 containedItems.Enqueue(new PresetContainedItem(containedItem, quantity));
             }
 
-            InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
+            InventoryItem preset = ConstructPreset(presetId, (IModdable)baseItem, containedItems);
 
             return preset;
         }

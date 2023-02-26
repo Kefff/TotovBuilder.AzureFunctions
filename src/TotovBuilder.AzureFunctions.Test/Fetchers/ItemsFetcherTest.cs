@@ -97,7 +97,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<Item>>(It.IsAny<DataType>())).Returns(value: null);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
@@ -2288,41 +2287,40 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
-  ""data"": {
-    ""items"": [
-      {
-      },
-      {
-        ""categories"": [
-          {
-            ""id"": ""5c164d2286f774194c5e69fa""
-          },
-          {
-            ""id"": ""543be5e94bdc2df1348b4568""
+          ""data"": {
+            ""items"": [
+              {
+              },
+              {
+                ""categories"": [
+                  {
+                    ""id"": ""5c164d2286f774194c5e69fa""
+                  },
+                  {
+                    ""id"": ""543be5e94bdc2df1348b4568""
+                  }
+                ],
+                ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
+                ""id"": ""5c1d0c5f86f7744bb2683cf0"",
+                ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
+                ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
+                ""name"": ""TerraGroup Labs keycard (Blue)"",
+                ""properties"": {
+                  ""__typename"": ""ItemPropertiesKey""
+                },
+                ""shortName"": ""Blue"",
+                ""weight"": 0.01,
+                ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
+              }
+            ]
           }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
-        ""id"": ""5c1d0c5f86f7744bb2683cf0"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
-        ""name"": ""TerraGroup Labs keycard (Blue)"",
-        ""properties"": {
-          ""__typename"": ""ItemPropertiesKey""
-        },
-        ""shortName"": ""Blue"",
-        ""weight"": 0.01,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
-      }
-    ]
-  }
-}") }));
+        }") }));
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
             Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<Item>>(It.IsAny<DataType>())).Returns(value: null);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
@@ -2352,19 +2350,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEquivalentTo(new Item[]
             {
-                new Item()
-                {
-                    CategoryId = "other",
-                    IconLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg",
-                    Id = "5c1d0c5f86f7744bb2683cf0",
-                    ImageLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/terragroup-labs-keycard-blue",
-                    MaxStackableAmount = 1,
-                    Name = "TerraGroup Labs keycard (Blue)",
-                    ShortName = "Blue",
-                    Weight = 0.01,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
-                }
+                        new Item()
+                        {
+                            CategoryId = "other",
+                            IconLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg",
+                            Id = "5c1d0c5f86f7744bb2683cf0",
+                            ImageLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg",
+                            MarketLink = "https://tarkov.dev/item/terragroup-labs-keycard-blue",
+                            MaxStackableAmount = 1,
+                            Name = "TerraGroup Labs keycard (Blue)",
+                            ShortName = "Blue",
+                            Weight = 0.01,
+                            WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
+                        }
             }, options => options.RespectingRuntimeTypes());
         }
 
@@ -2384,29 +2382,29 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
-  ""data"": {
-    ""items"": [
-      {
-        ""categories"": [
-          {
-            ""id"": ""NotImplementedItemType""
+          ""data"": {
+            ""items"": [
+              {
+                ""categories"": [
+                  {
+                    ""id"": ""NotImplementedItemType""
+                  }
+                ],
+                ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
+                ""id"": ""5c1d0c5f86f7744bb2683cf0"",
+                ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
+                ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
+                ""name"": ""TerraGroup Labs keycard (Blue)"",
+                ""properties"": {
+                  ""__typename"": ""ItemPropertiesKey""
+                },
+                ""shortName"": ""Blue"",
+                ""weight"": 0.01,
+                ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
+              }
+            ]
           }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
-        ""id"": ""5c1d0c5f86f7744bb2683cf0"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
-        ""name"": ""TerraGroup Labs keycard (Blue)"",
-        ""properties"": {
-          ""__typename"": ""ItemPropertiesKey""
-        },
-        ""shortName"": ""Blue"",
-        ""weight"": 0.01,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
-      }
-    ]
-  }
-}") }));
+        }") }));
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
@@ -2417,18 +2415,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(new ItemCategory[]
             {
-                new ItemCategory()
-                {
-                    Id = "NotImplementedItemCategory",
-                    Types = new ItemType[]
-                    {
-                        new ItemType()
+                        new ItemCategory()
                         {
-                            Id = "NotImplementedItemType",
-                            Name = "Not implemented item type"
+                            Id = "NotImplementedItemCategory",
+                            Types = new ItemType[]
+                            {
+                                new ItemType()
+                                {
+                                    Id = "NotImplementedItemType",
+                                    Name = "Not implemented item type"
+                                }
+                            }
                         }
-                    }
-                }
             }));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
@@ -2473,30 +2471,30 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
-  ""data"": {
-    ""items"": [
-      {
-        ""categories"": [
-          {
-            ""id"": ""5448e53e4bdc2d60728b4567""
+          ""data"": {
+            ""items"": [
+              {
+                ""categories"": [
+                  {
+                    ""id"": ""5448e53e4bdc2d60728b4567""
+                  }
+                ],
+                ""iconLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg"",
+                ""id"": ""5ab8ebf186f7742d8b372e80"",
+                ""inspectImageLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg"",
+                ""link"": ""https://tarkov.dev/item/sso-attack-2-raid-backpack"",
+                ""name"": ""SSO Attack 2 raid backpack"",
+                ""properties"": {
+                  ""__typename"": ""ItemPropertiesBackpack"",
+                  ""capacity"": 35
+                },
+                ""shortName"": ""Attack 2"",
+                ""weight"": 6.12,
+                ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack""
+              }
+            ]
           }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg"",
-        ""id"": ""5ab8ebf186f7742d8b372e80"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/sso-attack-2-raid-backpack"",
-        ""name"": ""SSO Attack 2 raid backpack"",
-        ""properties"": {
-          ""__typename"": ""ItemPropertiesBackpack"",
-          ""capacity"": 35
-        },
-        ""shortName"": ""Attack 2"",
-        ""weight"": 6.12,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack""
-      }
-    ]
-  }
-}") }));
+        }") }));
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
@@ -2532,19 +2530,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEquivalentTo(new Item[]
             {
-                new Container()
-                {
-                    Capacity = 35,
-                    CategoryId = "other",
-                    IconLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg",
-                    Id = "5ab8ebf186f7742d8b372e80",
-                    ImageLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/sso-attack-2-raid-backpack",
-                    Name = "SSO Attack 2 raid backpack",
-                    ShortName = "Attack 2",
-                    Weight = 6.12,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack"
-                }
+                        new Container()
+                        {
+                            Capacity = 35,
+                            CategoryId = "other",
+                            IconLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg",
+                            Id = "5ab8ebf186f7742d8b372e80",
+                            ImageLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg",
+                            MarketLink = "https://tarkov.dev/item/sso-attack-2-raid-backpack",
+                            Name = "SSO Attack 2 raid backpack",
+                            ShortName = "Attack 2",
+                            Weight = 6.12,
+                            WikiLink = "https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack"
+                        }
             });
         }
 
@@ -2564,57 +2562,56 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
-  ""data"": {
-    ""items"": [
-      {
-        ""categories"": [
-          {
-            ""id"": ""5c164d2286f774194c5e69fa""
-          },
-          {
-            ""id"": ""543be5e94bdc2df1348b4568""
+          ""data"": {
+            ""items"": [
+              {
+                ""categories"": [
+                  {
+                    ""id"": ""5c164d2286f774194c5e69fa""
+                  },
+                  {
+                    ""id"": ""543be5e94bdc2df1348b4568""
+                  }
+                ],
+                ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
+                ""id"": ""5c1d0c5f86f7744bb2683cf0"",
+                ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
+                ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
+                ""name"": ""TerraGroup Labs keycard (Blue)"",
+                ""properties"": {
+                  ""__typename"": ""ItemPropertiesKey""
+                },
+                ""shortName"": ""Blue"",
+                ""weight"": 0.01,
+                ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
+              },
+              {
+                ""categories"": [
+                  {
+                    ""id"": ""notSupported""
+                  }
+                ],
+                ""iconLink"": ""https://assets.tarkov.dev/preset-not-supported-icon.jpg"",
+                ""id"": ""not-supported"",
+                ""inspectImageLink"": ""https://assets.tarkov.dev/preset-not-supported-image.jpg"",
+                ""link"": ""https://tarkov.dev/item/preset-not-supported"",
+                ""name"": ""Not supported"",
+                ""properties"": {
+                  ""__typename"": ""ItemPropertiesPreset""
+                },
+                ""shortName"": ""NS"",
+                ""weight"": 0.16,
+                ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/preset-not-supported""
+              }
+            ]
           }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg"",
-        ""id"": ""5c1d0c5f86f7744bb2683cf0"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/terragroup-labs-keycard-blue"",
-        ""name"": ""TerraGroup Labs keycard (Blue)"",
-        ""properties"": {
-          ""__typename"": ""ItemPropertiesKey""
-        },
-        ""shortName"": ""Blue"",
-        ""weight"": 0.01,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)""
-      },
-      {
-        ""categories"": [
-          {
-            ""id"": ""notSupported""
-          }
-        ],
-        ""iconLink"": ""https://assets.tarkov.dev/preset-not-supported-icon.jpg"",
-        ""id"": ""not-supported"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/preset-not-supported-image.jpg"",
-        ""link"": ""https://tarkov.dev/item/preset-not-supported"",
-        ""name"": ""Not supported"",
-        ""properties"": {
-          ""__typename"": ""ItemPropertiesPreset""
-        },
-        ""shortName"": ""NS"",
-        ""weight"": 0.16,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/preset-not-supported""
-      }
-    ]
-  }
-}") }));
+        }") }));
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
             Mock<ICache> cacheMock = new();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<Item>>(It.IsAny<DataType>())).Returns(value: null);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
