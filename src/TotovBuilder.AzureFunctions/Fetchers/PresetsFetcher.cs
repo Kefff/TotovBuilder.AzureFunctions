@@ -306,30 +306,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private InventoryItem? DeserializePresetData(JsonElement presetJson)
         {
             string presetId = presetJson.GetProperty("id").GetString()!;
-
-            Item? presetItem = Items.FirstOrDefault(i => i.Id == presetId);
+            IModdable? presetItem = (IModdable?)Items.FirstOrDefault(i => i.Id == presetId);
 
             if (presetItem == null)
             {
-                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, presetId));
-            }
-            else if (presetItem is not IModdable)
-            {
-                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotModdable, presetId));
+                // Ignoring presets that were not added to the items list
+                return null;
             }
 
-            string baseItemId = ((IModdable)presetItem).BaseItemId!;
-            Item? baseItem = Items.FirstOrDefault(i => i.Id == baseItemId);
-
-            if (baseItem == null)
-            {
-                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, baseItemId));
-            }
-            else if (baseItem is not IModdable)
-            {
-                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotModdable, baseItemId));
-            }
-
+            IModdable baseItem = (IModdable)Items.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
             Queue<PresetContainedItem> containedItems = new();
 
             foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())

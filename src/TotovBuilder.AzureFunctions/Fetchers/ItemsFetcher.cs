@@ -671,25 +671,43 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 string presetId = presetItemJson.GetProperty("id").GetString()!;
                 string baseItemId = propertiesJson.GetProperty("baseItem").GetProperty("id").GetString()!;
+                Item? baseItem = items.FirstOrDefault(i => i.Id == baseItemId);
 
-                if (items.FirstOrDefault(i => i is IModdable && i.Id == baseItemId) is not IModdable baseItem)
+                if (baseItem == null)
                 {
-                    // Presets like the "customdogtags12345678910" preset that has a base item that is not moddable
+                    throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, baseItemId));
+                }
+                else if (baseItem is not IModdable)
+                {
+                    // Ignoring presets like the "customdogtags12345678910" preset that has a base item that is not moddable
                     return null;
                 }
 
-                IModdable presetItem = baseItem switch
-                {
-                    IArmorMod => DeserializeArmorModPreset(presetId, presetItemJson, (IArmorMod)baseItem),
-                    IHeadwear => DeserializeHeadwearPreset(presetId, presetItemJson, (IHeadwear)baseItem),
-                    IMagazine => DeserializeMagazinePreset(presetId, presetItemJson, (IMagazine)baseItem),
-                    IRangedWeapon => DeserializeRangedWeaponPreset(presetId, presetItemJson, propertiesJson, (IRangedWeapon)baseItem),
-                    IRangedWeaponMod => DeserializeRangedWeaponModPreset(presetId, presetItemJson, (IRangedWeaponMod)baseItem),
-                    IMod => DeserializeModPreset(presetId, presetItemJson, (IMod)baseItem),
-                    _ => throw new NotSupportedException(),
-                };
+                IModdable? presetItem = null;
 
-                return (Item)presetItem;
+                switch (baseItem)
+                {
+                    case IArmorMod:
+                        presetItem = DeserializeArmorModPreset(presetId, presetItemJson, (IArmorMod)baseItem);
+                        break;
+                    case IHeadwear:
+                        presetItem = DeserializeHeadwearPreset(presetId, presetItemJson, (IHeadwear)baseItem);
+                        break;
+                    case IMagazine:
+                        presetItem = DeserializeMagazinePreset(presetId, presetItemJson, (IMagazine)baseItem);
+                        break;
+                    case IRangedWeapon:
+                        presetItem = DeserializeRangedWeaponPreset(presetId, presetItemJson, propertiesJson, (IRangedWeapon)baseItem);
+                        break;
+                    case IRangedWeaponMod:
+                        presetItem = DeserializeRangedWeaponModPreset(presetId, presetItemJson, (IRangedWeaponMod)baseItem);
+                        break;
+                    case IMod:
+                        presetItem = DeserializeModPreset(presetId, presetItemJson, (IMod)baseItem);
+                        break;
+                }
+
+                return (Item?)presetItem;
             }
 
             return null;

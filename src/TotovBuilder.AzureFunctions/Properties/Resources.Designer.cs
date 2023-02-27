@@ -10,8 +10,9 @@
 
 namespace TotovBuilder.AzureFunctions.Properties {
     using System;
-    
-    
+    using System.Diagnostics.CodeAnalysis;
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,6 +23,7 @@ namespace TotovBuilder.AzureFunctions.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [ExcludeFromCodeCoverage]
     internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
@@ -257,15 +259,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string ItemNotFound {
             get {
                 return ResourceManager.GetString("ItemNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Item &quot;{0}&quot; is not moddable..
-        /// </summary>
-        internal static string ItemNotModdable {
-            get {
-                return ResourceManager.GetString("ItemNotModdable", resourceCulture);
             }
         }
         

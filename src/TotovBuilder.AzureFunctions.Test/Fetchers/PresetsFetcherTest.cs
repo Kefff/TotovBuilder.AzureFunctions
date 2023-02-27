@@ -114,39 +114,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ""quantity"": 1
             }
         ],
-        ""id"": ""preset-not-moddable""
-      },
-      {
-        ""containsItems"": [
-            {
-            ""item"": {
-                ""id"": ""base-item-not-existing""
-            },
-            ""quantity"": 1
-            }
-        ],
-        ""id"": ""preset-with-base-item-not-existing""
-      },
-      {
-        ""containsItems"": [
-            {
-            ""item"": {
-                ""id"": ""base-item-not-moddable""
-            },
-            ""quantity"": 1
-            }
-        ],
-        ""id"": ""preset-with-base-item-not-moddable""
-      },
-      {
-        ""containsItems"": [
-            {
-            ""item"": {
-                ""id"": ""5a16b7e1fcdbcb00165aa6c9""
-            },
-            ""quantity"": 1
-            }
-        ],
         ""id"": ""preset-face-shield-alone""
       }
     ]
@@ -161,27 +128,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(new List<Item>(TestData.Items)
-            {
-                new Item()
-                {
-                    Id = "preset-not-moddable"
-                },
-                new Mod()
-                {
-                    BaseItemId = "base-item-not-existing",
-                    Id = "preset-with-base-item-not-existing"
-                },
-                new Mod()
-                {
-                    BaseItemId = "base-item-not-moddable",
-                    Id = "preset-with-base-item-not-moddable"
-                },
-                new Item()
-                {
-                    Id = "base-item-not-moddable"
-                }
-            }));
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(new List<Item>(TestData.Items)));
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -487,13 +434,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ItemId = "preset-non-magazine-item-with-ammunition"
                 }
             });
-        }
-
-        private class NotSupportedItem : Item, IModdable
-        {
-            public string? BaseItemId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-            public string? DefaultPresetId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-            public ModSlot[] ModSlots { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
     }
 }
