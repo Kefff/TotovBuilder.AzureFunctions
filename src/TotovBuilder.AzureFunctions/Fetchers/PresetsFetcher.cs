@@ -111,20 +111,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 containedItems.Dequeue();
                 AddContent(inventoryItem, item, containedItems); // Continuing adding content while contained items are not moddable
             }
-            else if (containedItem.Item is not IModdable
-                && item is not IMagazine
-                && item is IContainer)
-            {
-                InventoryItem containedInventoryItem = new()
-                {
-                    ItemId = containedItem.Item.Id,
-                    Quantity = containedItem.Quantity
-                };
-                inventoryItem.Content = inventoryItem.Content.Append(containedInventoryItem).ToArray();
+            //else if (containedItem.Item is not IModdable
+            //    && item is not IMagazine
+            //    && item is IContainer)
+            //{
+            //    // For now, we cannot pass here because there a not IModdable containers other than magazines
+            //    InventoryItem containedInventoryItem = new()
+            //    {
+            //        ItemId = containedItem.Item.Id,
+            //        Quantity = containedItem.Quantity
+            //    };
+            //    inventoryItem.Content = inventoryItem.Content.Append(containedInventoryItem).ToArray();
 
-                containedItems.Dequeue();
-                AddContent(containedInventoryItem, containedItem.Item, containedItems); // Continuing adding content while contained items are not moddable
-            }
+            //    containedItems.Dequeue();
+            //    AddContent(containedInventoryItem, containedItem.Item, containedItems); // Continuing adding content while contained items are not moddable
+            //}
         }
 
         /// <summary>
