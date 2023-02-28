@@ -435,5 +435,181 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 }
             });
         }
+
+        [Fact]
+        public async Task Fetch_WithMoreModslotThanContainedItems_ShouldStopConstructingPresetWhenNoContainedItemRemains()
+        {
+            // Arrange
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(async () =>
+                {
+                    await Task.Delay(1000);
+                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+          ""data"": {
+            ""items"": [
+              {
+                ""containsItems"": [
+                  {
+                    ""item"": {
+                      ""id"": ""57e3dba62459770f0c32322b""
+                    },
+                    ""quantity"": 1
+                  }
+                ],
+                ""id"": ""584147732459775a2b6d9f12""
+              }
+            ]
+          }
+        }") };
+                });
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            Mock<ICache> cacheMock = new();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+
+            Mock<IItemsFetcher> itemsFetcherMock = new();
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Items));
+
+            PresetsFetcher fetcher = new(
+                new Mock<ILogger<PresetsFetcher>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationCacheMock.Object,
+                cacheMock.Object,
+                itemsFetcherMock.Object);
+
+            // Act
+            IEnumerable<InventoryItem>? result = (await fetcher.Fetch())?.OrderBy(p => p.ItemId);
+
+            // Assert
+            IEnumerable<InventoryItem> expected = new List<InventoryItem>()
+            {
+                new InventoryItem()
+                {
+                    ItemId = "584147732459775a2b6d9f12",
+                    ModSlots = new InventoryItemModSlot[]
+                    {
+                        new InventoryItemModSlot()
+                        {
+                            Item = new InventoryItem()
+                            {
+                                ItemId = "57e3dba62459770f0c32322b",
+                            },
+                            ModSlotName = "mod_pistol_grip"
+                        }
+                    }
+                }
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public async Task Fetch_WithNonModdableContainedItems_ShouldStopConstructingPresetWhenNoContainedItemRemains()
+        {
+            // Arrange
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(async () =>
+                {
+                    await Task.Delay(1000);
+                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+          ""data"": {
+            ""items"": [
+              {
+                ""containsItems"": [
+                  {
+                    ""item"": {
+                      ""id"": ""5894a05586f774094708ef75""
+                    },
+                    ""quantity"": 1
+                  },
+                  {
+                    ""item"": {
+                      ""id"": ""5efb0da7a29a85116f6ea05f""
+                    },
+                    ""quantity"": 10
+                  },
+                  {
+                    ""item"": {
+                      ""id"": ""5c3df7d588a4501f290594e5""
+                    },
+                    ""quantity"": 20
+                  }
+                ],
+                ""id"": ""5a8ae43686f774377b73cfb3""
+              }
+            ]
+          }
+        }") };
+                });
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            Mock<ICache> cacheMock = new();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+
+            Mock<IItemsFetcher> itemsFetcherMock = new();
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Items));
+
+            PresetsFetcher fetcher = new(
+                new Mock<ILogger<PresetsFetcher>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationCacheMock.Object,
+                cacheMock.Object,
+                itemsFetcherMock.Object);
+
+            // Act
+            IEnumerable<InventoryItem>? result = (await fetcher.Fetch())?.OrderBy(p => p.ItemId);
+
+            // Assert
+            IEnumerable<InventoryItem> expected = new List<InventoryItem>()
+            {
+                new InventoryItem()
+                {
+                    ItemId = "5a8ae43686f774377b73cfb3",
+                    ModSlots = new InventoryItemModSlot[]
+                    {
+                        new InventoryItemModSlot()
+                        {
+                            Item = new InventoryItem()
+                            {
+                                Content = new InventoryItem[]
+                                {
+                                    new InventoryItem()
+                                    {
+                                        ItemId = "5efb0da7a29a85116f6ea05f",
+                                        Quantity = 30
+                                    }
+                                },
+                                ItemId = "5894a05586f774094708ef75",
+                            },
+                            ModSlotName = "mod_magazine"
+                        }
+                    }
+                }
+            };
+            result.Should().BeEquivalentTo(expected);
+        }
     }
 }
