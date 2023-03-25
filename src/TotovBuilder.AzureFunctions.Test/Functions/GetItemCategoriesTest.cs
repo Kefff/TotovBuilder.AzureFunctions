@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker.Http;
 using Moq;
@@ -38,8 +39,9 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
 
             // Assert
+            IEnumerable<string> expected = TestData.ItemCategories.Select(c => c.Id);
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), TestData.ItemCategories));
+            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), expected));
         }
 
         [Fact]

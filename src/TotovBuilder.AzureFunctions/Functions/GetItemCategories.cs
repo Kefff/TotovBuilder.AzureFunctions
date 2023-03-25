@@ -51,7 +51,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "itemcategories")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<ItemCategory> itemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
+            IEnumerable<string> itemCategories = (await ItemCategoriesFetcher.Fetch())?.Select(c => c.Id) ?? Array.Empty<string>();
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, itemCategories);
         }
