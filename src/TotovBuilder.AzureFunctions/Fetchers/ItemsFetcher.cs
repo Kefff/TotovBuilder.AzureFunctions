@@ -484,6 +484,26 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             return DeserializeBaseItemProperties<Item>(itemJson, itemCategoryId);
         }
+        
+        /// <summary>
+        /// Deserializes the category of an item.
+        /// </summary>
+        /// <param name="itemJson">Json element representing the item to deserialize.</param>
+        /// <returns>Deserialized item category.</returns>
+        private ItemCategory DeserializeItemCategory(JsonElement itemJson)
+        {
+            List<string> tarkovItemCategoryIds = new();
+            JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
+
+            foreach (JsonElement tarkovItemCategoryJson in tarkovItemCategoriesJson.EnumerateArray())
+            {
+                tarkovItemCategoryIds.Add(tarkovItemCategoryJson.GetProperty("id").GetString()!);
+            }
+
+            ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategoryIds);
+
+            return itemCategory;
+        }
 
         /// <summary>
         /// Deserializes data representing an item.
@@ -496,61 +516,50 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 return null;
             }
+            
+            ItemCategory itemCategory = DeserializeItemCategory(itemJson);
 
-            List<string> tarkovItemCategories = new();
-            JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
-
-            foreach (JsonElement tarkovItemCategoryJson in tarkovItemCategoriesJson.EnumerateArray())
+            switch (itemCategory.Id)
             {
-                tarkovItemCategories.Add(tarkovItemCategoryJson.GetProperty("id").GetString()!);
+                case "ammunition":
+                    return DeserializeAmmunition(itemJson, itemCategory.Id);
+                case "armor":
+                    return DeserializeArmor(itemJson, itemCategory.Id);
+                case "armorMod":
+                    return DeserializeArmorMod(itemJson, itemCategory.Id);
+                case "backpack":
+                case "container":
+                case "securedContainer":
+                    return DeserializeContainer(itemJson, itemCategory.Id);
+                case "eyewear":
+                    return DeserializeEyewear(itemJson, itemCategory.Id);
+                case "grenade":
+                    return DeserializeGrenade(itemJson, itemCategory.Id);
+                case "headwear":
+                    return DeserializeHeadwear(itemJson, itemCategory.Id);
+                case "armband":
+                case "currency":
+                case "faceCover":
+                case "headphones":
+                case "other":
+                case "special":
+                    return DeserializeItem(itemJson, itemCategory.Id);
+                case "magazine":
+                    return DeserializeMagazine(itemJson, itemCategory.Id);
+                case "meleeWeapon":
+                    return DeserializeMeleeWeapon(itemJson, itemCategory.Id);
+                case "mod":
+                    return DeserializeMod(itemJson, itemCategory.Id);
+                case "mainWeapon":
+                case "secondaryWeapon":
+                    return DeserializeRangedWeapon(itemJson, itemCategory.Id);
+                case "rangedWeaponMod":
+                    return DeserializeRangedWeaponMod(itemJson, itemCategory.Id);
+                case "vest":
+                    return DeserializeVest(itemJson, itemCategory.Id);
+                default:
+                    throw new NotImplementedException(Properties.Resources.ItemCategoryNotImplemented);
             }
-
-            foreach (string tarkovItemCategory in tarkovItemCategories)
-            {
-                ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategory);
-
-                switch (itemCategory.Id)
-                {
-                    case "ammunition":
-                        return DeserializeAmmunition(itemJson, itemCategory.Id);
-                    case "armor":
-                        return DeserializeArmor(itemJson, itemCategory.Id);
-                    case "armorMod":
-                        return DeserializeArmorMod(itemJson, itemCategory.Id);
-                    case "backpack":
-                    case "container":
-                    case "securedContainer":
-                        return DeserializeContainer(itemJson, itemCategory.Id);
-                    case "eyewear":
-                        return DeserializeEyewear(itemJson, itemCategory.Id);
-                    case "grenade":
-                        return DeserializeGrenade(itemJson, itemCategory.Id);
-                    case "headwear":
-                        return DeserializeHeadwear(itemJson, itemCategory.Id);
-                    case "armband":
-                    case "currency":
-                    case "faceCover":
-                    case "headphones":
-                    case "other":
-                    case "special":
-                        return DeserializeItem(itemJson, itemCategory.Id);
-                    case "magazine":
-                        return DeserializeMagazine(itemJson, itemCategory.Id);
-                    case "meleeWeapon":
-                        return DeserializeMeleeWeapon(itemJson, itemCategory.Id);
-                    case "mod":
-                        return DeserializeMod(itemJson, itemCategory.Id);
-                    case "mainWeapon":
-                    case "secondaryWeapon":
-                        return DeserializeRangedWeapon(itemJson, itemCategory.Id);
-                    case "rangedWeaponMod":
-                        return DeserializeRangedWeaponMod(itemJson, itemCategory.Id);
-                    case "vest":
-                        return DeserializeVest(itemJson, itemCategory.Id);
-                }
-            }
-
-            throw new NotImplementedException(Properties.Resources.ItemCategoryNotImplemented);
         }
 
         /// <summary>
@@ -665,52 +674,53 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized preset item.</returns>
         private Item? DeserializePresetItemData(JsonElement presetItemJson, ConcurrentBag<Item> items)
         {
-            if (IsPreset(presetItemJson)
-                && TryDeserializeObject(presetItemJson, "properties", out JsonElement propertiesJson)
-                && propertiesJson.EnumerateObject().Count() > 1)
+            if (!IsPreset(presetItemJson)
+                || !TryDeserializeObject(presetItemJson, "properties", out JsonElement propertiesJson)
+                || propertiesJson.EnumerateObject().Count() <= 1)
             {
-                string presetId = presetItemJson.GetProperty("id").GetString()!;
-                string baseItemId = propertiesJson.GetProperty("baseItem").GetProperty("id").GetString()!;
-                Item? baseItem = items.FirstOrDefault(i => i.Id == baseItemId);
-
-                if (baseItem == null)
-                {
-                    throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, baseItemId));
-                }
-                else if (baseItem is not IModdable)
-                {
-                    // Ignoring presets like the "customdogtags12345678910" preset that has a base item that is not moddable
-                    return null;
-                }
-
-                IModdable? presetItem = null;
-
-                switch (baseItem)
-                {
-                    case IArmorMod:
-                        presetItem = DeserializeArmorModPreset(presetId, presetItemJson, (IArmorMod)baseItem);
-                        break;
-                    case IHeadwear:
-                        presetItem = DeserializeHeadwearPreset(presetId, presetItemJson, (IHeadwear)baseItem);
-                        break;
-                    case IMagazine:
-                        presetItem = DeserializeMagazinePreset(presetId, presetItemJson, (IMagazine)baseItem);
-                        break;
-                    case IRangedWeapon:
-                        presetItem = DeserializeRangedWeaponPreset(presetId, presetItemJson, propertiesJson, (IRangedWeapon)baseItem);
-                        break;
-                    case IRangedWeaponMod:
-                        presetItem = DeserializeRangedWeaponModPreset(presetId, presetItemJson, (IRangedWeaponMod)baseItem);
-                        break;
-                    case IMod:
-                        presetItem = DeserializeModPreset(presetId, presetItemJson, (IMod)baseItem);
-                        break;
-                }
-
-                return (Item?)presetItem;
+                return null;
             }
 
-            return null;
+            string presetId = presetItemJson.GetProperty("id").GetString()!;
+            string baseItemId = propertiesJson.GetProperty("baseItem").GetProperty("id").GetString()!;
+            Item? baseItem = items.FirstOrDefault(i => i.Id == baseItemId);
+
+            if (baseItem == null)
+            {
+                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, baseItemId));
+            }
+
+            IItem? presetItem = null;
+
+            switch (baseItem)
+            {
+                case IArmorMod:
+                    presetItem = DeserializeArmorModPreset(presetId, presetItemJson, (IArmorMod)baseItem);
+                    break;
+                case IHeadwear:
+                    presetItem = DeserializeHeadwearPreset(presetId, presetItemJson, (IHeadwear)baseItem);
+                    break;
+                case IMagazine:
+                    presetItem = DeserializeMagazinePreset(presetId, presetItemJson, (IMagazine)baseItem);
+                    break;
+                case IRangedWeapon:
+                    presetItem = DeserializeRangedWeaponPreset(presetId, presetItemJson, propertiesJson, (IRangedWeapon)baseItem);
+                    break;
+                case IRangedWeaponMod:
+                    presetItem = DeserializeRangedWeaponModPreset(presetId, presetItemJson, (IRangedWeaponMod)baseItem);
+                    break;
+                case IMod:
+                    presetItem = DeserializeModPreset(presetId, presetItemJson, (IMod)baseItem);
+                    break;
+                default:
+                    // Special case for items like "customdogtags12345678910" that is a preset of dogtags.
+                    // The base item is not moddable, but we need to include it because it can be used in a barter.
+                    ItemCategory itemCategory = DeserializeItemCategory(presetItemJson);
+                    presetItem = DeserializeItem(presetItemJson, itemCategory.Id);
+                    break;
+            }
+
+            return (Item)presetItem;
         }
 
         /// <summary>
@@ -904,14 +914,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Gets an item category from a tarkov item category ID.
         /// When no matching item category is found, return the "other" item category.
         /// </summary>
-        /// <param name="tarkovCategoryIds">Tarkov item category IDs.</param>
+        /// <param name="tarkovItemCategoryIds">Tarkov item category IDs.</param>
         /// <returns>Item category.</returns>
-        private ItemCategory GetItemCategoryFromTarkovCategoryId(string tarkovCategoryId)
+        private ItemCategory GetItemCategoryFromTarkovCategoryId(IEnumerable<string> tarkovItemCategoryIds)
         {
-            ItemCategory? result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovCategoryId))
-                ?? new ItemCategory() { Id = "other" };
+            ItemCategory? result;
 
-            return result;
+            foreach (string tarkovItemCategoryId in tarkovItemCategoryIds)
+            {
+                result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovItemCategoryId));
+
+                    if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return new ItemCategory() { Id = "other" };
         }
 
         /// <summary>

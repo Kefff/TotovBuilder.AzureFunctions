@@ -38,7 +38,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Price> prices = new();
+            List<Price> barters = new();
 
             JsonElement bartersJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -93,7 +93,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             }
                         }
 
-                        prices.Add(barter);
+                        barters.Add(barter);
                     }
                 }
                 catch (Exception e)
@@ -103,7 +103,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            return Task.FromResult(Result.Ok(prices.AsEnumerable()));
+            // Ignoring barters that require the same item as the one obtained to avoid price calculation infinite loops
+            barters.RemoveAll(b => b.BarterItems.Any(bi => bi.ItemId == b.ItemId));
+
+            return Task.FromResult(Result.Ok(barters.AsEnumerable()));
         }
     }
 }

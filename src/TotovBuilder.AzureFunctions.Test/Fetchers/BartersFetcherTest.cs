@@ -1,12 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
+using TotovBuilder.AzureFunctions.Functions;
+using TotovBuilder.AzureFunctions.Test.Mocks;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Test;
@@ -53,6 +58,111 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             // Assert
             result.Should().BeEquivalentTo(TestData.Barters);
+        }
+
+        [Fact]
+        public async Task Fetch_WithBartersRequiringObtainedItem_ShouldIgnoreThoseBarters()
+        {
+            // Arrange
+            string bartersJson = @"{
+  ""data"": {
+    ""barters"": [
+      {
+        ""level"": 3,
+        ""requiredItems"": [
+          {
+            ""item"": {
+              ""id"": ""545cdb794bdc2d3a198b456a""
+            },
+            ""quantity"": 2
+          }
+        ],
+        ""rewardItems"": [
+          {
+            ""item"": {
+              ""id"": ""545cdb794bdc2d3a198b456a""
+            },
+            ""quantity"": 1
+          }
+        ],
+        ""trader"": {
+          ""normalizedName"": ""mechanic""
+        }
+      },
+      {
+        ""level"": 2,
+        ""requiredItems"": [
+          {
+            ""item"": {
+              ""id"": ""5448be9a4bdc2dfd2f8b456a""
+            },
+            ""quantity"": 1
+          }
+        ],
+        ""rewardItems"": [
+          {
+            ""item"": {
+              ""id"": ""545cdb794bdc2d3a198b456a""
+            },
+            ""quantity"": 1
+          }
+        ],
+        ""trader"": {
+          ""normalizedName"": ""mechanic""
+        }
+      }
+    ]
+  }
+}";
+
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiBartersQuery = "{ barters { level requiredItems { item { id } quantity } rewardItems { item { id } quantity } trader { normalizedName } taskUnlock { id }  }  }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(bartersJson) }));
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            Mock<ICache> cacheMock = new();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+
+            BartersFetcher fetcher = new(
+                new Mock<ILogger<BartersFetcher>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationCacheMock.Object,
+                cacheMock.Object);
+
+            // Act
+            IEnumerable<Price>? result = await fetcher.Fetch();
+
+            // Assert
+            result.Should().BeEquivalentTo(
+                new Price[]
+                {
+                    new Price()
+                    {
+                        BarterItems = new BarterItem[]
+                        {
+                            new BarterItem()
+                            {
+                                ItemId = "5448be9a4bdc2dfd2f8b456a",
+                                Quantity = 1
+                            }
+                        },
+                        CurrencyName = "barter",
+                        ItemId = "545cdb794bdc2d3a198b456a",
+                        Merchant = "mechanic",
+                        MerchantLevel = 2
+                    }
+                });
         }
 
         [Fact]
