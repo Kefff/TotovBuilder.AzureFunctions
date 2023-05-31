@@ -26,7 +26,8 @@
         /// </summary>
         /// <param name="dataType">Type of data to store.</param>
         /// <param name="data">Data to store.</param>
-        void Store<T>(DataType dataType, T data)
+        /// <param name="updateStorageDate">Indicates whether the storage date must be updated or not.</param>
+        void Store<T>(DataType dataType, T data, bool updateStorageDate = true)
             where T : class;
 
         /// <summary>

@@ -20,8 +20,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     /// </summary>
     public class PricesFetcherTest
     {
-        [Fact]
-        public async Task Fetch_ShouldReturnPrices()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Fetch_ShouldReturnPrices(bool hasTarkovValues)
         {
             // Arrange
             Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
@@ -44,7 +46,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(hasTarkovValues ? TestData.TarkovValues : null));
 
             PricesFetcher fetcher = new(
                 new Mock<ILogger<PricesFetcher>>().Object,
@@ -57,9 +59,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             IEnumerable<Price>? result = await fetcher.Fetch();
 
             // Assert
-            List<Price> expected = new(TestData.Prices)
+            List<Price> expected = new(TestData.Prices);
+
+            if (hasTarkovValues)
             {
-                new Price()
+                expected.Add(new Price()
                 {
                     CurrencyName = "RUB",
                     ItemId = "5449016a4bdc2d6f028b456f",
@@ -67,8 +71,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     MerchantLevel = 1,
                     Value = 1,
                     ValueInMainCurrency = 1
-                }
-            };
+                });
+            }
+
             result.Should().BeEquivalentTo(expected);
         }
 

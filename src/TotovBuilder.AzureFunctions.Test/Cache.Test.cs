@@ -106,21 +106,28 @@ namespace TotovBuilder.AzureFunctions.Test
             result2.Should().BeNull();
         }
 
-        [Fact]
-        public void Store_ShouldCacheData()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Store_ShouldCacheData(bool updateStorageDate)
         {
             // Arrange
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration());
+
             Cache cache = new(
                 new Mock<ILogger<Cache>>().Object,
-                new Mock<IAzureFunctionsConfigurationCache>().Object);
+                azureFunctionsConfigurationCacheMock.Object);
 
             // Act
-            cache.Store(DataType.Changelog, TestData.Changelog);
+            cache.Store(DataType.Changelog, TestData.Changelog, updateStorageDate);
 
             // Act
+            bool hasValidCache = cache.HasValidCache(DataType.Changelog);
             IEnumerable<ChangelogEntry>? result = cache.Get<IEnumerable<ChangelogEntry>>(DataType.Changelog);
 
             // Assert
+            hasValidCache.Should().Be(updateStorageDate);
             result.Should().BeEquivalentTo(TestData.Changelog);
         }
     }
