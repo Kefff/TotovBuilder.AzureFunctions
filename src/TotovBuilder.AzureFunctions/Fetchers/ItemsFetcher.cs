@@ -4,6 +4,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using static System.Text.Json.JsonElement;
@@ -103,10 +104,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
             {
-                deserializationTasks.Add(Task.Run(() => DeserializeData(itemJson, items)));
+                deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Item, itemJson, items)));
             }
 
-            return await Task.WhenAll(deserializationTasks).ContinueWith((t) => Result.Ok(items.AsEnumerable()));
+            await Task.WhenAll(deserializationTasks);
+            deserializationTasks.Clear();
+
+            foreach (JsonElement itemJson in itemsJson.EnumerateArray())
+            {
+                deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Preset, itemJson, items)));
+            }
+
+            await Task.WhenAll(deserializationTasks);
+
+            return Result.Ok(items.AsEnumerable());
         }
 
         /// <summary>
@@ -202,6 +213,30 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Deserializes an <see cref="ArmorMod"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="ArmorMod"/> preset.</returns>
+        private static ArmorMod DeserializeArmorModPreset(string presetId, JsonElement presetJson, IArmorMod baseItem)
+        {
+            ArmorMod presetItem = DeserializeBasePresetProperties<ArmorMod>(presetId, presetJson, baseItem);
+            
+            presetItem.ArmorClass = baseItem.ArmorClass;
+            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
+            presetItem.BlindnessProtectionPercentage = baseItem.BlindnessProtectionPercentage;
+            presetItem.Durability = baseItem.Durability;
+            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
+            presetItem.Material = baseItem.Material;
+            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
+            presetItem.RicochetChance = baseItem.RicochetChance;
+            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
+
+            return presetItem;
+        }
+
+        /// <summary>
         /// Deserilizes the properties of an item that are common between item categories.
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
@@ -217,10 +252,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 Id = itemJson.GetProperty("id").GetString()!,
                 ImageLink = itemJson.GetProperty("inspectImageLink").GetString()!,
                 MarketLink = itemJson.GetProperty("link").GetString()!,
-                MaxStackableAmount = 1,
                 Name = itemJson.GetProperty("name").GetString()!,
                 ShortName = itemJson.GetProperty("shortName").GetString()!,
-                Weight = itemJson.GetProperty("weight").GetDouble()!,
+                Weight = itemJson.GetProperty("weight").GetDouble(),
                 WikiLink = itemJson.GetProperty("wikiLink").GetString()!
             };
 
@@ -233,6 +267,37 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             return item;
+        }
+
+        /// <summary>
+        /// Deserilizes the properties of a preset that are common between preset item categories.
+        /// </summary>
+        /// <typeparam name="T">Preset type.</typeparam>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="RangedWeapon"/> preset.</returns>
+        private static T DeserializeBasePresetProperties<T>(string presetId, JsonElement presetJson, IModdable baseItem)
+            where T : IModdable, new()
+        {
+            T preset = new()
+            {
+                BaseItemId = baseItem.Id,
+                CategoryId = baseItem.CategoryId,
+                ConflictingItemIds = baseItem.ConflictingItemIds,
+                IconLink = presetJson.GetProperty("iconLink").GetString()!,
+                Id = presetId,
+                ImageLink = presetJson.GetProperty("inspectImageLink").GetString()!,
+                MarketLink = presetJson.GetProperty("link").GetString()!,
+                MaxStackableAmount = baseItem.MaxStackableAmount,
+                ModSlots = baseItem.ModSlots,
+                Name = presetJson.GetProperty("name").GetString()!,
+                ShortName = presetJson.GetProperty("shortName").GetString()!,
+                Weight = baseItem.Weight,
+                WikiLink = presetJson.GetProperty("wikiLink").GetString()!
+            };
+
+            return preset;
         }
 
         /// <summary>
@@ -258,11 +323,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
         /// <param name="items">List of items the deserialized item will be stored into.</param>
-        private void DeserializeData(JsonElement itemJson, ConcurrentBag<Item> items)
+        private void DeserializeData(DataDeserializationType deserializationType, JsonElement itemJson, ConcurrentBag<Item> items)
         {
             try
             {
-                Item? item = DeserializeData(itemJson);
+                Item? item = null;
+
+                if (deserializationType == DataDeserializationType.Item)
+                {
+                    item = DeserializeItemData(itemJson);
+                }
+                else
+                {
+                    item = DeserializePresetItemData(itemJson, items);
+                }
 
                 if (item != null)
                 {
@@ -274,72 +348,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 string error = string.Format(Properties.Resources.ItemDeserializationError, e);
                 Logger.LogError(error);
             }
-        }
-
-        /// <summary>
-        /// Deserializes data representing an item.
-        /// </summary>
-        /// <param name="itemJson">Json element representing the item to deserialize.</param>
-        /// <returns>Deserialized item.</returns>
-        private Item? DeserializeData(JsonElement itemJson)
-        {
-            List<string> tarkovItemCategories = new();
-            JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
-
-            foreach (JsonElement tarkovItemCategoryJson in tarkovItemCategoriesJson.EnumerateArray())
-            {
-                tarkovItemCategories.Add(tarkovItemCategoryJson.GetProperty("id").GetString()!);
-            }
-
-            foreach (string tarkovItemCategory in tarkovItemCategories)
-            {
-                ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategory);
-
-                switch (itemCategory.Id)
-                {
-                    case "ammunition":
-                        return DeserializeAmmunition(itemJson, itemCategory.Id);
-                    case "armor":
-                        return DeserializeArmor(itemJson, itemCategory.Id);
-                    case "armorMod":
-                        return DeserializeArmorMod(itemJson, itemCategory.Id);
-                    case "backpack":
-                    case "container":
-                    case "securedContainer":
-                        return DeserializeContainer(itemJson, itemCategory.Id);
-                    case "eyewear":
-                        return DeserializeEyewear(itemJson, itemCategory.Id);
-                    case "grenade":
-                        return DeserializeGrenade(itemJson, itemCategory.Id);
-                    case "headwear":
-                        return DeserializeHeadwear(itemJson, itemCategory.Id);
-                    case "armband":
-                    case "currency":
-                    case "faceCover":
-                    case "headphones":
-                    case "other":
-                    case "special":
-                        return DeserializeItem(itemJson, itemCategory.Id);
-                    case "magazine":
-                        return DeserializeMagazine(itemJson, itemCategory.Id);
-                    case "meleeWeapon":
-                        return DeserializeMeleeWeapon(itemJson, itemCategory.Id);
-                    case "mod":
-                        return DeserializeMod(itemJson, itemCategory.Id);
-                    case "mainWeapon":
-                    case "secondaryWeapon":
-                        return DeserializeRangedWeapon(itemJson, itemCategory.Id);
-                    case "rangedWeaponMod":
-                        return DeserializeRangedWeaponMod(itemJson, itemCategory.Id);
-                    case "vest":
-                        return DeserializeVest(itemJson, itemCategory.Id);
-                }
-            }
-
-            string error = Properties.Resources.ItemCategoryNotImplemented;
-            Logger.LogError(error);
-
-            throw new NotImplementedException(error);
         }
 
         /// <summary>
@@ -421,6 +429,52 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Deserializes an <see cref="Headwear"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="Headwear"/> preset.</returns>
+        private static Headwear DeserializeHeadwearPreset(string presetId, JsonElement presetJson, IHeadwear baseItem)
+        {
+            Headwear presetItem = DeserializeBasePresetProperties<Headwear>(presetId, presetJson, baseItem);
+
+            presetItem.ArmorClass = baseItem.ArmorClass;
+            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
+            presetItem.BlocksHeadphones = baseItem.BlocksHeadphones;
+            presetItem.Deafening = baseItem.Deafening;
+            presetItem.Durability = baseItem.Durability;
+            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
+            presetItem.Material = baseItem.Material;
+            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
+            presetItem.RicochetChance = baseItem.RicochetChance;
+            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
+
+            return presetItem;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="Magazine"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="Magazine"/> preset.</returns>
+        private static Magazine DeserializeMagazinePreset(string presetId, JsonElement presetJson, IMagazine baseItem)
+        {
+            Magazine presetItem = DeserializeBasePresetProperties<Magazine>(presetId, presetJson, baseItem);
+
+            presetItem.AcceptedAmmunitionIds = baseItem.AcceptedAmmunitionIds;
+            presetItem.Capacity = baseItem.Capacity;
+            presetItem.CheckSpeedPercentageModifier = baseItem.CheckSpeedPercentageModifier;
+            presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
+            presetItem.LoadSpeedPercentageModifier = baseItem.LoadSpeedPercentageModifier;
+            presetItem.MalfunctionPercentage = baseItem.MalfunctionPercentage;
+
+            return presetItem;
+        }
+
+        /// <summary>
         /// Deserilizes an <see cref="Item"/>.
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
@@ -429,6 +483,83 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private Item DeserializeItem(JsonElement itemJson, string itemCategoryId)
         {
             return DeserializeBaseItemProperties<Item>(itemJson, itemCategoryId);
+        }
+        
+        /// <summary>
+        /// Deserializes the category of an item.
+        /// </summary>
+        /// <param name="itemJson">Json element representing the item to deserialize.</param>
+        /// <returns>Deserialized item category.</returns>
+        private ItemCategory DeserializeItemCategory(JsonElement itemJson)
+        {
+            List<string> tarkovItemCategoryIds = new();
+            JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
+
+            foreach (JsonElement tarkovItemCategoryJson in tarkovItemCategoriesJson.EnumerateArray())
+            {
+                tarkovItemCategoryIds.Add(tarkovItemCategoryJson.GetProperty("id").GetString()!);
+            }
+
+            ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategoryIds);
+
+            return itemCategory;
+        }
+
+        /// <summary>
+        /// Deserializes data representing an item.
+        /// </summary>
+        /// <param name="itemJson">Json element representing the item to deserialize.</param>
+        /// <returns>Deserialized item.</returns>
+        private Item? DeserializeItemData(JsonElement itemJson)
+        {
+            if (IsPreset(itemJson))
+            {
+                return null;
+            }
+            
+            ItemCategory itemCategory = DeserializeItemCategory(itemJson);
+
+            switch (itemCategory.Id)
+            {
+                case "ammunition":
+                    return DeserializeAmmunition(itemJson, itemCategory.Id);
+                case "armor":
+                    return DeserializeArmor(itemJson, itemCategory.Id);
+                case "armorMod":
+                    return DeserializeArmorMod(itemJson, itemCategory.Id);
+                case "backpack":
+                case "container":
+                case "securedContainer":
+                    return DeserializeContainer(itemJson, itemCategory.Id);
+                case "eyewear":
+                    return DeserializeEyewear(itemJson, itemCategory.Id);
+                case "grenade":
+                    return DeserializeGrenade(itemJson, itemCategory.Id);
+                case "headwear":
+                    return DeserializeHeadwear(itemJson, itemCategory.Id);
+                case "armband":
+                case "currency":
+                case "faceCover":
+                case "headphones":
+                case "other":
+                case "special":
+                    return DeserializeItem(itemJson, itemCategory.Id);
+                case "magazine":
+                    return DeserializeMagazine(itemJson, itemCategory.Id);
+                case "meleeWeapon":
+                    return DeserializeMeleeWeapon(itemJson, itemCategory.Id);
+                case "mod":
+                    return DeserializeMod(itemJson, itemCategory.Id);
+                case "mainWeapon":
+                case "secondaryWeapon":
+                    return DeserializeRangedWeapon(itemJson, itemCategory.Id);
+                case "rangedWeaponMod":
+                    return DeserializeRangedWeaponMod(itemJson, itemCategory.Id);
+                case "vest":
+                    return DeserializeVest(itemJson, itemCategory.Id);
+                default:
+                    throw new NotImplementedException(Properties.Resources.ItemCategoryNotImplemented);
+            }
         }
 
         /// <summary>
@@ -495,6 +626,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Deserializes an <see cref="Mod"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="Mod"/> preset.</returns>
+        private static Mod DeserializeModPreset(string presetId, JsonElement presetJson, IMod baseItem)
+        {
+            Mod presetItem = DeserializeBasePresetProperties<Mod>(presetId, presetJson, baseItem);
+
+            presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
+
+            return presetItem;
+        }
+
+        /// <summary>
         /// Deserializes an array of <see cref="ModSlot"/>.
         /// </summary>
         /// <param name="propertiesJson">Json element representing the properties of an item.</param>
@@ -520,6 +667,63 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Deserializes data representing an item.
+        /// </summary>
+        /// <param name="presetItemJson">Json element representing the preset item to deserialize.</param>
+        /// <param name="items">Items.</param>
+        /// <returns>Deserialized preset item.</returns>
+        private Item? DeserializePresetItemData(JsonElement presetItemJson, ConcurrentBag<Item> items)
+        {
+            if (!IsPreset(presetItemJson)
+                || !TryDeserializeObject(presetItemJson, "properties", out JsonElement propertiesJson)
+                || propertiesJson.EnumerateObject().Count() <= 1)
+            {
+                return null;
+            }
+
+            string presetId = presetItemJson.GetProperty("id").GetString()!;
+            string baseItemId = propertiesJson.GetProperty("baseItem").GetProperty("id").GetString()!;
+            Item? baseItem = items.FirstOrDefault(i => i.Id == baseItemId);
+
+            if (baseItem == null)
+            {
+                throw new InvalidDataException(string.Format(Properties.Resources.ItemNotFound, baseItemId));
+            }
+
+            IItem? presetItem = null;
+
+            switch (baseItem)
+            {
+                case IArmorMod:
+                    presetItem = DeserializeArmorModPreset(presetId, presetItemJson, (IArmorMod)baseItem);
+                    break;
+                case IHeadwear:
+                    presetItem = DeserializeHeadwearPreset(presetId, presetItemJson, (IHeadwear)baseItem);
+                    break;
+                case IMagazine:
+                    presetItem = DeserializeMagazinePreset(presetId, presetItemJson, (IMagazine)baseItem);
+                    break;
+                case IRangedWeapon:
+                    presetItem = DeserializeRangedWeaponPreset(presetId, presetItemJson, propertiesJson, (IRangedWeapon)baseItem);
+                    break;
+                case IRangedWeaponMod:
+                    presetItem = DeserializeRangedWeaponModPreset(presetId, presetItemJson, (IRangedWeaponMod)baseItem);
+                    break;
+                case IMod:
+                    presetItem = DeserializeModPreset(presetId, presetItemJson, (IMod)baseItem);
+                    break;
+                default:
+                    // Special case for items like "customdogtags12345678910" that is a preset of dogtags.
+                    // The base item is not moddable, but we need to include it because it can be used in a barter.
+                    ItemCategory itemCategory = DeserializeItemCategory(presetItemJson);
+                    presetItem = DeserializeItem(presetItemJson, itemCategory.Id);
+                    break;
+            }
+
+            return (Item)presetItem;
+        }
+
+        /// <summary>
         /// Deserilizes a <see cref="RangedWeapon"/>.
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
@@ -529,37 +733,54 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             RangedWeapon? rangedWeapon = DeserializeBaseItemProperties<RangedWeapon>(itemJson, itemCategoryId);
 
-            if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson))
+            if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                if (propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesWeapon")
+                rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString()!;
+                rangedWeapon.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
+                rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString()!.ToPascalCase()).ToArray();
+                rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
+                rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
+                rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
+
+                List<ModSlot> modSlots = new();
+                modSlots.AddRange(ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.RangedWeaponChambers ?? Array.Empty<ModSlot>());
+                modSlots.AddRange(DeserializeModSlots(propertiesJson));
+                rangedWeapon.ModSlots = modSlots.ToArray();
+
+                if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
                 {
-                    // Presets sent by the API are ignored
-                    rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString()!;
-                    rangedWeapon.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
-                    rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString()!.ToPascalCase()).ToArray();
-                    rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
-                    rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
-                    rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
-
-                    JsonElement defaultPreset = propertiesJson.GetProperty("defaultPreset");
-
-                    if (defaultPreset.ValueKind == JsonValueKind.Object)
-                    {
-                        rangedWeapon.DefaultPresetId = propertiesJson.GetProperty("defaultPreset").GetProperty("id").GetString()!;
-                        rangedWeapon.IconLink = propertiesJson.GetProperty("defaultPreset").GetProperty("iconLink").GetString()!;
-                        rangedWeapon.ImageLink = propertiesJson.GetProperty("defaultPreset").GetProperty("inspectImageLink").GetString()!;
-                    }
-
-                    List<ModSlot> modSlots = new();
-                    modSlots.AddRange(ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.RangedWeaponChambers ?? Array.Empty<ModSlot>());
-                    modSlots.AddRange(DeserializeModSlots(propertiesJson));
-                    rangedWeapon.ModSlots = modSlots.ToArray();
-
-                    return rangedWeapon;
+                    rangedWeapon.DefaultPresetId = defaultPresetJson.GetProperty("id").GetString();
                 }
             }
 
-            return null;
+            return rangedWeapon;
+        }
+
+        /// <summary>
+        /// Deserializes a <see cref="RangedWeapon"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="propertiesJson">Json element representing the properties of the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="RangedWeapon"/> preset.</returns>
+        private RangedWeapon DeserializeRangedWeaponPreset(string presetId, JsonElement presetJson, JsonElement propertiesJson, IRangedWeapon baseItem)
+        {
+            RangedWeapon presetItem = DeserializeBasePresetProperties<RangedWeapon>(presetId, presetJson, baseItem);
+
+            presetItem.Caliber = baseItem.Caliber;
+            presetItem.Ergonomics = baseItem.Ergonomics;
+            presetItem.FireModes = baseItem.FireModes;
+            presetItem.FireRate = baseItem.FireRate;
+            presetItem.HorizontalRecoil = baseItem.HorizontalRecoil;
+            presetItem.VerticalRecoil = baseItem.VerticalRecoil;
+
+            if (TryDeserializeDouble(propertiesJson, "moa", out double moa))
+            {
+                presetItem.MinuteOfAngle = moa;
+            }
+
+            return presetItem;
         }
 
         /// <summary>
@@ -585,6 +806,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             return rangedWeaponMod;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="RangedWeaponMod"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="RangedWeaponMod"/> preset.</returns>
+        private static RangedWeaponMod DeserializeRangedWeaponModPreset(string presetId, JsonElement presetJson, IRangedWeaponMod baseItem)
+        {
+            RangedWeaponMod presetItem = DeserializeBasePresetProperties<RangedWeaponMod>(presetId, presetJson, baseItem);
+
+            presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
+            presetItem.RecoilPercentageModifier = baseItem.RecoilPercentageModifier;
+
+            return presetItem;
         }
 
         /// <summary>
@@ -676,18 +914,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Gets an item category from a tarkov item category ID.
         /// When no matching item category is found, return the "other" item category.
         /// </summary>
-        /// <param name="tarkovCategoryIds">Tarkov item category IDs.</param>
+        /// <param name="tarkovItemCategoryIds">Tarkov item category IDs.</param>
         /// <returns>Item category.</returns>
-        private ItemCategory GetItemCategoryFromTarkovCategoryId(string tarkovCategoryId)
+        private ItemCategory GetItemCategoryFromTarkovCategoryId(IEnumerable<string> tarkovItemCategoryIds)
         {
-            ItemCategory? result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovCategoryId));
+            ItemCategory? result;
 
-            if (result == null)
+            foreach (string tarkovItemCategoryId in tarkovItemCategoryIds)
             {
-                result = new ItemCategory() { Id = "other" };
+                result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovItemCategoryId));
+
+                    if (result != null)
+                {
+                    return result;
+                }
             }
 
-            return result;
+            return new ItemCategory() { Id = "other" };
         }
 
         /// <summary>
@@ -697,7 +940,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Ricochet chance.</returns>
         private string GetRicochetChance(double ricochetXValue)
         {
-            RicochetChance? ricochetChance = TarkovValues.RicochetChances.SingleOrDefault((rc) =>
+            RicochetChance? ricochetChance = TarkovValues.RicochetChances.FirstOrDefault((rc) =>
             {
                 // Forced to do this for code coverage
                 bool isGreaterThanMin = rc.XMinValue <= ricochetXValue;
@@ -707,6 +950,34 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             });
 
             return (ricochetChance?.Name ?? string.Empty).ToPascalCase();
+        }
+
+        /// <summary>
+        /// Indicates whether an item is a preset.
+        /// </summary>
+        /// <param name="itemJson">Json element representing the item to deserialize.</param>
+        /// <returns><c>true</c> if the item being deserialized is a preset; otherwise <c>false</c>.</returns>
+        private bool IsPreset(JsonElement itemJson)
+        {
+            return TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson)
+                && propertiesJson.EnumerateObject().Any()
+                && propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesPreset";
+        }
+
+        /// <summary>
+        /// Represents the type of elements that should be deserialized.
+        /// </summary>
+        private enum DataDeserializationType
+        {
+            /// <summary>
+            /// Item deserialization.
+            /// </summary>
+            Item,
+
+            /// <summary>
+            /// Preset deserialization.
+            /// </summary>
+            Preset
         }
     }
 }

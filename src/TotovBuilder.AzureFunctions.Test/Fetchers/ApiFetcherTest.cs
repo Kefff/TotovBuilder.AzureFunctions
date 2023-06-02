@@ -65,7 +65,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>(), true), Times.Once);
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>(), true), Times.Never);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Never);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>(), true), Times.Once);
         }
 
         [Fact]
@@ -171,7 +171,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Never);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>(), true), Times.Never);
         }
 
         [Fact]
@@ -214,7 +214,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>(), true), Times.Never);
         }
 
         [Fact]
@@ -253,7 +253,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Prices);
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>(), true), Times.Never);
         }
 
         [Theory]
@@ -299,7 +299,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeNull();
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>(), true), Times.Never);
         }
 
         [Theory]

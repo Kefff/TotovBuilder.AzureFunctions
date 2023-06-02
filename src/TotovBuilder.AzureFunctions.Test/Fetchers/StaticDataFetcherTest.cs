@@ -55,7 +55,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<ChangelogEntry>>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<ChangelogEntry>>(), true), Times.Once);
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Never);
             cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>(), true), Times.Never);
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Never);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<ChangelogEntry>>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<ChangelogEntry>>(), true), Times.Once);
         }
 
         [Fact]
@@ -143,7 +143,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Should().BeEquivalentTo(TestData.Changelog);
             blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>()), Times.Once);
-            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>()), Times.Never);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<string>(), true), Times.Never);
         }
 
         public class StaticDataFetcherImplementation : StaticDataFetcher<IEnumerable<ChangelogEntry>>

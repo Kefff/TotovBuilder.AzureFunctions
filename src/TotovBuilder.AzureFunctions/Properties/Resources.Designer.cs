@@ -254,6 +254,25 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item &quot;{0}&quot; not found..
+        /// </summary>
+        internal static string ItemNotFound {
+            get {
+                return ResourceManager.GetString("ItemNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while constructing preset &quot;{0}&quot; :
+        ///Cannot find a slot for items &quot;{1}&quot;..
+        /// </summary>
+        internal static string PresetContructionError {
+            get {
+                return ResourceManager.GetString("PresetContructionError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing preset :
         ///{0}.
         /// </summary>
