@@ -111,21 +111,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 containedItems.Dequeue();
                 AddContent(inventoryItem, item, containedItems); // Continuing adding content while contained items are not moddable
             }
-            //else if (containedItem.Item is not IModdable
-            //    && item is not IMagazine
-            //    && item is IContainer)
-            //{
-            //    // For now, we cannot pass here because there a not IModdable containers other than magazines
-            //    InventoryItem containedInventoryItem = new()
-            //    {
-            //        ItemId = containedItem.Item.Id,
-            //        Quantity = containedItem.Quantity
-            //    };
-            //    inventoryItem.Content = inventoryItem.Content.Append(containedInventoryItem).ToArray();
-
-            //    containedItems.Dequeue();
-            //    AddContent(containedInventoryItem, containedItem.Item, containedItems); // Continuing adding content while contained items are not moddable
-            //}
         }
 
         /// <summary>
@@ -252,7 +237,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="baseItem">Base item.</param>
         /// <param name="containedItems">Contained items.</param>
         /// <returns>Preset.</returns>
-        private InventoryItem ConstructPreset(string presetId, IModdable baseItem, Queue<PresetContainedItem> containedItems)
+        private InventoryItem ConstructPreset(string presetId, IItem baseItem, Queue<PresetContainedItem> containedItems)
         {
             InventoryItem inventoryItem = new()
             {
@@ -307,11 +292,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private InventoryItem? DeserializePresetData(JsonElement presetJson)
         {
             string presetId = presetJson.GetProperty("id").GetString()!;
-            IModdable? presetItem = (IModdable?)Items.FirstOrDefault(i => i.Id == presetId);
+            IItem? item = Items.FirstOrDefault(i => i.Id == presetId);
 
-            if (presetItem == null)
+            if (item is not IModdable presetItem)
             {
-                // Ignoring presets that were not added to the items list
+                // Ignoring presets that were not added to the items list and presets that are not moddable
                 return null;
             }
 
@@ -334,7 +319,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 containedItems.Enqueue(new PresetContainedItem(containedItem, quantity));
             }
 
-            InventoryItem preset = ConstructPreset(presetId, (IModdable)baseItem, containedItems);
+            InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
 
             return preset;
         }
