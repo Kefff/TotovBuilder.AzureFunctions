@@ -207,19 +207,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEquivalentTo(new Item[]
             {
-                        new Item()
-                        {
-                            CategoryId = "other",
-                            IconLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg",
-                            Id = "5c1d0c5f86f7744bb2683cf0",
-                            ImageLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg",
-                            MarketLink = "https://tarkov.dev/item/terragroup-labs-keycard-blue",
-                            MaxStackableAmount = 1,
-                            Name = "TerraGroup Labs keycard (Blue)",
-                            ShortName = "Blue",
-                            Weight = 0.01,
-                            WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
-                        }
+                new Item()
+                {
+                    CategoryId = "other",
+                    IconLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-icon.jpg",
+                    Id = "5c1d0c5f86f7744bb2683cf0",
+                    ImageLink = "https://assets.tarkov.dev/5c1d0c5f86f7744bb2683cf0-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/terragroup-labs-keycard-blue",
+                    MaxStackableAmount = 1,
+                    Name = "TerraGroup Labs keycard (Blue)",
+                    ShortName = "Blue",
+                    Weight = 0.01,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
+                }
             }, options => options.RespectingRuntimeTypes());
         }
 
