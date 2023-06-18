@@ -301,6 +301,27 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Deserilizes a <see cref="Backpack"/>.
+        /// </summary>
+        /// <param name="itemJson">Json element representing the item to deserialize.</param>
+        /// <param name="itemCategoryId">ID of the item category ID the item belongs to.</param>
+        /// <returns>Deserialized <see cref="Container"/>.</returns>
+        private Item DeserializeBackpack(JsonElement itemJson, string itemCategoryId)
+        {
+            Backpack backpack = DeserializeBaseItemProperties<Backpack>(itemJson, itemCategoryId);
+
+            if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
+            {
+                backpack.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
+                backpack.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+                backpack.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
+                backpack.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
+            }
+
+            return backpack;
+        }
+
+        /// <summary>
         /// Deserilizes a <see cref="Container"/>.
         /// </summary>
         /// <param name="itemJson">Json element representing the item to deserialize.</param>
@@ -528,6 +549,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 case "armorMod":
                     return DeserializeArmorMod(itemJson, itemCategory.Id);
                 case "backpack":
+                    return DeserializeBackpack(itemJson, itemCategory.Id);
                 case "container":
                 case "securedContainer":
                     return DeserializeContainer(itemJson, itemCategory.Id);
