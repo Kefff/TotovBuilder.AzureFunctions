@@ -153,6 +153,9 @@
     <value>{0} - Error while fetching data from the API :
 {1}.</value>
   </data>
+  <data name="FetchingErrorWithoutCache" xml:space="preserve">
+    <value>{0} - Error while fetching data from the API. No cache available as backup.</value>
+  </data>
   <data name="InvalidApiQuery" xml:space="preserve">
     <value>{0} - Invalid API query :
 {1}</value>

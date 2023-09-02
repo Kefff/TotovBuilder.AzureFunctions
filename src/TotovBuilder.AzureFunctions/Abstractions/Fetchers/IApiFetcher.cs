@@ -11,6 +11,6 @@
         /// </summary>
         /// <remarks>Can return null because we cannot know what the "default" value should be when the API call fails.</remarks>
         /// <returns>Data fetched as a JSON string.</returns>
-        Task<T?> Fetch();
+        Task<T> Fetch();
     }
 }

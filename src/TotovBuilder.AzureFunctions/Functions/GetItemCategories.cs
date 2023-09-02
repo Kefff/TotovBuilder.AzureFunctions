@@ -2,7 +2,6 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
@@ -51,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "itemcategories")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<string> itemCategories = (await ItemCategoriesFetcher.Fetch())?.Select(c => c.Id) ?? Array.Empty<string>();
+            IEnumerable<string> itemCategories = (await ItemCategoriesFetcher.Fetch()).Select(c => c.Id);
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, itemCategories);
         }

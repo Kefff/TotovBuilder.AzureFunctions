@@ -46,16 +46,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
             ItemsFetcher fetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
@@ -99,16 +99,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(null));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(Array.Empty<ItemMissingProperties>()));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(null));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(Array.Empty<ArmorPenetration>()));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(null));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(new TarkovValues()));
 
             ItemsFetcher fetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
@@ -180,16 +180,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
             ItemsFetcher fetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
@@ -270,7 +270,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(new ItemCategory[]
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(new ItemCategory[]
             {
                         new ItemCategory()
                         {
@@ -287,13 +287,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             }));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
             ItemsFetcher fetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
@@ -360,16 +360,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(null));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
             ItemsFetcher fetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
@@ -387,19 +386,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.Should().BeEquivalentTo(new Item[]
             {
-                        new Container()
-                        {
-                            Capacity = 35,
-                            CategoryId = "other",
-                            IconLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg",
-                            Id = "5ab8ebf186f7742d8b372e80",
-                            ImageLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg",
-                            MarketLink = "https://tarkov.dev/item/sso-attack-2-raid-backpack",
-                            Name = "SSO Attack 2 raid backpack",
-                            ShortName = "Attack 2",
-                            Weight = 6.12,
-                            WikiLink = "https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack"
-                        }
+                new Container()
+                {
+                    Capacity = 35,
+                    CategoryId = "other",
+                    IconLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg",
+                    Id = "5ab8ebf186f7742d8b372e80",
+                    ImageLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg",
+                    MarketLink = "https://tarkov.dev/item/sso-attack-2-raid-backpack",
+                    Name = "SSO Attack 2 raid backpack",
+                    ShortName = "Attack 2",
+                    Weight = 6.12,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack"
+                }
             });
         }
 
@@ -484,16 +483,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
             ItemsFetcher fetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
@@ -602,16 +601,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>?>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>?>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
             ItemsFetcher fetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,

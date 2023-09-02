@@ -71,20 +71,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        public async Task<T?> Fetch()
+        public async Task<T> Fetch()
         {
+            T? result = null;
+
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString());
 
-                await FetchingTask;
+                await FetchingTask; // Will throw if the previous call cannot return data
 
                 Logger.LogInformation(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString());
 
-                return Cache.Get<T>(DataType);
-            }
+                result = Cache.Get<T>(DataType)!; // Will have data since the previous call will have been able to return data
 
-            T? result = null;
+                return result;
+            }
 
             FetchingTask = Task.Run(async () =>
             {
@@ -106,11 +108,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 else
                 {
                     result = Cache.Get<T>(DataType);
+
+                    if (result == null)
+                    {
+                        throw new Exception(string.Format(Properties.Resources.FetchingErrorWithoutCache, DataType.ToString()));
+                    }
                 }
             });
             await FetchingTask;
 
-            return result;
+            return result!; // If we reach this point without throwing, it means we have data
         }
 
         /// <summary>

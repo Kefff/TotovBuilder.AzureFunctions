@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -31,7 +30,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
             GetItemCategories function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, itemCategoriesFetcherMock.Object);
 
@@ -42,30 +41,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             IEnumerable<string> expected = TestData.ItemCategories.Select(c => c.Id);
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), expected));
-        }
-
-        [Fact]
-        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
-        {
-            // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
-
-            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
-            httpResponseDataFactoryMock
-                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
-                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
-
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>?>(null));
-
-            GetItemCategories function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, itemCategoriesFetcherMock.Object);
-
-            // Act
-            HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
-
-            // Assert
-            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<ItemCategory>()));
         }
     }
 }

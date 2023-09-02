@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker.Http;
 using Moq;
@@ -30,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IChangelogFetcher> changelogFetcherMock = new();
-            changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ChangelogEntry>?>(TestData.Changelog));
+            changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ChangelogEntry>>(TestData.Changelog));
 
             GetChangelog function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, changelogFetcherMock.Object);
 
@@ -40,30 +39,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), TestData.Changelog));
-        }
-
-        [Fact]
-        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
-        {
-            // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
-
-            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
-            httpResponseDataFactoryMock
-                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
-                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
-
-            Mock<IChangelogFetcher> changelogFetcherMock = new();
-            changelogFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ChangelogEntry>?>(null));
-
-            GetChangelog function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, changelogFetcherMock.Object);
-
-            // Act
-            HttpResponseData result = await function.Run(new Mock<HttpRequestDataImplementation>().Object);
-
-            // Assert
-            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<ChangelogEntry>()));
         }
     }
 }

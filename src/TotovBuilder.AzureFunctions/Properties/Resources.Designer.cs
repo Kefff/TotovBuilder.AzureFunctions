@@ -11,8 +11,8 @@
 namespace TotovBuilder.AzureFunctions.Properties {
     using System;
     using System.Diagnostics.CodeAnalysis;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -155,6 +155,15 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string FetchingError {
             get {
                 return ResourceManager.GetString("FetchingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Error while fetching data from the API. No cache available as backup..
+        /// </summary>
+        internal static string FetchingErrorWithoutCache {
+            get {
+                return ResourceManager.GetString("FetchingErrorWithoutCache", resourceCulture);
             }
         }
         

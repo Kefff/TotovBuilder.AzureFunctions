@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -48,7 +49,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }
 
         [Fact]
-        public async Task Fetch_WithInvalidData_ShouldReturnNull()
+        public async Task Fetch_WithInvalidData_ShouldThrow()
         {
             // Arrange
             Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
@@ -81,10 +82,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object);
 
             // Act
-            IEnumerable<ArmorPenetration>? result = await fetcher.Fetch();
+            Func<Task> act = () => fetcher.Fetch();
 
             // Assert
-            result.Should().BeNull();
+            await act.Should().ThrowAsync<Exception>();
         }
     }
 }

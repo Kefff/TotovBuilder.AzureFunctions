@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -89,10 +90,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object);
 
             // Act
-            IEnumerable<ItemMissingProperties>? result = await fetcher.Fetch();
+            Func<Task> act = () => fetcher.Fetch();
 
             // Assert
-            result.Should().BeNull();
+            await act.Should().ThrowAsync<Exception>();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = new();
             ConcurrentBag<InventoryItem> presets = new();
-            Items = await ItemsFetcher.Fetch() ?? Array.Empty<Item>();
+            Items = await ItemsFetcher.Fetch();
 
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -62,7 +62,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 deserializationTasks.Add(Task.Run(() => DeserializeData(itemJson, presets)));
             }
-            
+
             await Task.WhenAll(deserializationTasks);
 
             return Result.Ok(presets.AsEnumerable());

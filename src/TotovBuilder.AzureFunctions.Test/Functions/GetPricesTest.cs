@@ -89,10 +89,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IBartersFetcher> bartersFetcherMock = new();
-            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(barters));
+            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>>(barters));
 
             Mock<IPricesFetcher> pricesFetcherMock = new();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(prices));
+            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>>(prices));
 
             GetPrices function = new(
                 azureFunctionsConfigurationReaderMock.Object,
@@ -164,37 +164,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                     string.Empty,
                     Array.Empty<object>())
                 != null)));
-        }
-
-        [Fact]
-        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
-        {
-            // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
-
-            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
-            httpResponseDataFactoryMock
-                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
-                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
-
-            Mock<IBartersFetcher> bartersFetcherMock = new();
-            bartersFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(null));
-
-            Mock<IPricesFetcher> pricesFetcherMock = new();
-            pricesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Price>?>(null));
-
-            GetPrices function = new(
-                azureFunctionsConfigurationReaderMock.Object,
-                httpResponseDataFactoryMock.Object,
-                bartersFetcherMock.Object,
-                pricesFetcherMock.Object);
-
-            // Act
-            HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
-
-            // Assert
-            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<Item>()));
         }
     }
 }

@@ -58,9 +58,8 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "prices")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-
-            IEnumerable<Price> prices = await PricesFetcher.Fetch() ?? new List<Price>();
-            IEnumerable<Price> barters = await BartersFetcher.Fetch() ?? new List<Price>();
+            IEnumerable<Price> prices = await PricesFetcher.Fetch();
+            IEnumerable<Price> barters = await BartersFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, prices.Concat(barters).OrderBy(p => p.ItemId));
         }

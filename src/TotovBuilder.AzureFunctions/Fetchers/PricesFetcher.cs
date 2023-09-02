@@ -52,7 +52,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
             List<Price> prices = new();
-            TarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
+            TarkovValues = await TarkovValuesFetcher.Fetch();
 
             JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
 

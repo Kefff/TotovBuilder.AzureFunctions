@@ -50,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tarkovvalues")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-            TarkovValues tarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
+            TarkovValues tarkovValues = await TarkovValuesFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateResponse(httpRequest, tarkovValues);
         }

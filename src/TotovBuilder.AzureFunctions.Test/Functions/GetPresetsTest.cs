@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker.Http;
 using Moq;
@@ -30,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
-            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<InventoryItem>?>(TestData.Presets));
+            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<InventoryItem>>(TestData.Presets));
 
             GetPresets function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, presetsFetcherMock.Object);
 
@@ -40,30 +39,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             // Assert
             azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
             httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), TestData.Presets));
-        }
-
-        [Fact]
-        public async Task Run_WithoutData_ShouldReturnEmptyResponse()
-        {
-            // Arrange
-            Mock<IAzureFunctionsConfigurationReader> azureFunctionsConfigurationReaderMock = new();
-
-            Mock<IHttpResponseDataFactory> httpResponseDataFactoryMock = new();
-            httpResponseDataFactoryMock
-                .Setup(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), It.IsAny<IEnumerable<object>>()))
-                .Returns(Task.FromResult((HttpResponseData)new Mock<HttpResponseDataImplementation>().Object));
-
-            Mock<IPresetsFetcher> presetsFetcherMock = new();
-            presetsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<InventoryItem>?>(null));
-
-            GetPresets function = new(azureFunctionsConfigurationReaderMock.Object, httpResponseDataFactoryMock.Object, presetsFetcherMock.Object);
-
-            // Act
-            HttpResponseData result = await function.Run(new HttpRequestDataImplementation());
-
-            // Assert
-            azureFunctionsConfigurationReaderMock.Verify(m => m.Load());
-            httpResponseDataFactoryMock.Verify(m => m.CreateEnumerableResponse(It.IsAny<HttpRequestData>(), Array.Empty<InventoryItem>()));
         }
     }
 }

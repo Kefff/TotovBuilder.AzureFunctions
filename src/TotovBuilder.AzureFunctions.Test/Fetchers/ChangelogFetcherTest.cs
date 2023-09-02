@@ -183,10 +183,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object);
 
             // Act
-            IEnumerable<ChangelogEntry>? result = await fetcher.Fetch();
+            Func<Task> act = () => fetcher.Fetch();
 
             // Assert
-            result.Should().BeNull();
+            await act.Should().ThrowAsync<Exception>();
         }
     }
 }

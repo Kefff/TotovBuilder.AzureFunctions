@@ -50,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "presets")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch() ?? Array.Empty<InventoryItem>();
+            IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, presets);
         }

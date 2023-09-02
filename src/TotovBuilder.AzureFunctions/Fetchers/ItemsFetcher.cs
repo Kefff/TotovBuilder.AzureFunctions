@@ -95,10 +95,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = new();
             ConcurrentBag<Item> items = new();
-            ArmorPenetrations = await ArmorPenetrationsFetcher.Fetch() ?? Array.Empty<ArmorPenetration>();
-            ItemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
-            ItemMissingProperties = await ItemMissingPropertiesFetcher.Fetch() ?? Array.Empty<ItemMissingProperties>();
-            TarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
+            ArmorPenetrations = await ArmorPenetrationsFetcher.Fetch();
+            ItemCategories = await ItemCategoriesFetcher.Fetch();
+            ItemMissingProperties = await ItemMissingPropertiesFetcher.Fetch();
+            TarkovValues = await TarkovValuesFetcher.Fetch();
 
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -222,7 +222,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private static ArmorMod DeserializeArmorModPreset(string presetId, JsonElement presetJson, IArmorMod baseItem)
         {
             ArmorMod presetItem = DeserializeBasePresetProperties<ArmorMod>(presetId, presetJson, baseItem);
-            
+
             presetItem.ArmorClass = baseItem.ArmorClass;
             presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.BlindnessProtectionPercentage = baseItem.BlindnessProtectionPercentage;
@@ -505,7 +505,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             return DeserializeBaseItemProperties<Item>(itemJson, itemCategoryId);
         }
-        
+
         /// <summary>
         /// Deserializes the category of an item.
         /// </summary>
@@ -537,7 +537,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 return null;
             }
-            
+
             ItemCategory itemCategory = DeserializeItemCategory(itemJson);
 
             switch (itemCategory.Id)
@@ -946,7 +946,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovItemCategoryId));
 
-                    if (result != null)
+                if (result != null)
                 {
                     return result;
                 }

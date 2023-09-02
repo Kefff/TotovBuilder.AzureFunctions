@@ -50,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "items")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<Item> items = await ItemsFetcher.Fetch() ?? Array.Empty<Item>();
+            IEnumerable<Item> items = await ItemsFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, items);
         }

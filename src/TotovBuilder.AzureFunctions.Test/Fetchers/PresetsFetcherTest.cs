@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,7 +9,6 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Builds;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
@@ -24,10 +22,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     /// </summary>
     public class PresetsFetcherTest
     {
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task Fetch_ShouldReturnPresets(bool hasItems)
+        [Fact]
+        public async Task Fetch_ShouldReturnPresets()
         {
             // Arrange
             Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
@@ -54,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(hasItems ? TestData.Items : null));
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(TestData.Items));
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -68,7 +64,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             // Assert
             IEnumerable<InventoryItem> expected = TestData.Presets.OrderBy(i => i.ItemId);
-            result.Should().BeEquivalentTo(hasItems ? expected : Array.Empty<InventoryItem>());
+            result.Should().BeEquivalentTo(expected);
         }
 
         [Fact]
@@ -128,7 +124,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(new List<Item>(TestData.Items)));
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(new List<Item>(TestData.Items)));
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -194,7 +190,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(new List<Item>()
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(new List<Item>()
             {
                 new Ammunition()
                 {
@@ -354,7 +350,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(new List<Item>()
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(new List<Item>()
             {
                 new Ammunition()
                 {
@@ -480,7 +476,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Items));
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(TestData.Items));
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -570,7 +566,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>?>(TestData.Items));
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(TestData.Items));
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,

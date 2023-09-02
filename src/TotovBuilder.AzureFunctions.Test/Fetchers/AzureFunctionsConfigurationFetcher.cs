@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -70,10 +71,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object);
 
             // Act
-            AzureFunctionsConfiguration? result = await fetcher.Fetch();
+            Func<Task> act = () => fetcher.Fetch();
 
             // Assert
-            result.Should().BeNull();
+            await act.Should().ThrowAsync<Exception>();
         }
     }
 }

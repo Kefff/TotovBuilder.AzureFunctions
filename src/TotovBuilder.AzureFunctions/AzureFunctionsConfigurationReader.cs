@@ -73,7 +73,7 @@ namespace TotovBuilder.AzureFunctions
 
             LoadingTask = Task.Run(async () =>
             {
-                AzureFunctionsConfigurationCache.Values = await AzureFunctionsConfigurationFetcher.Fetch() ?? throw new Exception(Properties.Resources.InvalidConfiguration);
+                AzureFunctionsConfigurationCache.Values = await AzureFunctionsConfigurationFetcher.Fetch();
             });
             await LoadingTask;
         }

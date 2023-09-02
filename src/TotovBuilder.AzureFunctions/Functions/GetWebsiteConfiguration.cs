@@ -51,7 +51,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "websiteconfiguration")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-            WebsiteConfiguration websiteConfiguration = await WebsiteConfigurationFetcher.Fetch() ?? new WebsiteConfiguration();
+            WebsiteConfiguration websiteConfiguration = await WebsiteConfigurationFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateResponse(httpRequest, websiteConfiguration);
         }

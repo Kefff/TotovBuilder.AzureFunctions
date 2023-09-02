@@ -51,7 +51,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequestData httpRequest)
         {
             await AzureFunctionsConfigurationReader.Load();
-            IEnumerable<ChangelogEntry> changelog = await ChangelogFetcher.Fetch() ?? Array.Empty<ChangelogEntry>();
+            IEnumerable<ChangelogEntry> changelog = await ChangelogFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, changelog);
         }

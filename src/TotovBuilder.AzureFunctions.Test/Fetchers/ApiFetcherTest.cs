@@ -69,6 +69,51 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }
 
         [Fact]
+        public async Task Fetch_WithFailingPreviousFetchingTask_ShouldWaitForItToEndAndThrow()
+        {
+            // Arrange
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(async () =>
+                {
+                    await Task.Delay(1000);
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                });
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            Mock<ICache> cacheMock = new();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(() => null);
+
+            ApiFetcherImplementation apiFetcher = new(
+                new Mock<ILogger<ApiFetcherImplementation>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationCacheMock.Object,
+                cacheMock.Object);
+
+            // Act
+            _ = apiFetcher.Fetch();
+            Func<Task> act = () => apiFetcher.Fetch();
+
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>(), true), Times.Never);
+        }
+
+        [Fact]
         public async Task Fetch_WithValidCachedData_ShouldReturnCachedData()
         {
             // Arrange
@@ -263,7 +308,58 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         [InlineData(TestData.InvalidApiData1)]
         [InlineData(TestData.InvalidApiData2)]
         [InlineData(TestData.InvalidApiData3)]
-        public async Task Fetch_WithInvalidData_ShouldFail(string apiResponseData)
+        public async Task Fetch_WithInvalidDataWithCache_ShouldReturnCachedData(string apiResponseData)
+        {
+            // Arrange
+            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
+            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiQuestsQuery = "{ items { id buyFor { currency price priceRUB vendor { ... on TraderOffer { minTraderLevel taskUnlock { id name wikiLink } trader { normalizedName }  } ... on FleaMarket { normalizedName }  }  }  }  }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(apiResponseData) }));
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            IEnumerable<Price> cachedData = new List<Price>()
+            {
+                new Price()
+            };
+
+            Mock<ICache> cacheMock = new();
+            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            cacheMock.Setup(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>())).Returns(() => cachedData);
+
+            ApiFetcherImplementation apiFetcher = new(
+                new Mock<ILogger<ApiFetcherImplementation>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                azureFunctionsConfigurationCacheMock.Object,
+                cacheMock.Object);
+
+            // Act
+            IEnumerable<Price>? result = await apiFetcher.Fetch();
+
+            // Assert
+            result.Should().BeEquivalentTo(cachedData);
+            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
+            cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
+            cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>(), true), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(TestData.EmptyApiData1)]
+        [InlineData(TestData.EmptyApiData2)]
+        [InlineData(TestData.EmptyApiData3)]
+        [InlineData(TestData.InvalidApiData1)]
+        [InlineData(TestData.InvalidApiData2)]
+        [InlineData(TestData.InvalidApiData3)]
+        public async Task Fetch_WithInvalidDataWithoutCache_ShouldThrow(string apiResponseData)
         {
             // Arrange
             Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
@@ -293,10 +389,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 cacheMock.Object);
 
             // Act
-            IEnumerable<Price>? result = await apiFetcher.Fetch();
+            Func<Task> act = () => apiFetcher.Fetch();
 
             // Assert
-            result.Should().BeNull();
+            await act.Should().ThrowAsync<Exception>();
             httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Once);
             cacheMock.Verify(m => m.Get<IEnumerable<Price>>(It.IsAny<DataType>()), Times.Once);
             cacheMock.Verify(m => m.Store(It.IsAny<DataType>(), It.IsAny<IEnumerable<Price>>(), true), Times.Never);
