@@ -8,18 +8,13 @@ using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Fetchers;
 
 IHost host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults(builder =>
-    {
-        // Application Insights configuration
-        // Log levels readen from host.json
-        // Cf https://learn.microsoft.com/en-us/azure/azure-functions/configure-monitoring?tabs=v2#configure-categories
-        builder
-            .AddApplicationInsights()
-            .AddApplicationInsightsLogger();
-    })
+    .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices((HostBuilderContext hopstBuilderContext, IServiceCollection serviceCollection) =>
     {
         serviceCollection.AddHttpClient();
+
+        serviceCollection.AddApplicationInsightsTelemetryWorkerService();
+        serviceCollection.ConfigureFunctionsApplicationInsights();
 
         serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
         serviceCollection.AddSingleton<IAzureFunctionsConfigurationCache, AzureFunctionsConfigurationCache>();
@@ -42,7 +37,7 @@ IHost host = new HostBuilder()
         serviceCollection.Configure<LoggerFilterOptions>(options =>
         {
             // Removing default filters that only allow warnings and errors to be logged
-            // Cf https://github.com/Azure/azure-functions-dotnet-worker/issues/1182#issuecomment-1317230604
+            // Cf https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide#application-insights
             LoggerFilterRule? filtersToRemove = options.Rules.FirstOrDefault(rule =>
                 rule.ProviderName == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
 
