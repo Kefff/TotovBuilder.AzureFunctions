@@ -1,7 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
 using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -12,9 +13,9 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetWebsiteConfiguration
     {
         /// <summary>
-        /// Azure Functions configuration reader.
+        /// Configuration loader.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IConfigurationLoader ConfigurationLoader;
 
         /// <summary>
         /// HTTP response data factory.
@@ -29,15 +30,15 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetWebsiteConfiguration"/> class.
         /// </summary>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="websiteConfigurationFetcher">Website configuration fetcher.</param>
         public GetWebsiteConfiguration(
-            IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+            IConfigurationLoader configurationLoader,
             IHttpResponseDataFactory httpResponseDataFactory,
             IWebsiteConfigurationFetcher websiteConfigurationFetcher)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            ConfigurationLoader = configurationLoader;
             HttpResponseDataFactory = httpResponseDataFactory;
             WebsiteConfigurationFetcher = websiteConfigurationFetcher;
         }
@@ -50,7 +51,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         [Function("GetWebsiteConfiguration")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "websiteconfiguration")] HttpRequestData httpRequest)
         {
-            await AzureFunctionsConfigurationReader.Load();
+            await ConfigurationLoader.Load();
             WebsiteConfiguration websiteConfiguration = await WebsiteConfigurationFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateResponse(httpRequest, websiteConfiguration);

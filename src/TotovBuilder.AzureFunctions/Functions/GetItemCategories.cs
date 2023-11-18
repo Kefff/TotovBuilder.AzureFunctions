@@ -1,7 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
@@ -11,9 +12,9 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetItemCategories
     {
         /// <summary>
-        /// Azure Functions configuration reader.
+        /// Configuration loader.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IConfigurationLoader ConfigurationLoader;
 
         /// <summary>
         /// HTTP response data factory.
@@ -28,15 +29,15 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetItemCategories"/> class.
         /// </summary>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         public GetItemCategories(
-            IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+            IConfigurationLoader configurationLoader,
             IHttpResponseDataFactory httpResponseDataFactory,
             IItemCategoriesFetcher itemCategoriesFetcher)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            ConfigurationLoader = configurationLoader;
             HttpResponseDataFactory = httpResponseDataFactory;
             ItemCategoriesFetcher = itemCategoriesFetcher;
         }
@@ -49,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         [Function("GetItemCategories")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "itemcategories")] HttpRequestData httpRequest)
         {
-            await AzureFunctionsConfigurationReader.Load();
+            await ConfigurationLoader.Load();
             IEnumerable<string> itemCategories = (await ItemCategoriesFetcher.Fetch()).Select(c => c.Id);
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, itemCategories);

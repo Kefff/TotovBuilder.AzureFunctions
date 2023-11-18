@@ -1,7 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
 using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -12,9 +13,9 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetChangelog
     {
         /// <summary>
-        /// Azure Functions configuration reader.
+        /// Configuration loader.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IConfigurationLoader ConfigurationLoader;
 
         /// <summary>
         /// HTTP response data factory.
@@ -29,15 +30,15 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetChangelog"/> class.
         /// </summary>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="changelogFetcher">Changelog fetcher.</param>
         public GetChangelog(
-            IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+            IConfigurationLoader configurationLoader,
             IHttpResponseDataFactory httpResponseDataFactory,
             IChangelogFetcher changelogFetcher)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            ConfigurationLoader = configurationLoader;
             HttpResponseDataFactory = httpResponseDataFactory;
             ChangelogFetcher = changelogFetcher;
         }
@@ -50,7 +51,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         [Function("GetChangelog")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "changelog")] HttpRequestData httpRequest)
         {
-            await AzureFunctionsConfigurationReader.Load();
+            await ConfigurationLoader.Load();
             IEnumerable<ChangelogEntry> changelog = await ChangelogFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, changelog);

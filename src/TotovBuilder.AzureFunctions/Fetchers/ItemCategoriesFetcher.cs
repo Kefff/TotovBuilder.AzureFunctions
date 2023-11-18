@@ -1,8 +1,10 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -13,7 +15,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ItemCategoriesFetcher : StaticDataFetcher<IEnumerable<ItemCategory>>, IItemCategoriesFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationCache.Values.AzureItemCategoriesBlobName;
+        protected override string AzureBlobName => ConfigurationWrapper.Values.AzureItemCategoriesBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.ItemCategories;
@@ -23,14 +25,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
         public ItemCategoriesFetcher(
             ILogger<ItemCategoriesFetcher> logger,
             IBlobFetcher blobDataFetcher,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            IConfigurationWrapper configurationWrapper,
             ICache cache)
-            : base(logger, blobDataFetcher, azureFunctionsConfigurationCache, cache)
+            : base(logger, blobDataFetcher, configurationWrapper, cache)
         {
         }
 

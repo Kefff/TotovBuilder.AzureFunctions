@@ -1,8 +1,11 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 
@@ -14,7 +17,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class BartersFetcher : ApiFetcher<IEnumerable<Price>>, IBartersFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationCache.Values.ApiBartersQuery;
+        protected override string ApiQuery => ConfigurationWrapper.Values.ApiBartersQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Barters;
@@ -24,21 +27,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
         public BartersFetcher(
             ILogger<BartersFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            IConfigurationWrapper configurationWrapper,
             ICache cache)
-            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
+            : base(logger, httpClientWrapperFactory, configurationWrapper, cache)
         {
         }
 
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Price> barters = new();
+            List<Price> barters = new List<Price>();
 
             JsonElement bartersJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -46,7 +49,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 try
                 {
-                    List<BarterItem> barterItems = new();
+                    List<BarterItem> barterItems = new List<BarterItem>();
                     string merchant = barterJson.GetProperty("trader").GetProperty("normalizedName").GetString()!;
                     int merchantLevel = barterJson.GetProperty("level").GetInt32();
 
@@ -74,7 +77,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     foreach (JsonElement itemJson in barterJson.GetProperty("rewardItems").EnumerateArray())
                     {
                         int quantity = itemJson.GetProperty("quantity").GetInt32();
-                        Price barter = new()
+                        Price barter = new Price()
                         {
                             BarterItems = barterItems.ToArray(),
                             CurrencyName = "barter",

@@ -5,8 +5,10 @@ using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
@@ -23,22 +25,22 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturn5LastChangelogs()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureChangelogBlobName = "changelog.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new();
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            ChangelogFetcher fetcher = new(
+            ChangelogFetcher fetcher = new ChangelogFetcher(
                 new Mock<ILogger<ChangelogFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object);
 
             // Act
@@ -144,13 +146,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldReturnNull()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureChangelogBlobName = "changelog.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new();
+            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
@@ -172,14 +174,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 ]
 ")));
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
             cacheMock.Setup(m => m.Get<IEnumerable<ChangelogEntry>>(It.IsAny<DataType>())).Returns(value: null);
 
-            ChangelogFetcher fetcher = new(
+            ChangelogFetcher fetcher = new ChangelogFetcher(
                 new Mock<ILogger<ChangelogFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object);
 
             // Act

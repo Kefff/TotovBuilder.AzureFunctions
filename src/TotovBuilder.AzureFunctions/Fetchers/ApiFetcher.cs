@@ -4,8 +4,11 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Cache;
 using static System.Text.Json.JsonElement;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -21,9 +24,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         protected abstract string ApiQuery { get; }
         /// <summary>
-        /// Azure Functions configuration cache;
+        /// Configuration wrapper;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
+        protected readonly IConfigurationWrapper ConfigurationWrapper;
 
         /// <summary>
         /// Type of data handled.
@@ -56,15 +59,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
         protected ApiFetcher(
             ILogger<ApiFetcher<T>> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            IConfigurationWrapper configurationWrapper,
             ICache cache)
         {
-            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
+            ConfigurationWrapper = configurationWrapper;
             Cache = cache;
             HttpClientWrapperFactory = httpClientWrapperFactory;
             Logger = logger;
@@ -254,7 +257,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Fetched data as a JSON string.</returns>
         private async Task<Result<T>> ExecuteFetch()
         {
-            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationCache.Values.ApiUrl)
+            if (string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.ApiUrl)
                 || string.IsNullOrWhiteSpace(ApiQuery))
             {
                 string error = Properties.Resources.InvalidConfiguration;
@@ -269,7 +272,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                using HttpRequestMessage request = new(HttpMethod.Post, AzureFunctionsConfigurationCache.Values.ApiUrl);
+                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -278,7 +281,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IHttpClientWrapper client = HttpClientWrapperFactory.Create();
                 Task<HttpResponseMessage> fetchTask = client.SendAsync(request);
 
-                if (!fetchTask.Wait(AzureFunctionsConfigurationCache.Values.FetchTimeout * 1000))
+                if (!fetchTask.Wait(ConfigurationWrapper.Values.FetchTimeout * 1000))
                 {
                     string error = string.Format(Properties.Resources.FetchingDelayExceeded, DataType.ToString());
                     Logger.LogError(error);

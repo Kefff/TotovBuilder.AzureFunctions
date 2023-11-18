@@ -1,8 +1,10 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -13,7 +15,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ItemMissingPropertiesFetcher : StaticDataFetcher<IEnumerable<ItemMissingProperties>>, IItemMissingPropertiesFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationCache.Values.AzureItemMissingPropertiesBlobName;
+        protected override string AzureBlobName => ConfigurationWrapper.Values.AzureItemMissingPropertiesBlobName;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.ItemMissingProperties;
@@ -23,14 +25,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
         public ItemMissingPropertiesFetcher(
             ILogger<ItemMissingPropertiesFetcher> logger,
             IBlobFetcher blobDataFetcher,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            IConfigurationWrapper configurationWrapper,
             ICache cache)
-            : base(logger, blobDataFetcher, azureFunctionsConfigurationCache, cache)
+            : base(logger, blobDataFetcher, configurationWrapper, cache)
         {
         }
 

@@ -1,7 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
 using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -12,9 +13,9 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetTarkovValues
     {
         /// <summary>
-        /// Azure Functions configuration reader.
+        /// Configuration loader.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IConfigurationLoader ConfigurationLoader;
 
         /// <summary>
         /// HTTP response data factory.
@@ -29,14 +30,14 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetTarkovValues"/> class.
         /// </summary>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="changelogFetcher">Tarkov values fetcher.</param>
-        public GetTarkovValues(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+        public GetTarkovValues(IConfigurationLoader configurationLoader,
             IHttpResponseDataFactory httpResponseDataFactory,
             ITarkovValuesFetcher changelogFetcher)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            ConfigurationLoader = configurationLoader;
             HttpResponseDataFactory = httpResponseDataFactory;
             TarkovValuesFetcher = changelogFetcher;
         }
@@ -49,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         [Function("GetTarkovValues")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tarkovvalues")] HttpRequestData httpRequest)
         {
-            await AzureFunctionsConfigurationReader.Load();
+            await ConfigurationLoader.Load();
             TarkovValues tarkovValues = await TarkovValuesFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateResponse(httpRequest, tarkovValues);

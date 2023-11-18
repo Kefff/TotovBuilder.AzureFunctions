@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
@@ -26,41 +29,41 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnItems()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.ItemsJson) }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
-            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
-            ItemsFetcher fetcher = new(
+            ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
@@ -79,41 +82,41 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithoutItemMissingProperties_ShouldReturnItems()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.ItemsJson) }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(Array.Empty<ItemMissingProperties>()));
 
-            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(Array.Empty<ArmorPenetration>()));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(new TarkovValues()));
 
-            ItemsFetcher fetcher = new(
+            ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
@@ -132,15 +135,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldReturnOnlyValidData()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
@@ -173,28 +176,28 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
           }
         }") }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
-            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
-            ItemsFetcher fetcher = new(
+            ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
@@ -227,15 +230,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithNotImplementedItemCategory_ShouldIgnoreData()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
@@ -263,13 +266,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
           }
         }") }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(new ItemCategory[]
             {
                         new ItemCategory()
@@ -286,19 +289,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                         }
             }));
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
-            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
-            ItemsFetcher fetcher = new(
+            ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
@@ -316,15 +319,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithoutItemCategories_ShouldReturnItemsWithOtherItemCategory()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
@@ -353,27 +356,27 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
           }
         }") }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
-            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
-            ItemsFetcher fetcher = new(
+            ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
@@ -406,15 +409,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidPreset_ShouldReturnOnlyValidData()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
@@ -476,28 +479,28 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
           }
         }") }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
-            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
-            ItemsFetcher fetcher = new(
+            ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
@@ -530,15 +533,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithPresetWithNotModdableBaseItem_ShouldReturnItemForThisPreset()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiItemsQuery = "{ items { categories { id } iconLink id imageLink link name properties { __typename ... on ItemPropertiesAmmo { accuracy ammoType armorDamage caliber damage fragmentationChance heavyBleedModifier initialSpeed lightBleedModifier penetrationChance penetrationPower projectileCount recoil ricochetChance stackMaxSize tracer } ... on ItemPropertiesArmor { class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesArmorAttachment { class durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesBackpack { capacity } ... on ItemPropertiesChestRig { capacity class durability ergoPenalty material { name } speedPenalty turnPenalty zones } ... on ItemPropertiesContainer { capacity } ... on ItemPropertiesGlasses { blindnessProtection class durability material { name } } ... on ItemPropertiesGrenade { contusionRadius fragments fuse maxExplosionDistance minExplosionDistance type } ... on ItemPropertiesHelmet { class deafening durability ergoPenalty headZones material { name } speedPenalty turnPenalty } ... on ItemPropertiesMagazine { ammoCheckModifier capacity ergonomics loadModifier malfunctionChance } ... on ItemPropertiesScope { ergonomics recoil zoomLevels } ... on ItemPropertiesWeapon { caliber ergonomics fireModes fireRate recoilHorizontal recoilVertical } ... on ItemPropertiesWeaponMod { ergonomics recoil } } shortName weight wikiLink } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
@@ -594,28 +597,28 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
           }
         }") }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
             itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
             itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
 
-            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new();
+            Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
             armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
 
-            ItemsFetcher fetcher = new(
+            ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,

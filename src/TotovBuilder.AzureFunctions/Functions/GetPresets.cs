@@ -1,7 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
 using TotovBuilder.Model.Builds;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -12,9 +13,9 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetPresets
     {
         /// <summary>
-        /// Azure Functions configuration reader.
+        /// Configuration loader.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IConfigurationLoader ConfigurationLoader;
 
         /// <summary>
         /// HTTP response data factory.
@@ -29,14 +30,14 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetPresets"/> class.
         /// </summary>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="presetsFetcher">Presets fetcher.</param>
-        public GetPresets(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+        public GetPresets(IConfigurationLoader configurationLoader,
             IHttpResponseDataFactory httpResponseDataFactory,
             IPresetsFetcher presetsFetcher)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            ConfigurationLoader = configurationLoader;
             HttpResponseDataFactory = httpResponseDataFactory;
             PresetsFetcher = presetsFetcher;
         }
@@ -49,7 +50,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         [Function("GetPresets")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "presets")] HttpRequestData httpRequest)
         {
-            await AzureFunctionsConfigurationReader.Load();
+            await ConfigurationLoader.Load();
             IEnumerable<InventoryItem> presets = await PresetsFetcher.Fetch();
 
             return await HttpResponseDataFactory.CreateEnumerableResponse(httpRequest, presets);

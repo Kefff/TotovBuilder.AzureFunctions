@@ -1,7 +1,9 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Cache;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -12,9 +14,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         where T : class
     {
         /// <summary>
-        /// Azure Functions configuration cache;
+        /// Configuration wrapper;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
+        protected readonly IConfigurationWrapper ConfigurationWrapper;
 
         /// <summary>
         /// Name of the Azure Blob that stores the data.
@@ -52,17 +54,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache</param>
+        /// <param name="configurationWrapper">Configuration wrapper</param>
         /// <param name="cache">Cache.</param>
         protected StaticDataFetcher(
             ILogger<StaticDataFetcher<T>> logger,
             IBlobFetcher blobFetcher,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            IConfigurationWrapper configurationWrapper,
             ICache cache)
         {
             BlobFetcher = blobFetcher;
             Cache = cache;
-            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
+            ConfigurationWrapper = configurationWrapper;
             Logger = logger;
         }
 

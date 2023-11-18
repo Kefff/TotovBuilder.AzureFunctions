@@ -1,7 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
 using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -12,9 +13,9 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GetPrices
     {
         /// <summary>
-        /// Azure Functions configuration reader.
+        /// Configuration loader.
         /// </summary>
-        private readonly IAzureFunctionsConfigurationReader AzureFunctionsConfigurationReader;
+        private readonly IConfigurationLoader ConfigurationLoader;
 
         /// <summary>
         /// Barters fetcher.
@@ -34,16 +35,16 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GetPrices"/> class.
         /// </summary>
-        /// <param name="azureFunctionsConfigurationReader">Azure Functions configuration reader.</param>
+        /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="httpResponseDataFactory">Http response data factory.</param>
         /// <param name="bartersFetcher">Barters fetcher.</param>
         /// <param name="pricesFetcher">Prices fetcher.</param>
-        public GetPrices(IAzureFunctionsConfigurationReader azureFunctionsConfigurationReader,
+        public GetPrices(IConfigurationLoader configurationLoader,
             IHttpResponseDataFactory httpResponseDataFactory,
             IBartersFetcher bartersFetcher,
             IPricesFetcher pricesFetcher)
         {
-            AzureFunctionsConfigurationReader = azureFunctionsConfigurationReader;
+            ConfigurationLoader = configurationLoader;
             HttpResponseDataFactory = httpResponseDataFactory;
             BartersFetcher = bartersFetcher;
             PricesFetcher = pricesFetcher;
@@ -57,7 +58,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         [Function("GetPrices")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "prices")] HttpRequestData httpRequest)
         {
-            await AzureFunctionsConfigurationReader.Load();
+            await ConfigurationLoader.Load();
             IEnumerable<Price> prices = await PricesFetcher.Fetch();
             IEnumerable<Price> barters = await BartersFetcher.Fetch();
 

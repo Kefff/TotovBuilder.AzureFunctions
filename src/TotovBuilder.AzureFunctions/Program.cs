@@ -2,10 +2,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Generators;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Configuration;
 using TotovBuilder.AzureFunctions.Fetchers;
+using TotovBuilder.AzureFunctions.Generators;
+using TotovBuilder.AzureFunctions.Net;
 
 IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
@@ -16,16 +22,17 @@ IHost host = new HostBuilder()
         serviceCollection.AddApplicationInsightsTelemetryWorkerService();
         serviceCollection.ConfigureFunctionsApplicationInsights();
 
-        serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationCache, AzureFunctionsConfigurationCache>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationReader, AzureFunctionsConfigurationReader>();
-        serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
-        serviceCollection.AddSingleton<IBlobFetcher, BlobFetcher>();
         serviceCollection.AddSingleton<ICache, Cache>();
-        serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
+        serviceCollection.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
+        serviceCollection.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
         serviceCollection.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
         serviceCollection.AddSingleton<IHttpResponseDataFactory, HttpResponseDataFactory>();
+
+        serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
+        serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
+        serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
+        serviceCollection.AddSingleton<IBlobFetcher, BlobFetcher>();
+        serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
         serviceCollection.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
         serviceCollection.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
         serviceCollection.AddSingleton<IItemsFetcher, ItemsFetcher>();
@@ -33,6 +40,9 @@ IHost host = new HostBuilder()
         serviceCollection.AddSingleton<IPricesFetcher, PricesFetcher>();
         serviceCollection.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
         serviceCollection.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
+
+        serviceCollection.AddSingleton<IWebsiteDataGenerator, WebsiteDataGenerator>();
+        serviceCollection.AddSingleton<IWebsiteDataUploader, WebsiteDataUploader>();
 
         serviceCollection.Configure<LoggerFilterOptions>(options =>
         {

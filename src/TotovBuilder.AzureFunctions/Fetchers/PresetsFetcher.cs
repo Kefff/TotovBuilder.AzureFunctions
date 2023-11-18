@@ -2,12 +2,15 @@
 using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.Model;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Builds;
 using TotovBuilder.Model.Items;
+using TotovBuilder.Model.Utils;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -17,7 +20,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PresetsFetcher : ApiFetcher<IEnumerable<InventoryItem>>, IPresetsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationCache.Values.ApiPresetsQuery;
+        protected override string ApiQuery => ConfigurationWrapper.Values.ApiPresetsQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType => DataType.Presets;
@@ -36,15 +39,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="PresetsFetcher"/> class.
         /// </summary>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
         public PresetsFetcher(
             ILogger<PresetsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
+            IConfigurationWrapper configurationWrapper,
             ICache cache,
             IItemsFetcher itemsFetcher
-        ) : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
+        ) : base(logger, httpClientWrapperFactory, configurationWrapper, cache)
         {
             ItemsFetcher = itemsFetcher;
         }
@@ -52,8 +55,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override async Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
         {
-            List<Task> deserializationTasks = new();
-            ConcurrentBag<InventoryItem> presets = new();
+            List<Task> deserializationTasks = new List<Task>();
+            ConcurrentBag<InventoryItem> presets = new ConcurrentBag<InventoryItem>();
             Items = await ItemsFetcher.Fetch();
 
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
@@ -87,7 +90,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 && item is IMagazine magazine
                 && magazine.AcceptedAmmunitionIds.Contains(containedItem.Item.Id))
             {
-                InventoryItem containedInventoryItem = new()
+                InventoryItem containedInventoryItem = new InventoryItem()
                 {
                     ItemId = containedItem.Item.Id,
                     Quantity = containedItem.Quantity
@@ -198,7 +201,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return;
             }
 
-            List<InventoryItemModSlot> inventoryItemModSlots = new(inventoryItem.ModSlots);
+            List<InventoryItemModSlot> inventoryItemModSlots = new List<InventoryItemModSlot>(inventoryItem.ModSlots);
 
             foreach (ModSlot modSlot in item.ModSlots)
             {
@@ -212,7 +215,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (!hasItem)
                 {
-                    inventoryItemModSlot = new()
+                    inventoryItemModSlot = new InventoryItemModSlot()
                     {
                         ModSlotName = modSlot.Name
                     };
@@ -239,7 +242,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Preset.</returns>
         private InventoryItem ConstructPreset(string presetId, IItem baseItem, Queue<PresetContainedItem> containedItems)
         {
-            InventoryItem inventoryItem = new()
+            InventoryItem inventoryItem = new InventoryItem()
             {
                 ItemId = presetId
             };
@@ -301,7 +304,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             IModdable baseItem = (IModdable)Items.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
-            Queue<PresetContainedItem> containedItems = new();
+            Queue<PresetContainedItem> containedItems = new Queue<PresetContainedItem>();
 
             foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
             {

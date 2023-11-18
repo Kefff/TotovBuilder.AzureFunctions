@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Builds;
 using TotovBuilder.Model.Configuration;
@@ -26,15 +29,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnPresets()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -43,19 +46,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PresetsJson) };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(TestData.Items));
 
-            PresetsFetcher fetcher = new(
+            PresetsFetcher fetcher = new PresetsFetcher(
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemsFetcherMock.Object);
 
@@ -71,15 +74,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldReturnOnlyValidData()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -117,19 +120,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 }") };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(new List<Item>(TestData.Items)));
 
-            PresetsFetcher fetcher = new(
+            PresetsFetcher fetcher = new PresetsFetcher(
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemsFetcherMock.Object);
 
@@ -150,15 +153,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithIncompatibleAmmunitionInMagazine_ShouldTryFindingASlotUntilMaximumTriesAndReturnNothing()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -183,13 +186,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 }") };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(new List<Item>()
             {
                 new Ammunition()
@@ -286,10 +289,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 }
             }));
 
-            PresetsFetcher fetcher = new(
+            PresetsFetcher fetcher = new PresetsFetcher(
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemsFetcherMock.Object);
 
@@ -310,15 +313,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithNonMagazineItemContainingAmmunition_ShouldTryFindingASlotUntilMaximumTriesAndReturnNothing()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -343,13 +346,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 }") };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(new List<Item>()
             {
                 new Ammunition()
@@ -412,10 +415,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 }
             }));
 
-            PresetsFetcher fetcher = new(
+            PresetsFetcher fetcher = new PresetsFetcher(
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemsFetcherMock.Object);
 
@@ -436,15 +439,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithMoreModslotThanContainedItems_ShouldStopConstructingPresetWhenNoContainedItemRemains()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -469,19 +472,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }") };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(TestData.Items));
 
-            PresetsFetcher fetcher = new(
+            PresetsFetcher fetcher = new PresetsFetcher(
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemsFetcherMock.Object);
 
@@ -514,15 +517,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithNonModdableContainedItems_ShouldStopConstructingPresetWhenNoContainedItemRemains()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
                 FetchTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -559,19 +562,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }") };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
+            Mock<ICache> cacheMock = new Mock<ICache>();
             cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
 
-            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
             itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<Item>>(TestData.Items));
 
-            PresetsFetcher fetcher = new(
+            PresetsFetcher fetcher = new PresetsFetcher(
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
+                configurationWrapperMock.Object,
                 cacheMock.Object,
                 itemsFetcherMock.Object);
 
