@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -12,13 +12,25 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents an item categories fetcher.
     /// </summary>
-    public class ItemCategoriesFetcher : StaticDataFetcher<IEnumerable<ItemCategory>>, IItemCategoriesFetcher
+    public class ItemCategoriesFetcher : RawDataFetcher<IEnumerable<ItemCategory>>, IItemCategoriesFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => ConfigurationWrapper.Values.AzureItemCategoriesBlobName;
+        protected override string AzureBlobName
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.RawItemCategoriesBlobName;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.ItemCategories;
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.ItemCategories;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
@@ -26,13 +38,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="logger">Logger.</param>
         /// <param name="blobDataFetcher">Blob data fetcher.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
-        /// <param name="cache">Cache.</param>
         public ItemCategoriesFetcher(
             ILogger<ItemCategoriesFetcher> logger,
-            IBlobFetcher blobDataFetcher,
-            IConfigurationWrapper configurationWrapper,
-            ICache cache)
-            : base(logger, blobDataFetcher, configurationWrapper, cache)
+            IAzureBlobManager blobDataFetcher,
+            IConfigurationWrapper configurationWrapper)
+            : base(logger, blobDataFetcher, configurationWrapper)
         {
         }
 

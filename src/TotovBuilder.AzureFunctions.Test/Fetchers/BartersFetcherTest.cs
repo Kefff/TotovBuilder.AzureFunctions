@@ -3,12 +3,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
@@ -42,20 +41,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             BartersFetcher fetcher = new BartersFetcher(
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            IEnumerable<Price>? result = await fetcher.Fetch();
+            Result<IEnumerable<Price>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.Barters);
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(TestData.Barters);
         }
 
         [Fact]
@@ -129,20 +125,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             BartersFetcher fetcher = new BartersFetcher(
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            IEnumerable<Price>? result = await fetcher.Fetch();
+            Result<IEnumerable<Price>> result = await fetcher.Fetch();
 
-            // Assert
-            result.Should().BeEquivalentTo(
+            // Assert            
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(
                 new Price[]
                 {
                     new Price()
@@ -224,21 +217,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<Item>>(It.IsAny<DataType>())).Returns(value: null);
-
             BartersFetcher fetcher = new BartersFetcher(
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            IEnumerable<Price>? result = await fetcher.Fetch();
+            Result<IEnumerable<Price>> result = await fetcher.Fetch();
 
-            // Assert
-            result.Should().BeEquivalentTo(new Price[]
+            // Assert            
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(new Price[]
             {
                 new Price()
                 {

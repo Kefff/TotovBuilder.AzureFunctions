@@ -2,11 +2,10 @@
 using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Builds;
 using TotovBuilder.Model.Items;
@@ -20,10 +19,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PresetsFetcher : ApiFetcher<IEnumerable<InventoryItem>>, IPresetsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => ConfigurationWrapper.Values.ApiPresetsQuery;
+        protected override string ApiQuery
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.ApiPresetsQuery;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Presets;
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.Presets;
+            }
+        }
 
         /// <summary>
         /// List of items.
@@ -40,14 +51,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
-        /// <param name="cache">Cache.</param>
         public PresetsFetcher(
             ILogger<PresetsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
-            ICache cache,
             IItemsFetcher itemsFetcher
-        ) : base(logger, httpClientWrapperFactory, configurationWrapper, cache)
+        ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
             ItemsFetcher = itemsFetcher;
         }
@@ -57,7 +66,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = new List<Task>();
             ConcurrentBag<InventoryItem> presets = new ConcurrentBag<InventoryItem>();
-            Items = await ItemsFetcher.Fetch();
+            Result<IEnumerable<Item>> itemsResult = await ItemsFetcher.Fetch();
+
+            if (itemsResult.IsFailed)
+            {
+                return Result.Fail(itemsResult.Errors);
+            }
+
+            Items = itemsResult.Value;
 
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 

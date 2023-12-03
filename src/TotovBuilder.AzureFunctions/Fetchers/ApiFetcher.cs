@@ -4,11 +4,10 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Utils;
 using static System.Text.Json.JsonElement;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -23,6 +22,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// API query.
         /// </summary>
         protected abstract string ApiQuery { get; }
+
         /// <summary>
         /// Configuration wrapper;
         /// </summary>
@@ -39,9 +39,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected readonly ILogger<ApiFetcher<T>> Logger;
 
         /// <summary>
-        /// Cache.
+        /// Fetched data.
+        /// Once data has been fetched and stored in this property, it is never fetched again.
         /// </summary>
-        private readonly ICache Cache;
+        private T? FetchedData { get; set; } = null;
 
         /// <summary>
         /// Fetching task.
@@ -60,67 +61,50 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
-        /// <param name="cache">Cache.</param>
         protected ApiFetcher(
             ILogger<ApiFetcher<T>> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IConfigurationWrapper configurationWrapper,
-            ICache cache)
+            IConfigurationWrapper configurationWrapper)
         {
             ConfigurationWrapper = configurationWrapper;
-            Cache = cache;
             HttpClientWrapperFactory = httpClientWrapperFactory;
             Logger = logger;
         }
 
         /// <inheritdoc/>
-        public async Task<T> Fetch()
+        public async Task<Result<T>> Fetch()
         {
-            T? result = null;
-
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString());
-
-                await FetchingTask; // Will throw if the previous call cannot return data
-
+                await FetchingTask;
                 Logger.LogInformation(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString());
+            }
+            else
+            {
+                FetchingTask = Task.Run(async () =>
+                {
+                    if (FetchedData != null)
+                    {
+                        return;
+                    }
 
-                result = Cache.Get<T>(DataType)!; // Will have data since the previous call will have been able to return data
+                    Result<T> fetchResult = await ExecuteFetch();
 
-                return result;
+                    if (fetchResult.IsSuccess)
+                    {
+                        FetchedData = fetchResult.Value;
+                    }
+                });
+                await FetchingTask;
             }
 
-            FetchingTask = Task.Run(async () =>
+            if (FetchedData == null)
             {
-                if (Cache.HasValidCache(DataType))
-                {
-                    result = Cache.Get<T>(DataType);
-                    Logger.LogInformation(Properties.Resources.FetchedFromCache, DataType.ToString());
+                return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
+            }
 
-                    return;
-                }
-
-                Result<T> fetchResult = await ExecuteFetch();
-
-                if (fetchResult.IsSuccess)
-                {
-                    result = fetchResult.Value;
-                    Cache.Store(DataType, result);
-                }
-                else
-                {
-                    result = Cache.Get<T>(DataType);
-
-                    if (result == null)
-                    {
-                        throw new Exception(string.Format(Properties.Resources.FetchingErrorWithoutCache, DataType.ToString()));
-                    }
-                }
-            });
-            await FetchingTask;
-
-            return result!; // If we reach this point without throwing, it means we have data
+            return Result.Ok(FetchedData);
         }
 
         /// <summary>
@@ -254,7 +238,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Executes the fetch operation.
         /// </summary>
-        /// <returns>Fetched data as a JSON string.</returns>
+        /// <returns>Fetched data.</returns>
         private async Task<Result<T>> ExecuteFetch()
         {
             if (string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.ApiUrl)

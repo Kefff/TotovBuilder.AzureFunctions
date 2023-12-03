@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -12,13 +12,25 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a website configuration fetcher.
     /// </summary>
-    public class WebsiteConfigurationFetcher : StaticDataFetcher<WebsiteConfiguration>, IWebsiteConfigurationFetcher
+    public class WebsiteConfigurationFetcher : RawDataFetcher<WebsiteConfiguration>, IWebsiteConfigurationFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => ConfigurationWrapper.Values.AzureWebsiteConfigurationBlobName;
+        protected override string AzureBlobName
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.RawWebsiteConfigurationBlobName;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.WebsiteConfiguration;
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.WebsiteConfiguration;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebsiteConfigurationFetcher"/> class.
@@ -29,10 +41,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="cache">Cache.</param>
         public WebsiteConfigurationFetcher(
             ILogger<WebsiteConfigurationFetcher> logger,
-            IBlobFetcher blobDataFetcher,
-            IConfigurationWrapper configurationWrapper,
-            ICache cache)
-            : base(logger, blobDataFetcher, configurationWrapper, cache)
+            IAzureBlobManager blobDataFetcher,
+            IConfigurationWrapper configurationWrapper)
+            : base(logger, blobDataFetcher, configurationWrapper)
         {
         }
 
@@ -47,6 +58,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 {
                     PropertyNameCaseInsensitive = true
                 })!;
+
+                return Task.FromResult(Result.Ok(azureFunctionsConfiguration));
             }
             catch (Exception e)
             {
@@ -55,8 +68,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 return Task.FromResult(Result.Fail<WebsiteConfiguration>(error));
             }
-
-            return Task.FromResult(Result.Ok(azureFunctionsConfiguration));
         }
     }
 }

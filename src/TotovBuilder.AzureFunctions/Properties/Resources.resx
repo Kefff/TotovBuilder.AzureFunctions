@@ -121,6 +121,10 @@
     <value>Error while deserializing armor penetrations :
 {0}</value>
   </data>
+  <data name="AzureBlobFetchingError" xml:space="preserve">
+    <value>Error while fetching "{0}" blob from Azure blob storage :
+{1}</value>
+  </data>
   <data name="AzureFunctionsConfigurationDeserializationError" xml:space="preserve">
     <value>Error while deserializing Azure Functions configuration :
 {0}</value>
@@ -129,10 +133,6 @@
     <value>Error while deserializing barter :
 {0}</value>
   </data>
-  <data name="BlobFetchingError" xml:space="preserve">
-    <value>Error while fetching "{0}" blob from Azure Blob storage :
-{1}</value>
-  </data>
   <data name="ChangelogDeserializationError" xml:space="preserve">
     <value>Error while deserializing changelog :
 {0}</value>
@@ -140,21 +140,21 @@
   <data name="EndFetching" xml:space="preserve">
     <value>{0} - End : Fetching.</value>
   </data>
+  <data name="EndGeneratingWebsiteData" xml:space="preserve">
+    <value>Website data generation - End</value>
+  </data>
+  <data name="EndUploadingWebsiteData" xml:space="preserve">
+    <value>Website data uploading - End</value>
+  </data>
   <data name="EndWaitingForPreviousFetching" xml:space="preserve">
     <value>{0} - End : Waiting for previous fetching to finish.</value>
-  </data>
-  <data name="FetchedFromCache" xml:space="preserve">
-    <value>{0} - Fetched from cache.</value>
   </data>
   <data name="FetchingDelayExceeded" xml:space="preserve">
     <value>{0} Fetching delay exceeded.</value>
   </data>
   <data name="FetchingError" xml:space="preserve">
     <value>{0} - Error while fetching data from the API :
-{1}.</value>
-  </data>
-  <data name="FetchingErrorWithoutCache" xml:space="preserve">
-    <value>{0} - Error while fetching data from the API. No cache available as backup.</value>
+{1}</value>
   </data>
   <data name="InvalidApiQuery" xml:space="preserve">
     <value>{0} - Invalid API query :
@@ -194,6 +194,9 @@
   <data name="ItemNotFound" xml:space="preserve">
     <value>Item "{0}" not found.</value>
   </data>
+  <data name="NoDataFetched" xml:space="preserve">
+    <value>{0} - No data fetched.</value>
+  </data>
   <data name="PresetContructionError" xml:space="preserve">
     <value>Error while constructing preset "{0}" :
 Cannot find a slot for items "{1}".</value>
@@ -212,6 +215,12 @@ Cannot find a slot for items "{1}".</value>
   </data>
   <data name="StartFetching" xml:space="preserve">
     <value>{0} - Start : Fetching.</value>
+  </data>
+  <data name="StartGeneratingWebsiteData" xml:space="preserve">
+    <value>Website data generation - Start</value>
+  </data>
+  <data name="StartUploadingWebsiteData" xml:space="preserve">
+    <value>Website data uploading - Start</value>
   </data>
   <data name="StartWaitingForPreviousFetching" xml:space="preserve">
     <value>{0} - Start : Waiting for previous fetching to finish.</value>

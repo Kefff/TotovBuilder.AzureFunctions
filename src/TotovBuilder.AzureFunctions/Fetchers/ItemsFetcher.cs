@@ -2,11 +2,9 @@
 using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Configuration;
@@ -21,10 +19,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ItemsFetcher : ApiFetcher<IEnumerable<Item>>, IItemsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => ConfigurationWrapper.Values.ApiItemsQuery;
+        protected override string ApiQuery
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.ApiItemsQuery;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Items;
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.Items;
+            }
+        }
 
         /// <summary>
         /// List of armor penetrations.
@@ -72,7 +82,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
-        /// <param name="cache">Cache.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemMissingPropertiesFetcher">Item missing properties fetcher.</param>
         /// <param name="armorPenetrationsFetcher">Armor penetrations fetcher.</param>
@@ -81,12 +90,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ILogger<ItemsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
-            ICache cache,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemMissingPropertiesFetcher itemMissingPropertiesFetcher,
             IArmorPenetrationsFetcher armorPenetrationsFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher
-        ) : base(logger, httpClientWrapperFactory, configurationWrapper, cache)
+        ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
             ArmorPenetrationsFetcher = armorPenetrationsFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
@@ -95,14 +103,34 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override async Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
             List<Task> deserializationTasks = new List<Task>();
             ConcurrentBag<Item> items = new ConcurrentBag<Item>();
-            ArmorPenetrations = await ArmorPenetrationsFetcher.Fetch();
-            ItemCategories = await ItemCategoriesFetcher.Fetch();
-            ItemMissingProperties = await ItemMissingPropertiesFetcher.Fetch();
-            TarkovValues = await TarkovValuesFetcher.Fetch();
+
+            Result<IEnumerable<ArmorPenetration>>? armorPenetrationsResult = null;
+            Result<IEnumerable<ItemCategory>>? itemCategoriesResult = null;
+            Result<IEnumerable<ItemMissingProperties>>? itemMissingPropertiesResult = null;
+            Result<TarkovValues>? tarkovValuesResult = null;
+
+            Task.WaitAll(
+                ArmorPenetrationsFetcher.Fetch().ContinueWith(r => armorPenetrationsResult = r.Result),
+                ItemCategoriesFetcher.Fetch().ContinueWith(r => itemCategoriesResult = r.Result),
+                ItemMissingPropertiesFetcher.Fetch().ContinueWith(r => itemMissingPropertiesResult = r.Result),
+                TarkovValuesFetcher.Fetch().ContinueWith(r => tarkovValuesResult = r.Result));
+            Result allTasksResult = Result.Merge(armorPenetrationsResult, itemCategoriesResult, itemMissingPropertiesResult, tarkovValuesResult);
+
+            if (allTasksResult.IsSuccess)
+            {
+                ArmorPenetrations = armorPenetrationsResult!.Value;
+                ItemCategories = itemCategoriesResult!.Value;
+                ItemMissingProperties = itemMissingPropertiesResult!.Value;
+                TarkovValues = tarkovValuesResult!.Value;
+            }
+            else
+            {
+                return Task.FromResult(allTasksResult.ToResult<IEnumerable<Item>>());
+            }
 
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -111,7 +139,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Item, itemJson, items)));
             }
 
-            await Task.WhenAll(deserializationTasks);
+            Task.WaitAll(deserializationTasks.ToArray());
             deserializationTasks.Clear();
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
@@ -119,9 +147,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Preset, itemJson, items)));
             }
 
-            await Task.WhenAll(deserializationTasks);
+            Task.WaitAll(deserializationTasks.ToArray());
 
-            return Result.Ok(items.AsEnumerable());
+            return Task.FromResult(Result.Ok(items.AsEnumerable()));
         }
 
         /// <summary>
@@ -700,6 +728,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized preset item.</returns>
         private Item? DeserializePresetItemData(JsonElement presetItemJson, ConcurrentBag<Item> items)
         {
+            if (presetItemJson.GetProperty("name").GetString()! == "Gas tube + handguard")
+            {
+            }
+
             if (!IsPreset(presetItemJson)
                 || !TryDeserializeObject(presetItemJson, "properties", out JsonElement propertiesJson)
                 || propertiesJson.EnumerateObject().Count() <= 1)

@@ -12,10 +12,25 @@ namespace TotovBuilder.AzureFunctions.Test.Net.Mocks
             : base(FunctionContextImplementation.CreateMock().Object)
         { }
 
-        public override HttpStatusCode StatusCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override HttpHeadersCollection Headers { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override Stream Body { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override HttpStatusCode StatusCode
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+        public override HttpHeadersCollection Headers
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+        public override Stream Body
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
 
-        public override HttpCookies Cookies => throw new NotImplementedException();
+        public override HttpCookies Cookies
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

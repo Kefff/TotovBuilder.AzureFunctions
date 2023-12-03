@@ -1,11 +1,10 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 
@@ -17,15 +16,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PricesFetcher : ApiFetcher<IEnumerable<Price>>, IPricesFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => ConfigurationWrapper.Values.ApiPricesQuery;
+        protected override string ApiQuery
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.ApiPricesQuery;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Prices;
-
-        /// <summary>
-        /// Tarkov values.
-        /// </summary>
-        private TarkovValues TarkovValues = new TarkovValues();
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.Prices;
+            }
+        }
 
         /// <summary>
         /// Tarkov values fetcher.
@@ -44,9 +50,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ILogger<PricesFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
-            ICache cache,
             ITarkovValuesFetcher tarkovValuesFetcher)
-            : base(logger, httpClientWrapperFactory, configurationWrapper, cache)
+            : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
             TarkovValuesFetcher = tarkovValuesFetcher;
         }
@@ -55,8 +60,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
             List<Price> prices = new List<Price>();
-            TarkovValues = await TarkovValuesFetcher.Fetch();
+            Result<TarkovValues> tarkovValuesResult = await TarkovValuesFetcher.Fetch();
 
+            if (tarkovValuesResult.IsFailed)
+            {
+                return Result.Fail(tarkovValuesResult.Errors);
+            }
+
+            TarkovValues tarkovValues = tarkovValuesResult.Value;
             JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in pricesJson.EnumerateArray())
@@ -122,7 +133,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             // Adding a price to the main currency item
-            Currency? mainCurrency = TarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
+            Currency? mainCurrency = tarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
 
             if (mainCurrency != null)
             {

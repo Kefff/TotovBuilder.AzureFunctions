@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentResults;
+using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Configuration;
@@ -54,7 +55,7 @@ namespace TotovBuilder.AzureFunctions.Configuration
             ConfigurationWrapper.Values = new AzureFunctionsConfiguration()
             {
                 AzureBlobStorageConnectionString = ReadString(AzureBlobStorageConnectionStringKey),
-                AzureBlobStorageContainerName = ReadString(AzureBlobStorageContainerNameKey),
+                AzureBlobStorageRawDataContainerName = ReadString(AzureBlobStorageContainerNameKey),
                 AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
             };
         }
@@ -71,7 +72,12 @@ namespace TotovBuilder.AzureFunctions.Configuration
 
             LoadingTask = Task.Run(async () =>
             {
-                ConfigurationWrapper.Values = await AzureFunctionsConfigurationFetcher.Fetch();
+                Result<AzureFunctionsConfiguration> azureFunctionsConfigurationResult = await AzureFunctionsConfigurationFetcher.Fetch();
+
+                if (azureFunctionsConfigurationResult.IsSuccess)
+                {
+                    ConfigurationWrapper.Values = azureFunctionsConfigurationResult.Value;
+                }
             });
             await LoadingTask;
         }

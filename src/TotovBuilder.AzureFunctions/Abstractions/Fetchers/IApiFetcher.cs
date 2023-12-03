@@ -1,4 +1,6 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
+﻿using FluentResults;
+
+namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
 {
     /// <summary>
     /// Provides the functionalities of a base class for API fetchers.
@@ -10,7 +12,7 @@
         /// Fetches data from the API.
         /// </summary>
         /// <remarks>Can return null because we cannot know what the "default" value should be when the API call fails.</remarks>
-        /// <returns>Data fetched as a JSON string.</returns>
-        Task<T> Fetch();
+        /// <returns>Data fetched.</returns>
+        Task<Result<T>> Fetch();
     }
 }

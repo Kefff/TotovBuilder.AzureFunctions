@@ -1,4 +1,4 @@
-﻿namespace TotovBuilder.AzureFunctions.Cache
+﻿namespace TotovBuilder.AzureFunctions.Utils
 {
     /// <summary>
     /// Determines the available data types.

@@ -5,14 +5,14 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.AzureFunctions.Fetchers;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Test;
@@ -45,37 +45,37 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties)));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations)));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
                 armorPenetrationsFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Item>? result = (await fetcher.Fetch())?.OrderBy(i => i.Id);
+            Result<IEnumerable<Item>> result = await fetcher.Fetch();
 
             // Assert
+            result.IsSuccess.Should().BeTrue();
+
+            IEnumerable<Item> orderedResult = result.Value.OrderBy(i => i.Id);
             IEnumerable<Item> expected = TestData.Items.OrderBy(i => i.Id);
-            result.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
+
+            orderedResult.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
         }
 
         [Fact]
@@ -98,37 +98,37 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(Array.Empty<ItemMissingProperties>()));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemMissingProperties>>(Array.Empty<ItemMissingProperties>())));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(Array.Empty<ArmorPenetration>()));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ArmorPenetration>>(Array.Empty<ArmorPenetration>())));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(new TarkovValues()));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(new TarkovValues())));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
                 armorPenetrationsFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Item>? result = (await fetcher.Fetch())?.OrderBy(i => i.Id);
+            Result<IEnumerable<Item>> result = await fetcher.Fetch();
 
             // Assert
-            Item[] expected = TestData.ItemsWithoutMissingProperties;
-            result.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
+            result.IsSuccess.Should().BeTrue();
+
+            IEnumerable<Item> orderedResult = result.Value.OrderBy(i => i.Id);
+            IEnumerable<Item> expected = TestData.ItemsWithoutMissingProperties;
+
+            result.Value.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
         }
 
         [Fact]
@@ -179,36 +179,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties)));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations)));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
                 armorPenetrationsFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            Result<IEnumerable<Item>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(new Item[]
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(new Item[]
             {
                 new Item()
                 {
@@ -269,11 +266,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(new ItemCategory[]
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(new ItemCategory[]
             {
                         new ItemCategory()
                         {
@@ -287,36 +281,36 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                                 }
                             }
                         }
-            }));
+            })));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties)));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations)));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
                 armorPenetrationsFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            Result<IEnumerable<Item>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEmpty();
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEmpty();
         }
 
         [Fact]
-        public async Task Fetch_WithoutItemCategories_ShouldReturnItemsWithOtherItemCategory()
+        public async Task Fetch_WithFailedRawDataFetching_ShouldFail()
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
@@ -356,53 +350,36 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
           }
         }") }));
 
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Fail<IEnumerable<ItemCategory>>("Error")));
+
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties)));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations)));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
                 armorPenetrationsFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            Result<IEnumerable<Item>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(new Item[]
-            {
-                new Container()
-                {
-                    Capacity = 35,
-                    CategoryId = "other",
-                    IconLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-icon.jpg",
-                    Id = "5ab8ebf186f7742d8b372e80",
-                    ImageLink = "https://assets.tarkov.dev/5ab8ebf186f7742d8b372e80-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/sso-attack-2-raid-backpack",
-                    Name = "SSO Attack 2 raid backpack",
-                    ShortName = "Attack 2",
-                    Weight = 6.12,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/SSO_Attack_2_raid_backpack"
-                }
-            });
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Single().Message.Should().Be("Items - No data fetched.");
         }
 
         [Fact]
@@ -482,36 +459,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties)));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations)));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
                 armorPenetrationsFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            Result<IEnumerable<Item>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(new Item[]
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(new Item[]
             {
                 new Item()
                 {
@@ -600,36 +574,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemCategory>>(TestData.ItemCategories));
+            itemCategoriesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)));
 
             Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new Mock<IItemMissingPropertiesFetcher>();
-            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties));
+            itemMissingPropertiesFetcher.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ItemMissingProperties>>(TestData.ItemMissingProperties)));
 
             Mock<IArmorPenetrationsFetcher> armorPenetrationsFetcherMock = new Mock<IArmorPenetrationsFetcher>();
-            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations));
+            armorPenetrationsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<ArmorPenetration>>(TestData.ArmorPenetrations)));
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(TestData.TarkovValues));
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
             ItemsFetcher fetcher = new ItemsFetcher(
                 new Mock<ILogger<ItemsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                cacheMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemMissingPropertiesFetcher.Object,
                 armorPenetrationsFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Item>? result = await fetcher.Fetch();
+            Result<IEnumerable<Item>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(new Item[]
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(new Item[]
             {
                 new Item()
                 {

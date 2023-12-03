@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
-using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
@@ -28,40 +26,37 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureItemMissingPropertiesBlobName = "item-missing-properties.json"
+                RawItemMissingPropertiesBlobName = "item-missing-properties.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ItemMissingPropertiesJson)));
-
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ItemMissingPropertiesJson)));
 
             ItemMissingPropertiesFetcher fetcher = new ItemMissingPropertiesFetcher(
                 new Mock<ILogger<ItemMissingPropertiesFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            IEnumerable<ItemMissingProperties>? result = await fetcher.Fetch();
+            Result<IEnumerable<ItemMissingProperties>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.ItemMissingProperties);
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(TestData.ItemMissingProperties);
         }
 
         [Fact]
-        public async Task Fetch_WithInvalidData_ShouldReturnNull()
+        public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureItemMissingPropertiesBlobName = "item-missing-properties.json"
+                RawItemMissingPropertiesBlobName = "item-missing-properties.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
   },
@@ -81,21 +76,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ""modSlots"": []
   }")));
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<ItemMissingProperties>>(It.IsAny<DataType>())).Returns(value: null);
-
             ItemMissingPropertiesFetcher fetcher = new ItemMissingPropertiesFetcher(
                 new Mock<ILogger<ItemMissingPropertiesFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            Func<Task> act = () => fetcher.Fetch();
+            Result<IEnumerable<ItemMissingProperties>> result = await fetcher.Fetch();
 
             // Assert
-            await act.Should().ThrowAsync<Exception>();
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Single().Message.Should().Be("ItemMissingProperties - No data fetched.");
         }
     }
 }

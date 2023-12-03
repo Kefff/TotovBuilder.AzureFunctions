@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
-using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
@@ -28,60 +25,53 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureWebsiteConfigurationBlobName = "website-configuration.json"
+                RawWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
-
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
 
             WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(
                 new Mock<ILogger<WebsiteConfigurationFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            WebsiteConfiguration? result = await fetcher.Fetch();
+            Result<WebsiteConfiguration> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.WebsiteConfiguration);
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(TestData.WebsiteConfiguration);
         }
 
         [Fact]
-        public async Task Fetch_WithInvalidData_ShouldReturnNull()
+        public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureWebsiteConfigurationBlobName = "website-configuration.json"
+                RawWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
   invalid,
   ""bugReportUrl"": ""https://discord.gg/bugreport""
 }
 ")));
 
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<WebsiteConfiguration>>(It.IsAny<DataType>())).Returns(value: null);
-
             WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(
                 new Mock<ILogger<WebsiteConfigurationFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            Func<Task> act = () => fetcher.Fetch();
+            Result<WebsiteConfiguration> result = await fetcher.Fetch();
 
             // Assert
-            await act.Should().ThrowAsync<Exception>();
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Single().Message.Should().Be("WebsiteConfiguration - No data fetched.");
         }
     }
 }

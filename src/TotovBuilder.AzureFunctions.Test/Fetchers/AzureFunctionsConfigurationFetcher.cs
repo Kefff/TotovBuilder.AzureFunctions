@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
-using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
@@ -30,27 +29,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
-
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
 
             AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            AzureFunctionsConfiguration? result = await fetcher.Fetch();
+            Result<AzureFunctionsConfiguration> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
         }
 
         [Fact]
-        public async Task Fetch_WithInvalidData_ShouldReturnNull()
+        public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
@@ -59,24 +55,20 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new Mock<IBlobFetcher>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
-
-            Mock<ICache> cacheMock = new Mock<ICache>();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<AzureFunctionsConfiguration>(It.IsAny<DataType>())).Returns(value: null);
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
 
             AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                configurationWrapperMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            Func<Task> act = () => fetcher.Fetch();
+            Result<AzureFunctionsConfiguration> result = await fetcher.Fetch();
 
             // Assert
-            await act.Should().ThrowAsync<Exception>();
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Single().Message.Should().Be("AzureFunctionsConfiguration - No data fetched.");
         }
     }
 }

@@ -18,22 +18,86 @@ namespace TotovBuilder.AzureFunctions.Test.Functions.Mocks
             : base()
         { }
 
-        public override string InvocationId => throw new NotImplementedException();
+        public override string InvocationId
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        public override string FunctionId => throw new NotImplementedException();
+        public override string FunctionId
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        public override TraceContext TraceContext => throw new NotImplementedException();
+        public override TraceContext TraceContext
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        public override BindingContext BindingContext => throw new NotImplementedException();
+        public override BindingContext BindingContext
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        public override RetryContext RetryContext => throw new NotImplementedException();
+        public override RetryContext RetryContext
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        public override IServiceProvider InstanceServices { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override IServiceProvider InstanceServices
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
 
-        public override FunctionDefinition FunctionDefinition => throw new NotImplementedException();
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        public override IDictionary<object, object> Items { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override FunctionDefinition FunctionDefinition
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        public override IInvocationFeatures Features => throw new NotImplementedException();
+        public override IDictionary<object, object> Items
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public override IInvocationFeatures Features
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

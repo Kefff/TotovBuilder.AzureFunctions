@@ -2,16 +2,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Generators;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Cache;
 using TotovBuilder.AzureFunctions.Configuration;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.AzureFunctions.Generators;
 using TotovBuilder.AzureFunctions.Net;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Utils;
 
 IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
@@ -22,7 +20,6 @@ IHost host = new HostBuilder()
         serviceCollection.AddApplicationInsightsTelemetryWorkerService();
         serviceCollection.ConfigureFunctionsApplicationInsights();
 
-        serviceCollection.AddSingleton<ICache, Cache>();
         serviceCollection.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
         serviceCollection.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
         serviceCollection.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
@@ -31,7 +28,7 @@ IHost host = new HostBuilder()
         serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
         serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
         serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
-        serviceCollection.AddSingleton<IBlobFetcher, BlobFetcher>();
+        serviceCollection.AddSingleton<IAzureBlobManager, AzureBlobManager>();
         serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
         serviceCollection.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
         serviceCollection.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
@@ -41,8 +38,8 @@ IHost host = new HostBuilder()
         serviceCollection.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
         serviceCollection.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
 
-        serviceCollection.AddSingleton<IWebsiteDataGenerator, WebsiteDataGenerator>();
-        serviceCollection.AddSingleton<IWebsiteDataUploader, WebsiteDataUploader>();
+        //serviceCollection.AddSingleton<IWebsiteDataGenerator, WebsiteDataGenerator>();
+        //serviceCollection.AddSingleton<IWebsiteDataUploader, WebsiteDataUploader>();
 
         serviceCollection.Configure<LoggerFilterOptions>(options =>
         {

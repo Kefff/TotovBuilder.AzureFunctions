@@ -1,16 +1,16 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Cache;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Cache;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Utils;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
     /// Represents a static data fetcher.
     /// </summary>
-    public abstract class StaticDataFetcher<T> : IApiFetcher<T>
+    public abstract class RawDataFetcher<T> : IApiFetcher<T>
         where T : class
     {
         /// <summary>
@@ -19,7 +19,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected readonly IConfigurationWrapper ConfigurationWrapper;
 
         /// <summary>
-        /// Name of the Azure Blob that stores the data.
+        /// Name of the Azure blob that stores the data.
         /// </summary>
         protected abstract string AzureBlobName { get; }
 
@@ -31,17 +31,18 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Logger.
         /// </summary>
-        protected readonly ILogger<StaticDataFetcher<T>> Logger;
+        protected readonly ILogger<RawDataFetcher<T>> Logger;
 
         /// <summary>
-        /// Blob fetcher.
+        /// Azure blob manager.
         /// </summary>
-        private readonly IBlobFetcher BlobFetcher;
+        private readonly IAzureBlobManager AzureBlobManager;
 
         /// <summary>
-        /// Cache.
+        /// Fetched data.
+        /// Once data has been fetched and stored in this property, it is never fetched again.
         /// </summary>
-        private readonly ICache Cache;
+        private T? FetchedData { get; set; } = null;
 
         /// <summary>
         /// Fetching task.
@@ -53,67 +54,52 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="StaticDataFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="blobFetcher">Blob fetcher.</param>
+        /// <param name="azureBlobManager">Azure blob manager.</param>
         /// <param name="configurationWrapper">Configuration wrapper</param>
-        /// <param name="cache">Cache.</param>
-        protected StaticDataFetcher(
-            ILogger<StaticDataFetcher<T>> logger,
-            IBlobFetcher blobFetcher,
-            IConfigurationWrapper configurationWrapper,
-            ICache cache)
+        protected RawDataFetcher(
+            ILogger<RawDataFetcher<T>> logger,
+            IAzureBlobManager azureBlobManager,
+            IConfigurationWrapper configurationWrapper)
         {
-            BlobFetcher = blobFetcher;
-            Cache = cache;
+            AzureBlobManager = azureBlobManager;
             ConfigurationWrapper = configurationWrapper;
             Logger = logger;
         }
 
         /// <inheritdoc/>
-        public async Task<T> Fetch()
+        public async Task<Result<T>> Fetch()
         {
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString());
-
-                await FetchingTask; // Will throw if the previous call cannot return data
-
+                await FetchingTask;
                 Logger.LogInformation(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString());
+            }
+            else
+            {
+                FetchingTask = Task.Run(async () =>
+                {
+                    if (FetchedData != null)
+                    {
+                        return;
+                    }
 
-                return Cache.Get<T>(DataType)!; // Will have data since the previous call will have been able to return data
+                    Result<T> fetchResult = await ExecuteFetch();
+
+                    if (fetchResult.IsSuccess)
+                    {
+                        FetchedData = fetchResult.Value;
+                    }
+                });
+                await FetchingTask;
             }
 
-            T? result = null;
-
-            FetchingTask = Task.Run(async () =>
+            if (FetchedData == null)
             {
-                if (Cache.HasValidCache(DataType))
-                {
-                    result = Cache.Get<T>(DataType);
-                    Logger.LogInformation(Properties.Resources.FetchedFromCache, DataType.ToString());
+                return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
+            }
 
-                    return;
-                }
-
-                Result<T> fetchResult = await ExecuteFetch();
-
-                if (fetchResult.IsSuccess)
-                {
-                    result = fetchResult.Value;
-                    Cache.Store(DataType, result);
-                }
-                else
-                {
-                    result = Cache.Get<T>(DataType);
-
-                    if (result == null)
-                    {
-                        throw new Exception(string.Format(Properties.Resources.FetchingErrorWithoutCache, DataType.ToString()));
-                    }
-                }
-            });
-            await FetchingTask;
-
-            return result!; // If we reach this point without throwing, it means we have data
+            return Result.Ok(FetchedData);
         }
 
         /// <summary>
@@ -126,12 +112,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Executes the fetch operation.
         /// </summary>
-        /// <returns>Fetched data as a JSON string.</returns>
+        /// <returns>Fetched data.</returns>
         private async Task<Result<T>> ExecuteFetch()
         {
             Logger.LogInformation(Properties.Resources.StartFetching, DataType.ToString());
 
-            Result<string> blobFetchResult = await BlobFetcher.Fetch(AzureBlobName);
+            Result<string> blobFetchResult = await AzureBlobManager.Fetch(ConfigurationWrapper.Values.AzureBlobStorageRawDataContainerName, AzureBlobName);
 
             if (!blobFetchResult.IsSuccess)
             {
