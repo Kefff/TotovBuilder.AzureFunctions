@@ -70,6 +70,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <param name="changelogFetcher">Changelog fetcher.</param>.
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemsFetcher">Item fetcher.</param>
+        /// <param name="logger">Logger.</param>
         /// <param name="presetsFetcher">Presets fetcher.</param>
         /// <param name="pricesFetcher">Prices fetcher.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
@@ -120,15 +121,16 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <param name="azureBlobName">Blob name.</param>
         /// <returns></returns>
         private async Task FetchAndUpload<TData>(IApiFetcher<TData> fetcher, string azureBlobName)
-            where TData: class
+            where TData : class
         {
             Result<TData> result = await fetcher.Fetch();
-            object data = new { };
 
-            if (result.IsSuccess)
+            if (result.IsFailed)
             {
-                await AzureBlobManager.Update(ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName, azureBlobName, data);
+                return;
             }
+
+            await AzureBlobManager.Update(ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName, azureBlobName, result.Value);
         }
     }
 }

@@ -64,7 +64,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (tarkovValuesResult.IsFailed)
             {
-                return Result.Fail(tarkovValuesResult.Errors);
+                return tarkovValuesResult.ToResult();
             }
 
             TarkovValues tarkovValues = tarkovValuesResult.Value;

@@ -600,5 +600,47 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             orderedResult.Should().BeEquivalentTo(expected);
         }
+
+        [Fact]
+        public async Task Fetch_WithFailedItemsFetch_ShouldFail()
+        {
+            // Arrange
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiUrl = "https://localhost/api",
+                FetchTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(async () =>
+                {
+                    await Task.Delay(1000);
+                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PresetsJson) };
+                });
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Fail<IEnumerable<Item>>("Error"))).Verifiable();
+
+            PresetsFetcher fetcher = new PresetsFetcher(
+                new Mock<ILogger<PresetsFetcher>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                configurationWrapperMock.Object,
+                itemsFetcherMock.Object);
+
+            // Act
+            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Single().Message.Should().Be("Presets - No data fetched.");
+            itemsFetcherMock.Verify();
+        }
     }
 }

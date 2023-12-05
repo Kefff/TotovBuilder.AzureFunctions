@@ -70,7 +70,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (itemsResult.IsFailed)
             {
-                return Result.Fail(itemsResult.Errors);
+                return itemsResult.ToResult();
             }
 
             Items = itemsResult.Value;
@@ -335,7 +335,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 Item containedItem = Items.First(i => i.Id == containedItemId);
                 int quantity = containedItemJson.GetProperty("quantity").GetInt32();
 
-                containedItems.Enqueue(new PresetContainedItem(containedItem, quantity));
+                PresetContainedItem presetContainedItem = new PresetContainedItem(containedItem, quantity);
+                containedItems.Enqueue(presetContainedItem);
             }
 
             InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
