@@ -23,7 +23,6 @@ IHost host = new HostBuilder()
         serviceCollection.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
         serviceCollection.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
         serviceCollection.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
-        serviceCollection.AddSingleton<IHttpResponseDataFactory, HttpResponseDataFactory>();
 
         serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
         serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();

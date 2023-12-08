@@ -34,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -71,7 +71,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -109,7 +109,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -170,7 +170,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 1
+                ExecutionTimeout = 1
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -207,7 +207,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -246,7 +246,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();

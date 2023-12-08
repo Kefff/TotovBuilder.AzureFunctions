@@ -25,7 +25,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
 
             Mock<IConfigurationWrapper> mockConfigurationWrapperMock = new Mock<IConfigurationWrapper>();
             mockConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration());
@@ -41,7 +41,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeEquivalentTo(TestData.Changelog);
-            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
             blobDataFetcherMock
-                .Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(m => m.Fetch(It.IsAny<string>()))
                 .Returns(async () =>
                 {
                     await Task.Delay(1000);
@@ -75,7 +75,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeEquivalentTo(TestData.Changelog);
-            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration());
@@ -100,7 +100,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeEquivalentTo(TestData.Changelog);
-            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             });
 
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Fail<string>(string.Empty)));
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Fail<string>(string.Empty)));
 
             RawDataFetcherImplementation rawDataFetcher = new RawDataFetcherImplementation(
                 new Mock<ILogger<RawDataFetcherImplementation>>().Object,
@@ -126,7 +126,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeFalse();
             result.Errors.Single().Message.Should().Be("Changelog - No data fetched.");
-            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            blobDataFetcherMock.Verify(m => m.Fetch(It.IsAny<string>()), Times.Once);
         }
 
         public class RawDataFetcherImplementation : RawDataFetcher<IEnumerable<ChangelogEntry>>

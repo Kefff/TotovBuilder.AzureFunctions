@@ -122,7 +122,11 @@
 {0}</value>
   </data>
   <data name="AzureBlobFetchingError" xml:space="preserve">
-    <value>Error while fetching "{0}" blob from Azure blob storage :
+    <value>Error while fetching blob "{0}" from Azure blob storage :
+{1}</value>
+  </data>
+  <data name="AzureBlobUpdatingError" xml:space="preserve">
+    <value>Error while updating blob "{0}" from Azure blob storage :
 {1}</value>
   </data>
   <data name="AzureFunctionsConfigurationDeserializationError" xml:space="preserve">
@@ -143,14 +147,17 @@
   <data name="EndGeneratingWebsiteData" xml:space="preserve">
     <value>Website data generation - End</value>
   </data>
+  <data name="EndUpdating" xml:space="preserve">
+    <value>End : Updating blob "{0}".</value>
+  </data>
   <data name="EndUploadingWebsiteData" xml:space="preserve">
     <value>Website data uploading - End</value>
   </data>
   <data name="EndWaitingForPreviousFetching" xml:space="preserve">
     <value>{0} - End : Waiting for previous fetching to finish.</value>
   </data>
-  <data name="FetchingDelayExceeded" xml:space="preserve">
-    <value>{0} Fetching delay exceeded.</value>
+  <data name="ExecutionDelayExceeded" xml:space="preserve">
+    <value>{0} - Execution delay exceeded.</value>
   </data>
   <data name="FetchingError" xml:space="preserve">
     <value>{0} - Error while fetching data from the API :
@@ -218,6 +225,9 @@ Cannot find a slot for items "{1}".</value>
   </data>
   <data name="StartGeneratingWebsiteData" xml:space="preserve">
     <value>Website data generation - Start</value>
+  </data>
+  <data name="StartUpdating" xml:space="preserve">
+    <value>Start : Updating blob "{0}".</value>
   </data>
   <data name="StartUploadingWebsiteData" xml:space="preserve">
     <value>Website data uploading - Start</value>

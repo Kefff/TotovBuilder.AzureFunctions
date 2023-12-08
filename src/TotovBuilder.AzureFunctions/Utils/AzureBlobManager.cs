@@ -36,25 +36,23 @@ namespace TotovBuilder.AzureFunctions.Utils
         }
 
         /// <inheritdoc/>
-        public Task<Result<string>> Fetch(string azureBlobContainerName, string azureBlobName)
+        public Task<Result<string>> Fetch(string azureBlobName)
         {
-            return Task.Run(() => ExecuteFetch(azureBlobContainerName, azureBlobName));
+            return Task.Run(() => ExecuteFetch(azureBlobName));
         }
 
         /// <inheritdoc/>
-        public Task Update(string azureBlobContainerName, string azureBlobName, object data)
+        public Task<Result> Update(string azureBlobName, object data)
         {
-            // TODO
-            throw new NotImplementedException();
+            return Task.Run(() => ExecuteUpdate(azureBlobName, data));
         }
 
         /// <summary>
-        /// Fetches the value of an Azure blob storage.
+        /// Fetches the value of an Azure blob.
         /// </summary>
-        /// <param name="azureBlobContainerName">Name of the Azure blob container that contains the blob.</param>
         /// <param name="azureBlobName">Name of the blob.</param>
         /// <returns>Blob value.</returns>
-        private Result<string> ExecuteFetch(string azureBlobContainerName, string azureBlobName)
+        private Result<string> ExecuteFetch(string azureBlobName)
         {
             if (string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.AzureBlobStorageConnectionString)
                 || string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.AzureBlobStorageRawDataContainerName))
@@ -69,15 +67,15 @@ namespace TotovBuilder.AzureFunctions.Utils
 
             try
             {
-                BlobContainerClient blobContainerClient = new BlobContainerClient(ConfigurationWrapper.Values.AzureBlobStorageConnectionString, azureBlobContainerName);
+                BlobContainerClient blobContainerClient = new BlobContainerClient(ConfigurationWrapper.Values.AzureBlobStorageConnectionString, ConfigurationWrapper.Values.AzureBlobStorageRawDataContainerName);
                 BlockBlobClient blockBlobClient = blobContainerClient.GetBlockBlobClient(azureBlobName);
 
                 using MemoryStream memoryStream = new MemoryStream();
                 Task fetchTask = blockBlobClient.DownloadToAsync(memoryStream);
 
-                if (!fetchTask.Wait(ConfigurationWrapper.Values.FetchTimeout * 1000))
+                if (!fetchTask.Wait(ConfigurationWrapper.Values.ExecutionTimeout * 1000))
                 {
-                    string error = Properties.Resources.FetchingDelayExceeded;
+                    string error = Properties.Resources.ExecutionDelayExceeded;
                     Logger.LogError(error);
 
                     return Result.Fail(error);
@@ -97,6 +95,54 @@ namespace TotovBuilder.AzureFunctions.Utils
             }
 
             return Result.Ok(blobData);
+        }
+
+        /// <summary>
+        /// Updates an Azure blob.
+        /// </summary>
+        /// <param name="azureBlobName">Name of the blob.</param>
+        /// <param name="data">Blob value.</param>
+        private Result ExecuteUpdate(string azureBlobName, object data)
+        {
+            if (string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.AzureBlobStorageConnectionString)
+                || string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName))
+            {
+                string error = Properties.Resources.InvalidConfiguration;
+                Logger.LogError(error);
+
+                return Result.Fail(error);
+            }
+
+            try
+            {
+                BlobContainerClient blobContainerClient = new BlobContainerClient(ConfigurationWrapper.Values.AzureBlobStorageConnectionString, ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName);
+                BlockBlobClient blockBlobClient = blobContainerClient.GetBlockBlobClient(azureBlobName);
+
+                using MemoryStream memoryStream = new MemoryStream();
+                StreamWriter writer = new StreamWriter(memoryStream);
+                writer.Write(data);
+                writer.Flush();
+                memoryStream.Position = 0;
+
+                Task updateTask = blockBlobClient.UploadAsync(memoryStream);
+
+                if (!updateTask.Wait(ConfigurationWrapper.Values.ExecutionTimeout * 1000))
+                {
+                    string error = Properties.Resources.ExecutionDelayExceeded;
+                    Logger.LogError(error);
+
+                    return Result.Fail(error);
+                }
+
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                string error = string.Format(Properties.Resources.AzureBlobUpdatingError, azureBlobName, e);
+                Logger.LogError(error);
+
+                return Result.Fail(error);
+            }
         }
     }
 }

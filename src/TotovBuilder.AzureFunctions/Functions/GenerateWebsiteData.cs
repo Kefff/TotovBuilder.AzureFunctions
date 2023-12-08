@@ -1,5 +1,7 @@
+using System.Text.Json;
 using FluentResults;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
@@ -42,6 +44,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IItemsFetcher ItemsFetcher;
 
         /// <summary>
+        /// Logger.
+        /// </summary>
+        private readonly ILogger<GenerateWebsiteData> Logger;
+
+        /// <summary>
         /// Presets fetcher.
         /// </summary>
         private readonly IPresetsFetcher PresetsFetcher;
@@ -82,6 +89,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             IChangelogFetcher changelogFetcher,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemsFetcher itemsFetcher,
+            ILogger<GenerateWebsiteData> logger,
             IPresetsFetcher presetsFetcher,
             IPricesFetcher pricesFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher,
@@ -93,6 +101,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             ChangelogFetcher = changelogFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
             ItemsFetcher = itemsFetcher;
+            Logger = logger;
             PresetsFetcher = presetsFetcher;
             PricesFetcher = pricesFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
@@ -100,7 +109,12 @@ namespace TotovBuilder.AzureFunctions.Functions
         }
 
         [Function("GenerateWebsiteData")]
-        public async Task Run([TimerTrigger("%TOTOVBUILDER_GenerateWebsiteDataSchedule%")] ScheduleTrigger _)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Azure Functions do not support discard (\"_\") parameters when the parameter is not used.")]
+#if DEBUG
+        public async Task Run([TimerTrigger("%TOTOVBUILDER_GenerateWebsiteDataSchedule%", RunOnStartup = true)] ScheduleTrigger scheduleTrigger)
+#else
+        public async Task Run([TimerTrigger("%TOTOVBUILDER_GenerateWebsiteDataSchedule%")] ScheduleTrigger scheduleTrigger)
+#endif
         {
             await ConfigurationLoader.Load();
             Task.WaitAll(
@@ -123,14 +137,25 @@ namespace TotovBuilder.AzureFunctions.Functions
         private async Task FetchAndUpload<TData>(IApiFetcher<TData> fetcher, string azureBlobName)
             where TData : class
         {
-            Result<TData> result = await fetcher.Fetch();
+            Result<TData> fetchResult = await fetcher.Fetch();
 
-            if (result.IsFailed)
+            if (fetchResult.IsFailed)
             {
                 return;
             }
 
-            await AzureBlobManager.Update(ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName, azureBlobName, result.Value);
+            string data = JsonSerializer.Serialize(fetchResult.Value, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            Logger.LogInformation(Properties.Resources.StartUpdating, azureBlobName);
+
+            Result updateResult = await AzureBlobManager.Update(azureBlobName, data);
+
+            if (updateResult.IsFailed)
+            {
+                return;
+            }
+
+            Logger.LogInformation(Properties.Resources.EndUpdating, azureBlobName);
         }
     }
 }

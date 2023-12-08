@@ -33,7 +33,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -79,7 +79,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -155,7 +155,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -312,7 +312,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -435,7 +435,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -513,7 +513,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -610,7 +610,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();

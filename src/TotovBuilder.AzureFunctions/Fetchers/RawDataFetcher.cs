@@ -117,7 +117,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             Logger.LogInformation(Properties.Resources.StartFetching, DataType.ToString());
 
-            Result<string> blobFetchResult = await AzureBlobManager.Fetch(ConfigurationWrapper.Values.AzureBlobStorageRawDataContainerName, AzureBlobName);
+            Result<string> blobFetchResult = await AzureBlobManager.Fetch(AzureBlobName);
 
             if (!blobFetchResult.IsSuccess)
             {

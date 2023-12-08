@@ -30,7 +30,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiBartersQuery = "{ barters { level requiredItems { item { id } quantity } rewardItems { item { id } quantity } trader { normalizedName } taskUnlock { id }  }  }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -114,7 +114,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiBartersQuery = "{ barters { level requiredItems { item { id } quantity } rewardItems { item { id } quantity } trader { normalizedName } taskUnlock { id }  }  }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
@@ -165,7 +165,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 ApiBartersQuery = "{ barters { level requiredItems { item { id } quantity } rewardItems { item { id } quantity } trader { normalizedName } taskUnlock { id }  }  }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();

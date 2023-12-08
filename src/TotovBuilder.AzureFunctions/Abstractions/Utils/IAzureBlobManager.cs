@@ -8,19 +8,17 @@ namespace TotovBuilder.AzureFunctions.Abstractions.Utils
     public interface IAzureBlobManager
     {
         /// <summary>
-        /// Fetches data from an Azure blob storage.
+        /// Fetches data from an Azure blob.
         /// </summary>
-        /// <param name="azureBlobContainerName">Name of the Azure blob container that contains the blob.</param>
         /// <param name="azureBlobName">Name of the blob.</param>
         /// <returns>Blob data.</returns>
-        Task<Result<string>> Fetch(string azureBlobContainerName, string azureBlobName);
+        Task<Result<string>> Fetch(string azureBlobName);
 
         /// <summary>
-        /// Updates data of an Azure blob storage.
+        /// Updates data of an Azure blob.
         /// </summary>
-        /// <param name="azureBlobContainerName">Name of the Azure blob container that contains the blob.</param>
         /// <param name="azureBlobName">Name of the blob.</param>
         /// <param name="data">Data to upload.</param>
-        Task Update(string azureBlobContainerName, string azureBlobName, object data);
+        Task<Result> Update(string azureBlobName, object data);
     }
 }

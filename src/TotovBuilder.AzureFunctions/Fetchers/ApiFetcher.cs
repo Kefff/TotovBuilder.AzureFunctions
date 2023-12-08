@@ -265,9 +265,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IHttpClientWrapper client = HttpClientWrapperFactory.Create();
                 Task<HttpResponseMessage> fetchTask = client.SendAsync(request);
 
-                if (!fetchTask.Wait(ConfigurationWrapper.Values.FetchTimeout * 1000))
+                if (!fetchTask.Wait(ConfigurationWrapper.Values.ExecutionTimeout * 1000))
                 {
-                    string error = string.Format(Properties.Resources.FetchingDelayExceeded, DataType.ToString());
+                    string error = string.Format(Properties.Resources.ExecutionDelayExceeded, DataType.ToString());
                     Logger.LogError(error);
 
                     return Result.Fail(error);

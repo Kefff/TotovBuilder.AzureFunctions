@@ -11,7 +11,7 @@
     "logLevel": {
       "default": "Warning",
       "Host.Results": "Information",
-      "TotovBuilder.AzureFunctions.Fetchers": "Information"
+      "Function": "Information"
     }
   }
 }

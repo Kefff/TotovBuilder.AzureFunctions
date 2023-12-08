@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             });
 
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.TarkovValuesJson)));
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.TarkovValuesJson)));
 
             TarkovValuesFetcher fetcher = new TarkovValuesFetcher(
                 new Mock<ILogger<TarkovValuesFetcher>>().Object,
@@ -55,7 +55,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             });
 
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
   ""invalid"": {
     invalid
   },

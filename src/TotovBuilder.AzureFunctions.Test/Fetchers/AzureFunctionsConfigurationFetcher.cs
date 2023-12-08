@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             });
 
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
 
             AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,
@@ -55,7 +55,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             });
 
             Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
+            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
 
             AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,
