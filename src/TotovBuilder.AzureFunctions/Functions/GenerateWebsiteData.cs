@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Text.Json;
 using FluentResults;
 using Microsoft.Azure.Functions.Worker;
@@ -133,7 +134,6 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <typeparam name="TData">Type of data.</typeparam>
         /// <param name="fetcher">Fetcher.</param>
         /// <param name="azureBlobName">Blob name.</param>
-        /// <returns></returns>
         private async Task FetchAndUpload<TData>(IApiFetcher<TData> fetcher, string azureBlobName)
             where TData : class
         {
@@ -144,11 +144,30 @@ namespace TotovBuilder.AzureFunctions.Functions
                 return;
             }
 
-            string data = JsonSerializer.Serialize(fetchResult.Value, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            string serializedData;
+
+            if (typeof(IEnumerable).IsAssignableFrom(typeof(TData)))
+            {
+                serializedData = JsonSerializer.Serialize(
+                    fetchResult.Value as IEnumerable<object>, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
+                    new JsonSerializerOptions()
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+            }
+            else
+            {
+                serializedData = JsonSerializer.Serialize(
+                    fetchResult.Value as object, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
+                    new JsonSerializerOptions()
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+            }
 
             Logger.LogInformation(Properties.Resources.StartUpdating, azureBlobName);
 
-            Result updateResult = await AzureBlobManager.Update(azureBlobName, data);
+            Result updateResult = await AzureBlobManager.Update(azureBlobName, serializedData);
 
             if (updateResult.IsFailed)
             {

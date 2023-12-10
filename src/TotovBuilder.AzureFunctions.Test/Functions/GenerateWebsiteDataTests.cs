@@ -99,13 +99,13 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Verifiable();
 
             JsonSerializerOptions serializationOptions = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog, serializationOptions);
-            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories, serializationOptions);
-            string expectedItems = JsonSerializer.Serialize(TestData.Items, serializationOptions);
-            string expectedPresets = JsonSerializer.Serialize(TestData.Presets, serializationOptions);
-            string expectedPrices = JsonSerializer.Serialize(TestData.Prices, serializationOptions);
-            string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues, serializationOptions);
-            string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration, serializationOptions);
+            string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog as IEnumerable<object>, serializationOptions);
+            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories as IEnumerable<object>, serializationOptions);
+            string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
+            string expectedPresets = JsonSerializer.Serialize(TestData.Presets as IEnumerable<object>, serializationOptions);
+            string expectedPrices = JsonSerializer.Serialize(TestData.Prices as IEnumerable<object>, serializationOptions);
+            string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues as object, serializationOptions);
+            string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration as object, serializationOptions);
 
             Mock<IAzureBlobManager> azureBlobManagerMock = new Mock<IAzureBlobManager>();
             azureBlobManagerMock
@@ -350,13 +350,13 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Verifiable();
 
             JsonSerializerOptions serializationOptions = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog, serializationOptions);
-            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories, serializationOptions);
-            string expectedItems = JsonSerializer.Serialize(TestData.Items, serializationOptions);
-            string expectedPresets = JsonSerializer.Serialize(TestData.Presets, serializationOptions);
-            string expectedPrices = JsonSerializer.Serialize(TestData.Prices, serializationOptions);
-            string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues, serializationOptions);
-            string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration, serializationOptions);
+            string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog as IEnumerable<object>, serializationOptions);
+            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories as IEnumerable<object>, serializationOptions);
+            string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
+            string expectedPresets = JsonSerializer.Serialize(TestData.Presets as IEnumerable<object>, serializationOptions);
+            string expectedPrices = JsonSerializer.Serialize(TestData.Prices as IEnumerable<object>, serializationOptions);
+            string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues as object, serializationOptions);
+            string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration as object, serializationOptions);
 
             Mock<IAzureBlobManager> azureBlobManagerMock = new Mock<IAzureBlobManager>();
             azureBlobManagerMock
