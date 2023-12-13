@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.Model.Items;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
@@ -120,7 +121,10 @@ namespace TotovBuilder.AzureFunctions.Functions
             await ConfigurationLoader.Load();
             Task.WaitAll(
                 FetchAndUpload(ChangelogFetcher, ConfigurationWrapper.Values.WebsiteChangelogBlobName),
-                FetchAndUpload(ItemCategoriesFetcher, ConfigurationWrapper.Values.WebsiteItemCategoriesBlobName),
+                FetchAndUpload(
+                    ItemCategoriesFetcher,
+                    ConfigurationWrapper.Values.WebsiteItemCategoriesBlobName,
+                    TransformItemCategories),
                 FetchAndUpload(ItemsFetcher, ConfigurationWrapper.Values.WebsiteItemsBlobName),
                 FetchAndUpload(PresetsFetcher, ConfigurationWrapper.Values.WebsitePresetsBlobName),
                 FetchAndUpload(PricesFetcher, ConfigurationWrapper.Values.WebsitePricesBlobName),
@@ -129,7 +133,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         }
 
         /// <summary>
-        /// Fetches data generated for the website and uploads it to a blob storage.
+        /// Fetches data for the website and uploads it to a blob storage.
         /// </summary>
         /// <typeparam name="TData">Type of data.</typeparam>
         /// <param name="fetcher">Fetcher.</param>
@@ -137,19 +141,34 @@ namespace TotovBuilder.AzureFunctions.Functions
         private async Task FetchAndUpload<TData>(IApiFetcher<TData> fetcher, string azureBlobName)
             where TData : class
         {
-            Result<TData> fetchResult = await fetcher.Fetch();
+            await FetchAndUpload(fetcher, azureBlobName, (TData input) => input);
+        }
+
+        /// <summary>
+        /// Fetches data for the website, transforms and uploads it to a blob storage.
+        /// </summary>
+        /// <typeparam name="TData">Type of data.</typeparam>
+        /// <param name="fetcher">Fetcher.</param>
+        /// <param name="azureBlobName">Blob name.</param>
+        private async Task FetchAndUpload<TIn, TOut>(IApiFetcher<TIn> fetcher, string azureBlobName, Func<TIn, TOut> transformationFunction)
+            where TIn : class
+            where TOut : class
+        {
+            Result<TIn> fetchResult = await fetcher.Fetch();
 
             if (fetchResult.IsFailed)
             {
                 return;
             }
 
+            TOut transformedData = transformationFunction(fetchResult.Value);
+
             string serializedData;
 
-            if (typeof(IEnumerable).IsAssignableFrom(typeof(TData)))
+            if (typeof(IEnumerable).IsAssignableFrom(typeof(TOut)))
             {
                 serializedData = JsonSerializer.Serialize(
-                    fetchResult.Value as IEnumerable<object>, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
+                    transformedData as IEnumerable<object>, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
                     new JsonSerializerOptions()
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -158,7 +177,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             else
             {
                 serializedData = JsonSerializer.Serialize(
-                    fetchResult.Value as object, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
+                    transformedData as object, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
                     new JsonSerializerOptions()
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -175,6 +194,16 @@ namespace TotovBuilder.AzureFunctions.Functions
             }
 
             Logger.LogInformation(Properties.Resources.EndUpdating, azureBlobName);
+        }
+
+        /// <summary>
+        /// Transform item categories into a list of item category IDs.
+        /// </summary>
+        /// <param name="itemCategories">Item categories.</param>
+        /// <returns>Item category IDs.</returns>
+        private IEnumerable<string> TransformItemCategories(IEnumerable<ItemCategory> itemCategories)
+        {
+            return itemCategories.Select(ic => ic.Id);
         }
     }
 }

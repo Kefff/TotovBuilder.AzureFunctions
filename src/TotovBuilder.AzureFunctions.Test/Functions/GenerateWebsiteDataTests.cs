@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentResults;
@@ -100,7 +101,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             JsonSerializerOptions serializationOptions = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog as IEnumerable<object>, serializationOptions);
-            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories as IEnumerable<object>, serializationOptions);
+            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories.Select(ic => ic.Id) as IEnumerable<object>, serializationOptions);
             string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
             string expectedPresets = JsonSerializer.Serialize(TestData.Presets as IEnumerable<object>, serializationOptions);
             string expectedPrices = JsonSerializer.Serialize(TestData.Prices as IEnumerable<object>, serializationOptions);
@@ -351,7 +352,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
 
             JsonSerializerOptions serializationOptions = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog as IEnumerable<object>, serializationOptions);
-            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories as IEnumerable<object>, serializationOptions);
+            string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories.Select(ic => ic.Id) as IEnumerable<object>, serializationOptions);
             string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
             string expectedPresets = JsonSerializer.Serialize(TestData.Presets as IEnumerable<object>, serializationOptions);
             string expectedPrices = JsonSerializer.Serialize(TestData.Prices as IEnumerable<object>, serializationOptions);
