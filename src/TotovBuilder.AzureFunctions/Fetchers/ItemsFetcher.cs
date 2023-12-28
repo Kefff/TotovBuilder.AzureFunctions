@@ -290,11 +290,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 WikiLink = itemJson.GetProperty("wikiLink").GetString()!
             };
 
+            if (TryDeserializeArray(itemJson, "conflictingItems", out ArrayEnumerator conflictingItemsJson))
+            {
+                List<string> conflictingItemIds = new List<string>();
+
+                foreach (JsonElement conflictingItemJson in conflictingItemsJson)
+                {
+                    conflictingItemIds.Add(conflictingItemJson.GetProperty("id").GetString()!);
+                }
+
+                item.ConflictingItemIds = conflictingItemIds.ToArray();
+            }
+
             ItemMissingProperties? itemForMissingProperties = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == item.Id);
 
             if (itemForMissingProperties != null)
             {
-                item.ConflictingItemIds = itemForMissingProperties.ConflictingItemIds;
                 item.MaxStackableAmount = itemForMissingProperties.MaxStackableAmount;
             }
 
@@ -801,7 +812,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
 
                 List<ModSlot> modSlots = new List<ModSlot>();
-                modSlots.AddRange(ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.RangedWeaponChambers ?? Array.Empty<ModSlot>());
                 modSlots.AddRange(DeserializeModSlots(propertiesJson));
                 rangedWeapon.ModSlots = modSlots.ToArray();
 
