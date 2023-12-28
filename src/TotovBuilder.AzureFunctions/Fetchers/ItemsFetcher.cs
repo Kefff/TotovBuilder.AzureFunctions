@@ -235,7 +235,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armorMod.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
                 armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
-                armorMod.ModSlots = DeserializeModSlots(propertiesJson); // TODO : MISSING FROM API
+                armorMod.ModSlots = DeserializeModSlots(propertiesJson);
                 armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 //item.RicochetChance = ; // TODO : MISSING FROM API
                 armorMod.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();

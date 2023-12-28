@@ -163,25 +163,23 @@ namespace TotovBuilder.AzureFunctions.Functions
 
             TOut transformedData = transformationFunction(fetchResult.Value);
 
+            JsonSerializerOptions serializationOptions = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
             string serializedData;
 
             if (typeof(IEnumerable).IsAssignableFrom(typeof(TOut)))
             {
                 serializedData = JsonSerializer.Serialize(
                     transformedData as IEnumerable<object>, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
-                    new JsonSerializerOptions()
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                    });
+                    serializationOptions);
             }
             else
             {
                 serializedData = JsonSerializer.Serialize(
                     transformedData as object, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
-                    new JsonSerializerOptions()
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                    });
+                    serializationOptions);
             }
 
             Logger.LogInformation(Properties.Resources.StartUpdating, azureBlobName);
