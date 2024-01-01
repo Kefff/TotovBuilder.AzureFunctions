@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions;
-using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
@@ -22,42 +23,39 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnArmorPenetration()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureArmorPenetrationsBlobName = "armor-penetrations.json"
+                RawArmorPenetrationsBlobName = "armor-penetrations.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new();
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ArmorPenetrationsJson)));
 
-            Mock<ICache> cacheMock = new();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-
-            ArmorPenetrationsFetcher fetcher = new(
+            ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(
                 new Mock<ILogger<ArmorPenetrationsFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            IEnumerable<ArmorPenetration>? result = await fetcher.Fetch();
+            Result<IEnumerable<ArmorPenetration>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(TestData.ArmorPenetrations);
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(TestData.ArmorPenetrations);
         }
 
         [Fact]
-        public async Task Fetch_WithInvalidData_ShouldReturnNull()
+        public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                AzureArmorPenetrationsBlobName = "armor-penetrations.json"
+                RawArmorPenetrationsBlobName = "armor-penetrations.json"
             });
 
-            Mock<IBlobFetcher> blobDataFetcherMock = new();
+            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
             blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
@@ -70,21 +68,17 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 ]
 ")));
 
-            Mock<ICache> cacheMock = new();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<ArmorPenetration>>(It.IsAny<DataType>())).Returns(value: null);
-
-            ArmorPenetrationsFetcher fetcher = new(
+            ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(
                 new Mock<ILogger<ArmorPenetrationsFetcher>>().Object,
                 blobDataFetcherMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
-                cacheMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
-            IEnumerable<ArmorPenetration>? result = await fetcher.Fetch();
+            Result<IEnumerable<ArmorPenetration>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeNull();
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Single().Message.Should().Be("ArmorPenetrations - No data fetched.");
         }
     }
 }

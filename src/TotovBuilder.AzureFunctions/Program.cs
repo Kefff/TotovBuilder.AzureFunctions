@@ -2,35 +2,33 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Configuration;
 using TotovBuilder.AzureFunctions.Fetchers;
+using TotovBuilder.AzureFunctions.Net;
+using TotovBuilder.AzureFunctions.Utils;
 
 IHost host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults(builder =>
-    {
-        // Application Insights configuration
-        // Log levels readen from host.json
-        // Cf https://learn.microsoft.com/en-us/azure/azure-functions/configure-monitoring?tabs=v2#configure-categories
-        builder
-            .AddApplicationInsights()
-            .AddApplicationInsightsLogger();
-    })
+    .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices((HostBuilderContext hopstBuilderContext, IServiceCollection serviceCollection) =>
     {
         serviceCollection.AddHttpClient();
 
-        serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationCache, AzureFunctionsConfigurationCache>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationReader, AzureFunctionsConfigurationReader>();
-        serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
-        serviceCollection.AddSingleton<IBlobFetcher, BlobFetcher>();
-        serviceCollection.AddSingleton<ICache, Cache>();
-        serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
+        serviceCollection.AddApplicationInsightsTelemetryWorkerService();
+        serviceCollection.ConfigureFunctionsApplicationInsights();
+
+        serviceCollection.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
+        serviceCollection.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
         serviceCollection.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
-        serviceCollection.AddSingleton<IHttpResponseDataFactory, HttpResponseDataFactory>();
+
+        serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
+        serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
+        serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
+        serviceCollection.AddSingleton<IAzureBlobManager, AzureBlobManager>();
+        serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
         serviceCollection.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
         serviceCollection.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
         serviceCollection.AddSingleton<IItemsFetcher, ItemsFetcher>();
@@ -39,10 +37,13 @@ IHost host = new HostBuilder()
         serviceCollection.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
         serviceCollection.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
 
+        //serviceCollection.AddSingleton<IWebsiteDataGenerator, WebsiteDataGenerator>();
+        //serviceCollection.AddSingleton<IWebsiteDataUploader, WebsiteDataUploader>();
+
         serviceCollection.Configure<LoggerFilterOptions>(options =>
         {
             // Removing default filters that only allow warnings and errors to be logged
-            // Cf https://github.com/Azure/azure-functions-dotnet-worker/issues/1182#issuecomment-1317230604
+            // Cf https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide#application-insights
             LoggerFilterRule? filtersToRemove = options.Rules.FirstOrDefault(rule =>
                 rule.ProviderName == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
 

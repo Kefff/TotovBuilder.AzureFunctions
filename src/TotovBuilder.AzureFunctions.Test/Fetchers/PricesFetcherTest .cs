@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
@@ -20,50 +23,43 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     /// </summary>
     public class PricesFetcherTest
     {
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task Fetch_ShouldReturnPrices(bool hasTarkovValues)
+        [Fact]
+        public async Task Fetch_ShouldReturnPrices()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPricesQuery = "{ items { id name buyFor { vendor { ... on TraderOffer { trader { normalizedName } minTraderLevel taskUnlock { id } } ... on FleaMarket { normalizedName } } price currency priceRUB } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(hasTarkovValues ? TestData.TarkovValues : null));
-
-            PricesFetcher fetcher = new(
+            PricesFetcher fetcher = new PricesFetcher(
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
-                cacheMock.Object,
+                configurationWrapperMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Price>? result = await fetcher.Fetch();
+            Result<IEnumerable<Price>> result = await fetcher.Fetch();
 
             // Assert
-            List<Price> expected = new(TestData.Prices);
-
-            if (hasTarkovValues)
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(new List<Price>(TestData.Prices)
             {
-                expected.Add(new Price()
+                new Price()
                 {
                     CurrencyName = "RUB",
                     ItemId = "5449016a4bdc2d6f028b456f",
@@ -71,25 +67,23 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     MerchantLevel = 1,
                     Value = 1,
                     ValueInMainCurrency = 1
-                });
-            }
-
-            result.Should().BeEquivalentTo(expected);
+                }
+            });
         }
 
         [Fact]
         public async Task Fetch_WithInvalidData_ShouldReturnOnlyValidData()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationCache> azureFunctionsConfigurationCacheMock = new();
-            azureFunctionsConfigurationCacheMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiPricesQuery = "{ items { id name buyFor { vendor { ... on TraderOffer { trader { normalizedName } minTraderLevel taskUnlock { id } } ... on FleaMarket { normalizedName } } price currency priceRUB } } }",
                 ApiUrl = "https://localhost/api",
-                FetchTimeout = 5
+                ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
@@ -115,28 +109,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
   }
 }") }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            Mock<ICache> cacheMock = new();
-            cacheMock.Setup(m => m.HasValidCache(It.IsAny<DataType>())).Returns(false);
-            cacheMock.Setup(m => m.Get<IEnumerable<Item>>(It.IsAny<DataType>())).Returns(value: null);
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)));
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult<TarkovValues?>(TestData.TarkovValues));
-
-            PricesFetcher fetcher = new(
+            PricesFetcher fetcher = new PricesFetcher(
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                azureFunctionsConfigurationCacheMock.Object,
-                cacheMock.Object,
+                configurationWrapperMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
-            IEnumerable<Price>? result = await fetcher.Fetch();
+            Result<IEnumerable<Price>> result = await fetcher.Fetch();
 
             // Assert
-            result.Should().BeEquivalentTo(new Price[]
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(new Price[]
             {
                 new Price()
                 {
@@ -156,6 +146,44 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ValueInMainCurrency = 1
                 }
             });
+        }
+
+        [Fact]
+        public async Task Fetch_WithFailedTarkovValuesFetch_ShouldFail()
+        {
+            // Arrange
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
+            {
+                ApiPricesQuery = "{ items { id name buyFor { vendor { ... on TraderOffer { trader { normalizedName } minTraderLevel taskUnlock { id } } ... on FleaMarket { normalizedName } } price currency priceRUB } } }",
+                ApiUrl = "https://localhost/api",
+                ExecutionTimeout = 5
+            });
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) }));
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            tarkovValuesFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Fail<TarkovValues>("Error"))).Verifiable();
+
+            PricesFetcher fetcher = new PricesFetcher(
+                new Mock<ILogger<PricesFetcher>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                configurationWrapperMock.Object,
+                tarkovValuesFetcherMock.Object);
+
+            // Act
+            Result<IEnumerable<Price>> result = await fetcher.Fetch();
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Single().Message.Should().Be("Prices - No data fetched.");
+            tarkovValuesFetcherMock.Verify();
         }
     }
 }

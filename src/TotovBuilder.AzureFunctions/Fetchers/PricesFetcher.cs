@@ -1,8 +1,10 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 
@@ -14,15 +16,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PricesFetcher : ApiFetcher<IEnumerable<Price>>, IPricesFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationCache.Values.ApiPricesQuery;
+        protected override string ApiQuery
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.ApiPricesQuery;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Prices;
-
-        /// <summary>
-        /// Tarkov values.
-        /// </summary>
-        private TarkovValues TarkovValues = new();
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.Prices;
+            }
+        }
 
         /// <summary>
         /// Tarkov values fetcher.
@@ -34,16 +43,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="cache">Cache.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         public PricesFetcher(
             ILogger<PricesFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
-            ICache cache,
+            IConfigurationWrapper configurationWrapper,
             ITarkovValuesFetcher tarkovValuesFetcher)
-            : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
+            : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
             TarkovValuesFetcher = tarkovValuesFetcher;
         }
@@ -51,9 +59,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Price> prices = new();
-            TarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
+            List<Price> prices = new List<Price>();
+            Result<TarkovValues> tarkovValuesResult = await TarkovValuesFetcher.Fetch();
 
+            if (tarkovValuesResult.IsFailed)
+            {
+                return tarkovValuesResult.ToResult();
+            }
+
+            TarkovValues tarkovValues = tarkovValuesResult.Value;
             JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in pricesJson.EnumerateArray())
@@ -69,7 +83,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             continue;
                         }
 
-                        Price price = new()
+                        Price price = new Price()
                         {
                             CurrencyName = priceJson.GetProperty("currency").GetString()!,
                             ItemId = itemJson.GetProperty("id").GetString()!,
@@ -119,7 +133,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             // Adding a price to the main currency item
-            Currency? mainCurrency = TarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
+            Currency? mainCurrency = tarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
 
             if (mainCurrency != null)
             {

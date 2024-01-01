@@ -10,9 +10,8 @@
 
 namespace TotovBuilder.AzureFunctions.Properties {
     using System;
-    using System.Diagnostics.CodeAnalysis;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,7 +22,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [ExcludeFromCodeCoverage]
     internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
@@ -73,6 +71,26 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error while fetching blob &quot;{0}&quot; from Azure blob storage :
+        ///{1}.
+        /// </summary>
+        internal static string AzureBlobFetchingError {
+            get {
+                return ResourceManager.GetString("AzureBlobFetchingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error while updating blob &quot;{0}&quot; from Azure blob storage :
+        ///{1}.
+        /// </summary>
+        internal static string AzureBlobUpdatingError {
+            get {
+                return ResourceManager.GetString("AzureBlobUpdatingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing Azure Functions configuration :
         ///{0}.
         /// </summary>
@@ -89,16 +107,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string BarterDeserializationError {
             get {
                 return ResourceManager.GetString("BarterDeserializationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error while fetching &quot;{0}&quot; blob from Azure Blob storage :
-        ///{1}.
-        /// </summary>
-        internal static string BlobFetchingError {
-            get {
-                return ResourceManager.GetString("BlobFetchingError", resourceCulture);
             }
         }
         
@@ -122,6 +130,33 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Website data generation - End.
+        /// </summary>
+        internal static string EndGeneratingWebsiteData {
+            get {
+                return ResourceManager.GetString("EndGeneratingWebsiteData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to End : Updating blob &quot;{0}&quot;..
+        /// </summary>
+        internal static string EndUpdating {
+            get {
+                return ResourceManager.GetString("EndUpdating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Website data uploading - End.
+        /// </summary>
+        internal static string EndUploadingWebsiteData {
+            get {
+                return ResourceManager.GetString("EndUploadingWebsiteData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} - End : Waiting for previous fetching to finish..
         /// </summary>
         internal static string EndWaitingForPreviousFetching {
@@ -131,26 +166,17 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Fetched from cache..
+        ///   Looks up a localized string similar to {0} - Execution delay exceeded..
         /// </summary>
-        internal static string FetchedFromCache {
+        internal static string ExecutionDelayExceeded {
             get {
-                return ResourceManager.GetString("FetchedFromCache", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} Fetching delay exceeded..
-        /// </summary>
-        internal static string FetchingDelayExceeded {
-            get {
-                return ResourceManager.GetString("FetchingDelayExceeded", resourceCulture);
+                return ResourceManager.GetString("ExecutionDelayExceeded", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to {0} - Error while fetching data from the API :
-        ///{1}..
+        ///{1}.
         /// </summary>
         internal static string FetchingError {
             get {
@@ -263,6 +289,15 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} - No data fetched..
+        /// </summary>
+        internal static string NoDataFetched {
+            get {
+                return ResourceManager.GetString("NoDataFetched", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while constructing preset &quot;{0}&quot; :
         ///Cannot find a slot for items &quot;{1}&quot;..
         /// </summary>
@@ -308,6 +343,33 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string StartFetching {
             get {
                 return ResourceManager.GetString("StartFetching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Website data generation - Start.
+        /// </summary>
+        internal static string StartGeneratingWebsiteData {
+            get {
+                return ResourceManager.GetString("StartGeneratingWebsiteData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start : Updating blob &quot;{0}&quot;..
+        /// </summary>
+        internal static string StartUpdating {
+            get {
+                return ResourceManager.GetString("StartUpdating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Website data uploading - Start.
+        /// </summary>
+        internal static string StartUploadingWebsiteData {
+            get {
+                return ResourceManager.GetString("StartUploadingWebsiteData", resourceCulture);
             }
         }
         

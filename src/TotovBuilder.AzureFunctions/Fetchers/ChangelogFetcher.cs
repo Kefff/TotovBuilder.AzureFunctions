@@ -1,8 +1,10 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -10,27 +12,37 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a changelog fetcher.
     /// </summary>
-    public class ChangelogFetcher : StaticDataFetcher<IEnumerable<ChangelogEntry>>, IChangelogFetcher
+    public class ChangelogFetcher : RawDataFetcher<IEnumerable<ChangelogEntry>>, IChangelogFetcher
     {
         /// <inheritdoc/>
-        protected override string AzureBlobName => AzureFunctionsConfigurationCache.Values.AzureChangelogBlobName;
+        protected override string AzureBlobName
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.RawChangelogBlobName;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Changelog;
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.Changelog;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="blobFetcher">Blob fetcher.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
-        /// <param name="cache">Cache.</param>
+        /// <param name="azureBlobManager">Azure blob manager.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         public ChangelogFetcher(
             ILogger<ChangelogFetcher> logger,
-            IBlobFetcher blobFetcher,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
-            ICache cache)
-            : base(logger, blobFetcher, azureFunctionsConfigurationCache, cache)
+            IAzureBlobManager azureBlobManager,
+            IConfigurationWrapper configurationWrapper)
+            : base(logger, azureBlobManager, configurationWrapper)
         {
         }
 

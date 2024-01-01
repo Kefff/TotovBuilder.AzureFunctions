@@ -2,8 +2,10 @@
 using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
@@ -17,10 +19,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class ItemsFetcher : ApiFetcher<IEnumerable<Item>>, IItemsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery => AzureFunctionsConfigurationCache.Values.ApiItemsQuery;
+        protected override string ApiQuery
+        {
+            get
+            {
+                return ConfigurationWrapper.Values.ApiItemsQuery;
+            }
+        }
 
         /// <inheritdoc/>
-        protected override DataType DataType => DataType.Items;
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.Items;
+            }
+        }
 
         /// <summary>
         /// List of armor penetrations.
@@ -55,7 +69,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Tarkov values.
         /// </summary>
-        private TarkovValues TarkovValues = new();
+        private TarkovValues TarkovValues = new TarkovValues();
 
         /// <summary>
         /// Tarkov values fetcher.
@@ -67,8 +81,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
-        /// <param name="cache">Cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemMissingPropertiesFetcher">Item missing properties fetcher.</param>
         /// <param name="armorPenetrationsFetcher">Armor penetrations fetcher.</param>
@@ -76,13 +89,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public ItemsFetcher(
             ILogger<ItemsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
-            ICache cache,
+            IConfigurationWrapper configurationWrapper,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemMissingPropertiesFetcher itemMissingPropertiesFetcher,
             IArmorPenetrationsFetcher armorPenetrationsFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher
-        ) : base(logger, httpClientWrapperFactory, azureFunctionsConfigurationCache, cache)
+        ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
             ArmorPenetrationsFetcher = armorPenetrationsFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
@@ -91,14 +103,34 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override async Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
-            List<Task> deserializationTasks = new();
-            ConcurrentBag<Item> items = new();
-            ArmorPenetrations = await ArmorPenetrationsFetcher.Fetch() ?? Array.Empty<ArmorPenetration>();
-            ItemCategories = await ItemCategoriesFetcher.Fetch() ?? Array.Empty<ItemCategory>();
-            ItemMissingProperties = await ItemMissingPropertiesFetcher.Fetch() ?? Array.Empty<ItemMissingProperties>();
-            TarkovValues = await TarkovValuesFetcher.Fetch() ?? new TarkovValues();
+            List<Task> deserializationTasks = new List<Task>();
+            ConcurrentBag<Item> items = new ConcurrentBag<Item>();
+
+            Result<IEnumerable<ArmorPenetration>>? armorPenetrationsResult = null;
+            Result<IEnumerable<ItemCategory>>? itemCategoriesResult = null;
+            Result<IEnumerable<ItemMissingProperties>>? itemMissingPropertiesResult = null;
+            Result<TarkovValues>? tarkovValuesResult = null;
+
+            Task.WaitAll(
+                ArmorPenetrationsFetcher.Fetch().ContinueWith(r => armorPenetrationsResult = r.Result),
+                ItemCategoriesFetcher.Fetch().ContinueWith(r => itemCategoriesResult = r.Result),
+                ItemMissingPropertiesFetcher.Fetch().ContinueWith(r => itemMissingPropertiesResult = r.Result),
+                TarkovValuesFetcher.Fetch().ContinueWith(r => tarkovValuesResult = r.Result));
+            Result allTasksResult = Result.Merge(armorPenetrationsResult, itemCategoriesResult, itemMissingPropertiesResult, tarkovValuesResult);
+
+            if (allTasksResult.IsSuccess)
+            {
+                ArmorPenetrations = armorPenetrationsResult!.Value;
+                ItemCategories = itemCategoriesResult!.Value;
+                ItemMissingProperties = itemMissingPropertiesResult!.Value;
+                TarkovValues = tarkovValuesResult!.Value;
+            }
+            else
+            {
+                return Task.FromResult(allTasksResult.ToResult<IEnumerable<Item>>());
+            }
 
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -107,7 +139,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Item, itemJson, items)));
             }
 
-            await Task.WhenAll(deserializationTasks);
+            Task.WaitAll(deserializationTasks.ToArray());
             deserializationTasks.Clear();
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
@@ -115,9 +147,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Preset, itemJson, items)));
             }
 
-            await Task.WhenAll(deserializationTasks);
+            Task.WaitAll(deserializationTasks.ToArray());
 
-            return Result.Ok(items.AsEnumerable());
+            return Task.FromResult(Result.Ok(items.AsEnumerable()));
         }
 
         /// <summary>
@@ -203,7 +235,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armorMod.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
                 armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
-                armorMod.ModSlots = DeserializeModSlots(propertiesJson); // TODO : MISSING FROM API
+                armorMod.ModSlots = DeserializeModSlots(propertiesJson);
                 armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 //item.RicochetChance = ; // TODO : MISSING FROM API
                 armorMod.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
@@ -222,7 +254,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private static ArmorMod DeserializeArmorModPreset(string presetId, JsonElement presetJson, IArmorMod baseItem)
         {
             ArmorMod presetItem = DeserializeBasePresetProperties<ArmorMod>(presetId, presetJson, baseItem);
-            
+
             presetItem.ArmorClass = baseItem.ArmorClass;
             presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.BlindnessProtectionPercentage = baseItem.BlindnessProtectionPercentage;
@@ -245,7 +277,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private T DeserializeBaseItemProperties<T>(JsonElement itemJson, string itemCategoryId)
             where T : Item, new()
         {
-            T item = new()
+            T item = new T()
             {
                 CategoryId = itemCategoryId,
                 IconLink = itemJson.GetProperty("iconLink").GetString()!,
@@ -258,11 +290,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 WikiLink = itemJson.GetProperty("wikiLink").GetString()!
             };
 
+            if (TryDeserializeArray(itemJson, "conflictingItems", out ArrayEnumerator conflictingItemsJson))
+            {
+                List<string> conflictingItemIds = new List<string>();
+
+                foreach (JsonElement conflictingItemJson in conflictingItemsJson)
+                {
+                    conflictingItemIds.Add(conflictingItemJson.GetProperty("id").GetString()!);
+                }
+
+                item.ConflictingItemIds = conflictingItemIds.ToArray();
+            }
+
             ItemMissingProperties? itemForMissingProperties = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == item.Id);
 
             if (itemForMissingProperties != null)
             {
-                item.ConflictingItemIds = itemForMissingProperties.ConflictingItemIds;
                 item.MaxStackableAmount = itemForMissingProperties.MaxStackableAmount;
             }
 
@@ -280,7 +323,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private static T DeserializeBasePresetProperties<T>(string presetId, JsonElement presetJson, IModdable baseItem)
             where T : IModdable, new()
         {
-            T preset = new()
+            T preset = new T()
             {
                 BaseItemId = baseItem.Id,
                 CategoryId = baseItem.CategoryId,
@@ -505,7 +548,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             return DeserializeBaseItemProperties<Item>(itemJson, itemCategoryId);
         }
-        
+
         /// <summary>
         /// Deserializes the category of an item.
         /// </summary>
@@ -513,7 +556,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized item category.</returns>
         private ItemCategory DeserializeItemCategory(JsonElement itemJson)
         {
-            List<string> tarkovItemCategoryIds = new();
+            List<string> tarkovItemCategoryIds = new List<string>();
             JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
 
             foreach (JsonElement tarkovItemCategoryJson in tarkovItemCategoriesJson.EnumerateArray())
@@ -537,7 +580,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 return null;
             }
-            
+
             ItemCategory itemCategory = DeserializeItemCategory(itemJson);
 
             switch (itemCategory.Id)
@@ -670,13 +713,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized array of <see cref="ModSlot"/>.</returns>
         private static ModSlot[] DeserializeModSlots(JsonElement propertiesJson)
         {
-            List<ModSlot> modSlots = new();
+            List<ModSlot> modSlots = new List<ModSlot>();
 
             if (propertiesJson.TryGetProperty("slots", out JsonElement modSlotsJson))
             {
                 foreach (JsonElement modSlotJson in modSlotsJson.EnumerateArray())
                 {
-                    ModSlot modSlot = new()
+                    ModSlot modSlot = new ModSlot()
                     {
                         CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),
                         Name = modSlotJson.GetProperty("nameId").GetString()!
@@ -696,6 +739,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized preset item.</returns>
         private Item? DeserializePresetItemData(JsonElement presetItemJson, ConcurrentBag<Item> items)
         {
+            if (presetItemJson.GetProperty("name").GetString()! == "Gas tube + handguard")
+            {
+            }
+
             if (!IsPreset(presetItemJson)
                 || !TryDeserializeObject(presetItemJson, "properties", out JsonElement propertiesJson)
                 || propertiesJson.EnumerateObject().Count() <= 1)
@@ -764,8 +811,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
                 rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
 
-                List<ModSlot> modSlots = new();
-                modSlots.AddRange(ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == rangedWeapon.Id)?.RangedWeaponChambers ?? Array.Empty<ModSlot>());
+                List<ModSlot> modSlots = new List<ModSlot>();
                 modSlots.AddRange(DeserializeModSlots(propertiesJson));
                 rangedWeapon.ModSlots = modSlots.ToArray();
 
@@ -905,7 +951,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Armored areas.</returns>
         private string[] GetArmoredAreas(JsonElement propertiesJson)
         {
-            List<string> armoredAreas = new();
+            List<string> armoredAreas = new List<string>();
 
             if (TryDeserializeArray(propertiesJson, "zones", out ArrayEnumerator armoredAreasJson))
             {
@@ -946,7 +992,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovItemCategoryId));
 
-                    if (result != null)
+                if (result != null)
                 {
                     return result;
                 }

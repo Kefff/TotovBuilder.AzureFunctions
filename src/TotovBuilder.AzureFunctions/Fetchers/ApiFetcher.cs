@@ -4,8 +4,10 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions;
+using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Utils;
 using static System.Text.Json.JsonElement;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -20,10 +22,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// API query.
         /// </summary>
         protected abstract string ApiQuery { get; }
+
         /// <summary>
-        /// Azure Functions configuration cache;
+        /// Configuration wrapper;
         /// </summary>
-        protected readonly IAzureFunctionsConfigurationCache AzureFunctionsConfigurationCache;
+        protected readonly IConfigurationWrapper ConfigurationWrapper;
 
         /// <summary>
         /// Type of data handled.
@@ -36,9 +39,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected readonly ILogger<ApiFetcher<T>> Logger;
 
         /// <summary>
-        /// Cache.
+        /// Fetched data.
+        /// Once data has been fetched and stored in this property, it is never fetched again.
         /// </summary>
-        private readonly ICache Cache;
+        private T? FetchedData { get; set; } = null;
 
         /// <summary>
         /// Fetching task.
@@ -56,61 +60,51 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="azureFunctionsConfigurationCache">Azure Functions configuration cache.</param>
-        /// <param name="cache">Cache.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         protected ApiFetcher(
             ILogger<ApiFetcher<T>> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IAzureFunctionsConfigurationCache azureFunctionsConfigurationCache,
-            ICache cache)
+            IConfigurationWrapper configurationWrapper)
         {
-            AzureFunctionsConfigurationCache = azureFunctionsConfigurationCache;
-            Cache = cache;
+            ConfigurationWrapper = configurationWrapper;
             HttpClientWrapperFactory = httpClientWrapperFactory;
             Logger = logger;
         }
 
         /// <inheritdoc/>
-        public async Task<T?> Fetch()
+        public async Task<Result<T>> Fetch()
         {
             if (!FetchingTask.IsCompleted)
             {
                 Logger.LogInformation(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString());
-
                 await FetchingTask;
-
                 Logger.LogInformation(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString());
+            }
+            else
+            {
+                FetchingTask = Task.Run(async () =>
+                {
+                    if (FetchedData != null)
+                    {
+                        return;
+                    }
 
-                return Cache.Get<T>(DataType);
+                    Result<T> fetchResult = await ExecuteFetch();
+
+                    if (fetchResult.IsSuccess)
+                    {
+                        FetchedData = fetchResult.Value;
+                    }
+                });
+                await FetchingTask;
             }
 
-            T? result = null;
-
-            FetchingTask = Task.Run(async () =>
+            if (FetchedData == null)
             {
-                if (Cache.HasValidCache(DataType))
-                {
-                    result = Cache.Get<T>(DataType);
-                    Logger.LogInformation(Properties.Resources.FetchedFromCache, DataType.ToString());
+                return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
+            }
 
-                    return;
-                }
-
-                Result<T> fetchResult = await ExecuteFetch();
-
-                if (fetchResult.IsSuccess)
-                {
-                    result = fetchResult.Value;
-                    Cache.Store(DataType, result);
-                }
-                else
-                {
-                    result = Cache.Get<T>(DataType);
-                }
-            });
-            await FetchingTask;
-
-            return result;
+            return Result.Ok(FetchedData);
         }
 
         /// <summary>
@@ -244,10 +238,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Executes the fetch operation.
         /// </summary>
-        /// <returns>Fetched data as a JSON string.</returns>
+        /// <returns>Fetched data.</returns>
         private async Task<Result<T>> ExecuteFetch()
         {
-            if (string.IsNullOrWhiteSpace(AzureFunctionsConfigurationCache.Values.ApiUrl)
+            if (string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.ApiUrl)
                 || string.IsNullOrWhiteSpace(ApiQuery))
             {
                 string error = Properties.Resources.InvalidConfiguration;
@@ -262,7 +256,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                using HttpRequestMessage request = new(HttpMethod.Post, AzureFunctionsConfigurationCache.Values.ApiUrl);
+                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -271,9 +265,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 IHttpClientWrapper client = HttpClientWrapperFactory.Create();
                 Task<HttpResponseMessage> fetchTask = client.SendAsync(request);
 
-                if (!fetchTask.Wait(AzureFunctionsConfigurationCache.Values.FetchTimeout * 1000))
+                if (!fetchTask.Wait(ConfigurationWrapper.Values.ExecutionTimeout * 1000))
                 {
-                    string error = string.Format(Properties.Resources.FetchingDelayExceeded, DataType.ToString());
+                    string error = string.Format(Properties.Resources.ExecutionDelayExceeded, DataType.ToString());
                     Logger.LogError(error);
 
                     return Result.Fail(error);
