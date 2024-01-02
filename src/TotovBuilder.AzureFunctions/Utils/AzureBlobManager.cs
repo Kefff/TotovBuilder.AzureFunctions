@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Azure.Core;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -101,7 +103,7 @@ namespace TotovBuilder.AzureFunctions.Utils
         /// Updates an Azure blob.
         /// </summary>
         /// <param name="azureBlobName">Name of the blob.</param>
-        /// <param name="data">Blob value.</param>
+        /// <param name="data">Data to upload.</param>
         private Result ExecuteUpdate(string azureBlobName, object data)
         {
             if (string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.AzureBlobStorageConnectionString)
@@ -117,6 +119,7 @@ namespace TotovBuilder.AzureFunctions.Utils
             {
                 BlobContainerClient blobContainerClient = new BlobContainerClient(ConfigurationWrapper.Values.AzureBlobStorageConnectionString, ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName);
                 BlockBlobClient blockBlobClient = blobContainerClient.GetBlockBlobClient(azureBlobName);
+                BlobHttpHeaders httpHeaders = new BlobHttpHeaders { ContentType = MimeMapping.MimeUtility.GetMimeMapping(azureBlobName) };
 
                 using MemoryStream memoryStream = new MemoryStream();
                 StreamWriter writer = new StreamWriter(memoryStream);
@@ -124,7 +127,7 @@ namespace TotovBuilder.AzureFunctions.Utils
                 writer.Flush();
                 memoryStream.Position = 0;
 
-                Task updateTask = blockBlobClient.UploadAsync(memoryStream);
+                Task updateTask = blockBlobClient.UploadAsync(memoryStream, httpHeaders);
 
                 if (!updateTask.Wait(ConfigurationWrapper.Values.ExecutionTimeout * 1000))
                 {

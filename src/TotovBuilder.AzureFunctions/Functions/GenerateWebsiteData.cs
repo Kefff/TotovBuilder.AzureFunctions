@@ -150,6 +150,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <typeparam name="TData">Type of data.</typeparam>
         /// <param name="fetcher">Fetcher.</param>
         /// <param name="azureBlobName">Blob name.</param>
+        /// <param name="transformationFunction">Function for transforming data before uploading.</param>
         private async Task FetchAndUpload<TIn, TOut>(IApiFetcher<TIn> fetcher, string azureBlobName, Func<TIn, TOut> transformationFunction)
             where TIn : class
             where TOut : class
