@@ -204,17 +204,37 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                armor.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
                 armor.ArmoredAreas = GetArmoredAreas(propertiesJson);
-                armor.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armor.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                armor.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
                 armor.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                //armor.RicochetChance = ; // TODO : MISSING FROM API
                 armor.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
+
+                if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
+                {
+                    armor.DefaultPresetId = defaultPresetJson.GetProperty("id").GetString();
+                }
             }
 
             return armor;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="Armor"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="Armor"/> preset.</returns>
+        private static Armor DeserializeArmorPreset(string presetId, JsonElement presetJson, IArmor baseItem)
+        {
+            Armor presetItem = DeserializeBasePresetProperties<Armor>(presetId, presetJson, baseItem);
+
+            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
+            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
+            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
+            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
+
+            return presetItem;
         }
 
         /// <summary>
@@ -230,14 +250,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
                 armorMod.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
-                armorMod.ArmoredAreas = GetArmoredAreas(propertiesJson);
                 armorMod.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
                 armorMod.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
                 armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
                 armorMod.ModSlots = DeserializeModSlots(propertiesJson);
                 armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                //item.RicochetChance = ; // TODO : MISSING FROM API
+                armorMod.RicochetChance = GetRicochetChance(propertiesJson.GetProperty("ricochetX").GetDouble());
                 armorMod.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
             }
 
@@ -256,7 +275,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ArmorMod presetItem = DeserializeBasePresetProperties<ArmorMod>(presetId, presetJson, baseItem);
 
             presetItem.ArmorClass = baseItem.ArmorClass;
-            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.BlindnessProtectionPercentage = baseItem.BlindnessProtectionPercentage;
             presetItem.Durability = baseItem.Durability;
             presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
@@ -476,17 +494,18 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                headwear.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
                 headwear.ArmoredAreas = GetArmoredAreas(propertiesJson);
                 headwear.BlocksHeadphones = propertiesJson.GetProperty("blocksHeadset").GetBoolean();
                 headwear.Deafening = propertiesJson.GetProperty("deafening").GetString()!;
-                headwear.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
-                headwear.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
                 headwear.ModSlots = DeserializeModSlots(propertiesJson);
                 headwear.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                headwear.RicochetChance = GetRicochetChance(propertiesJson.GetProperty("ricochetX").GetDouble());
                 headwear.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
+
+                if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
+                {
+                    headwear.DefaultPresetId = defaultPresetJson.GetProperty("id").GetString();
+                }
             }
 
             return headwear;
@@ -503,15 +522,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             Headwear presetItem = DeserializeBasePresetProperties<Headwear>(presetId, presetJson, baseItem);
 
-            presetItem.ArmorClass = baseItem.ArmorClass;
             presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.BlocksHeadphones = baseItem.BlocksHeadphones;
             presetItem.Deafening = baseItem.Deafening;
-            presetItem.Durability = baseItem.Durability;
             presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
-            presetItem.Material = baseItem.Material;
             presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
-            presetItem.RicochetChance = baseItem.RicochetChance;
             presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
 
             return presetItem;
@@ -739,10 +754,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized preset item.</returns>
         private Item? DeserializePresetItemData(JsonElement presetItemJson, ConcurrentBag<Item> items)
         {
-            if (presetItemJson.GetProperty("name").GetString()! == "Gas tube + handguard")
-            {
-            }
-
             if (!IsPreset(presetItemJson)
                 || !TryDeserializeObject(presetItemJson, "properties", out JsonElement propertiesJson)
                 || propertiesJson.EnumerateObject().Count() <= 1)
@@ -768,6 +779,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     break;
                 case IHeadwear:
                     presetItem = DeserializeHeadwearPreset(presetId, presetItemJson, (IHeadwear)baseItem);
+                    break;
+                case IVest:
+                    presetItem = DeserializeVestPreset(presetId, presetItemJson, (IVest)baseItem);
+                    break;
+                case IArmor:
+                    presetItem = DeserializeArmorPreset(presetId, presetItemJson, (IArmor)baseItem);
                     break;
                 case IMagazine:
                     presetItem = DeserializeMagazinePreset(presetId, presetItemJson, (IMagazine)baseItem);
@@ -905,27 +922,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                if (TryDeserializeDouble(propertiesJson, "class", out double armorClass))
-                {
-                    vest.ArmorClass = armorClass;
-                }
-
                 vest.ArmoredAreas = GetArmoredAreas(propertiesJson);
                 vest.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
-
-                if (TryDeserializeDouble(propertiesJson, "durability", out double durability))
-                {
-                    vest.Durability = durability;
-                }
 
                 if (TryDeserializeDouble(propertiesJson, "ergoPenalty", out double ergonomicsPercentageModifier))
                 {
                     vest.ErgonomicsPercentageModifier = ergonomicsPercentageModifier / 100;
-                }
-
-                if (TryDeserializeString(propertiesJson.GetProperty("material"), "name", out string material))
-                {
-                    vest.Material = material.ToPascalCase();
                 }
 
                 if (TryDeserializeDouble(propertiesJson, "speedPenalty", out double movementSpeedPercentageModifier))
@@ -933,15 +935,38 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     vest.MovementSpeedPercentageModifier = movementSpeedPercentageModifier;
                 }
 
-                //vest.RicochetChance = ; // TODO : MISSING FROM API
-
                 if (TryDeserializeDouble(propertiesJson, "turnPenalty", out double turningSpeedPercentageModifier))
                 {
                     vest.TurningSpeedPercentageModifier = turningSpeedPercentageModifier;
                 }
+
+                if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
+                {
+                    vest.DefaultPresetId = defaultPresetJson.GetProperty("id").GetString();
+                }
             }
 
             return vest;
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="Vest"/> preset.
+        /// </summary>
+        /// <param name="presetId">Preset ID.</param>
+        /// <param name="presetJson">JSON element representing the preset.</param>
+        /// <param name="baseItem">Base item.</param>
+        /// <returns>Deserialized <see cref="Vest"/> preset.</returns>
+        private static Vest DeserializeVestPreset(string presetId, JsonElement presetJson, IVest baseItem)
+        {
+            Vest presetItem = DeserializeBasePresetProperties<Vest>(presetId, presetJson, baseItem);
+
+            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
+            presetItem.Capacity = baseItem.Capacity;
+            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
+            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
+            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
+
+            return presetItem;
         }
 
         /// <summary>
