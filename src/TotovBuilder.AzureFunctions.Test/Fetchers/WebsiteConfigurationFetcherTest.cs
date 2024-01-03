@@ -5,10 +5,10 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
+using TotovBuilder.Shared.Abstractions.Azure;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
@@ -28,12 +28,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 RawWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
 
             WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(
                 new Mock<ILogger<WebsiteConfigurationFetcher>>().Object,
-                blobDataFetcherMock.Object,
+                azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act
@@ -54,8 +54,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 RawWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
   invalid,
   ""bugReportUrl"": ""https://discord.gg/bugreport""
 }
@@ -63,7 +63,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(
                 new Mock<ILogger<WebsiteConfigurationFetcher>>().Object,
-                blobDataFetcherMock.Object,
+                azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act

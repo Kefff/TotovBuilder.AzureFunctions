@@ -117,17 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ApiDataFetched" xml:space="preserve">
+    <value>{0} - Data fetched from the API.</value>
+  </data>
+  <data name="ApiDataFetching" xml:space="preserve">
+    <value>{0} - Fetching data from the API.</value>
+  </data>
+  <data name="ApiFetchingError" xml:space="preserve">
+    <value>{0} - Error while fetching data from the API :
+{1}</value>
+  </data>
   <data name="ArmorPenetrationsDeserializationError" xml:space="preserve">
     <value>Error while deserializing armor penetrations :
 {0}</value>
-  </data>
-  <data name="AzureBlobFetchingError" xml:space="preserve">
-    <value>Error while fetching blob "{0}" from Azure blob storage :
-{1}</value>
-  </data>
-  <data name="AzureBlobUpdatingError" xml:space="preserve">
-    <value>Error while updating blob "{0}" from Azure blob storage :
-{1}</value>
   </data>
   <data name="AzureFunctionsConfigurationDeserializationError" xml:space="preserve">
     <value>Error while deserializing Azure Functions configuration :
@@ -141,27 +143,8 @@
     <value>Error while deserializing changelog :
 {0}</value>
   </data>
-  <data name="EndFetching" xml:space="preserve">
-    <value>{0} - End : Fetching.</value>
-  </data>
-  <data name="EndGeneratingWebsiteData" xml:space="preserve">
-    <value>Website data generation - End</value>
-  </data>
-  <data name="EndUpdating" xml:space="preserve">
-    <value>End : Updating blob "{0}".</value>
-  </data>
-  <data name="EndUploadingWebsiteData" xml:space="preserve">
-    <value>Website data uploading - End</value>
-  </data>
-  <data name="EndWaitingForPreviousFetching" xml:space="preserve">
-    <value>{0} - End : Waiting for previous fetching to finish.</value>
-  </data>
   <data name="ExecutionDelayExceeded" xml:space="preserve">
     <value>{0} - Execution delay exceeded.</value>
-  </data>
-  <data name="FetchingError" xml:space="preserve">
-    <value>{0} - Error while fetching data from the API :
-{1}</value>
   </data>
   <data name="InvalidApiQuery" xml:space="preserve">
     <value>{0} - Invalid API query :
@@ -212,6 +195,9 @@ Cannot find a slot for items "{1}".</value>
     <value>Error while deserializing preset :
 {0}</value>
   </data>
+  <data name="PreviousFetchingFinished" xml:space="preserve">
+    <value>{0} - Waiting for previous fetching to finish.</value>
+  </data>
   <data name="PriceDeserializationError" xml:space="preserve">
     <value>Error while deserializing price :
 {0}</value>
@@ -220,27 +206,21 @@ Cannot find a slot for items "{1}".</value>
     <value>Error while deserializing quest :
 {0}</value>
   </data>
-  <data name="StartFetching" xml:space="preserve">
-    <value>{0} - Start : Fetching.</value>
-  </data>
-  <data name="StartGeneratingWebsiteData" xml:space="preserve">
-    <value>Website data generation - Start</value>
-  </data>
-  <data name="StartUpdating" xml:space="preserve">
-    <value>Start : Updating blob "{0}".</value>
-  </data>
-  <data name="StartUploadingWebsiteData" xml:space="preserve">
-    <value>Website data uploading - Start</value>
-  </data>
-  <data name="StartWaitingForPreviousFetching" xml:space="preserve">
-    <value>{0} - Start : Waiting for previous fetching to finish.</value>
-  </data>
   <data name="TarkovValuesDeserializationError" xml:space="preserve">
     <value>Error while deserializing Tarkov values :
 {0}</value>
   </data>
+  <data name="WaitingForPreviousFetching" xml:space="preserve">
+    <value>{0} - Waiting for previous fetching to finish.</value>
+  </data>
   <data name="WebsiteConfigurationDeserializationError" xml:space="preserve">
     <value>Error while deserializing website configuration :
 {0}</value>
+  </data>
+  <data name="WebsiteDataGenerated" xml:space="preserve">
+    <value>Website data generated</value>
+  </data>
+  <data name="WebsiteDataGenerating" xml:space="preserve">
+    <value>Generating website data.</value>
   </data>
 </root>

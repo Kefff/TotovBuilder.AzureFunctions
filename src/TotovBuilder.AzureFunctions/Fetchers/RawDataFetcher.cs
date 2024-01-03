@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Utils;
+using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -34,9 +34,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected readonly ILogger<RawDataFetcher<T>> Logger;
 
         /// <summary>
-        /// Azure blob manager.
+        /// Azure blob storage manager.
         /// </summary>
-        private readonly IAzureBlobManager AzureBlobManager;
+        private readonly IAzureBlobStorageManager AzureBlobStorageManager;
 
         /// <summary>
         /// Fetched data.
@@ -54,14 +54,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="StaticDataFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="azureBlobManager">Azure blob manager.</param>
+        /// <param name="azureBlobStorageManager">Azure blob storage manager.</param>
         /// <param name="configurationWrapper">Configuration wrapper</param>
         protected RawDataFetcher(
             ILogger<RawDataFetcher<T>> logger,
-            IAzureBlobManager azureBlobManager,
+            IAzureBlobStorageManager azureBlobStorageManager,
             IConfigurationWrapper configurationWrapper)
         {
-            AzureBlobManager = azureBlobManager;
+            AzureBlobStorageManager = azureBlobStorageManager;
             ConfigurationWrapper = configurationWrapper;
             Logger = logger;
         }
@@ -71,9 +71,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             if (!FetchingTask.IsCompleted)
             {
-                Logger.LogInformation(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString());
+                Logger.LogInformation(Properties.Resources.WaitingForPreviousFetching, DataType.ToString());
                 await FetchingTask;
-                Logger.LogInformation(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString());
+                Logger.LogInformation(Properties.Resources.PreviousFetchingFinished, DataType.ToString());
             }
             else
             {
@@ -115,9 +115,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Fetched data.</returns>
         private async Task<Result<T>> ExecuteFetch()
         {
-            Logger.LogInformation(Properties.Resources.StartFetching, DataType.ToString());
-
-            Result<string> blobFetchResult = await AzureBlobManager.Fetch(AzureBlobName);
+            Result<string> blobFetchResult = await AzureBlobStorageManager.FetchBlob(ConfigurationWrapper.Values.AzureBlobStorageRawDataContainerName, AzureBlobName);
 
             if (!blobFetchResult.IsSuccess)
             {
@@ -125,8 +123,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             Result<T> deserializedData = await DeserializeData(blobFetchResult.Value);
-
-            Logger.LogInformation(Properties.Resources.EndFetching, DataType.ToString());
 
             return deserializedData;
         }

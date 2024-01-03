@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Net;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Configuration;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.AzureFunctions.Net;
-using TotovBuilder.AzureFunctions.Utils;
+using TotovBuilder.Shared.Azure;
+using TotovBuilder.Shared.Extensions;
 
 IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
@@ -27,7 +27,6 @@ IHost host = new HostBuilder()
         serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
         serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
         serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
-        serviceCollection.AddSingleton<IAzureBlobManager, AzureBlobManager>();
         serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
         serviceCollection.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
         serviceCollection.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
@@ -36,9 +35,6 @@ IHost host = new HostBuilder()
         serviceCollection.AddSingleton<IPricesFetcher, PricesFetcher>();
         serviceCollection.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
         serviceCollection.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
-
-        //serviceCollection.AddSingleton<IWebsiteDataGenerator, WebsiteDataGenerator>();
-        //serviceCollection.AddSingleton<IWebsiteDataUploader, WebsiteDataUploader>();
 
         serviceCollection.Configure<LoggerFilterOptions>(options =>
         {
@@ -52,6 +48,14 @@ IHost host = new HostBuilder()
                 options.Rules.Remove(filtersToRemove);
             }
         });
+
+        serviceCollection.ConfigureAzureBlobStorageManager(
+            (IServiceProvider serviceProvider) =>
+            {
+                IConfigurationWrapper configurationWrapper = serviceProvider.GetRequiredService<IConfigurationWrapper>();
+
+                return new AzureBlobStorageManagerOptions(configurationWrapper.Values.AzureBlobStorageConnectionString, configurationWrapper.Values.ExecutionTimeout);
+            });
     })
     .Build();
 

@@ -5,10 +5,10 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
+using TotovBuilder.Shared.Abstractions.Azure;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
@@ -28,12 +28,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 RawTarkovValuesBlobName = "tarkov-values.json"
             });
 
-            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.TarkovValuesJson)));
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.TarkovValuesJson)));
 
             TarkovValuesFetcher fetcher = new TarkovValuesFetcher(
                 new Mock<ILogger<TarkovValuesFetcher>>().Object,
-                blobDataFetcherMock.Object,
+                azureBlobStorageManagerMock.Object,
                 configurationWrapperWrapper.Object);
 
             // Act
@@ -54,8 +54,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 RawTarkovValuesBlobName = "tarkov-values.json"
             });
 
-            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
   ""invalid"": {
     invalid
   },
@@ -73,7 +73,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             TarkovValuesFetcher fetcher = new TarkovValuesFetcher(
                 new Mock<ILogger<TarkovValuesFetcher>>().Object,
-                blobDataFetcherMock.Object,
+                azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act

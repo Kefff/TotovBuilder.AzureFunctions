@@ -58,6 +58,8 @@ namespace TotovBuilder.AzureFunctions.Configuration
                 AzureBlobStorageRawDataContainerName = ReadString(AzureBlobStorageContainerNameKey),
                 AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
             };
+
+            _ = Load();
         }
 
         /// <inheritdoc/>

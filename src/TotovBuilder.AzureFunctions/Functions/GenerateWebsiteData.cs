@@ -5,8 +5,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.Model.Items;
+using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Functions
 {
@@ -16,9 +16,9 @@ namespace TotovBuilder.AzureFunctions.Functions
     public class GenerateWebsiteData
     {
         /// <summary>
-        /// Azure blob manager.
+        /// Azure blob storage manager.
         /// </summary>
-        private readonly IAzureBlobManager AzureBlobManager;
+        private readonly IAzureBlobStorageManager AzureBlobStorageManager;
 
         /// <summary>
         /// Configuration loader.
@@ -46,11 +46,6 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IItemsFetcher ItemsFetcher;
 
         /// <summary>
-        /// Logger.
-        /// </summary>
-        private readonly ILogger<GenerateWebsiteData> Logger;
-
-        /// <summary>
         /// Presets fetcher.
         /// </summary>
         private readonly IPresetsFetcher PresetsFetcher;
@@ -75,7 +70,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// </summary>
         /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
-        /// <param name="azureBlobManager">Azure blob manager.</param>
+        /// <param name="azureBlobStorageManager">Azure blob storage manager.</param>
         /// <param name="changelogFetcher">Changelog fetcher.</param>.
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemsFetcher">Item fetcher.</param>
@@ -87,7 +82,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         public GenerateWebsiteData(
             IConfigurationLoader configurationLoader,
             IConfigurationWrapper configurationWrapper,
-            IAzureBlobManager azureBlobManager,
+            IAzureBlobStorageManager azureBlobStorageManager,
             IChangelogFetcher changelogFetcher,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemsFetcher itemsFetcher,
@@ -99,11 +94,10 @@ namespace TotovBuilder.AzureFunctions.Functions
         {
             ConfigurationLoader = configurationLoader;
             ConfigurationWrapper = configurationWrapper;
-            AzureBlobManager = azureBlobManager;
+            AzureBlobStorageManager = azureBlobStorageManager;
             ChangelogFetcher = changelogFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
             ItemsFetcher = itemsFetcher;
-            Logger = logger;
             PresetsFetcher = presetsFetcher;
             PricesFetcher = pricesFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
@@ -183,16 +177,12 @@ namespace TotovBuilder.AzureFunctions.Functions
                     serializationOptions);
             }
 
-            Logger.LogInformation(Properties.Resources.StartUpdating, azureBlobName);
-
-            Result updateResult = await AzureBlobManager.Update(azureBlobName, serializedData);
+            Result updateResult = await AzureBlobStorageManager.UpdateBlob(ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName, azureBlobName, serializedData);
 
             if (updateResult.IsFailed)
             {
                 return;
             }
-
-            Logger.LogInformation(Properties.Resources.EndUpdating, azureBlobName);
         }
 
         /// <summary>

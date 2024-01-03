@@ -6,7 +6,7 @@ namespace TotovBuilder.AzureFunctions.Net
     /// <summary>
     /// Represents an HTTP client wrapper.
     /// </summary>
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Wrapper to be able to create mocks of the HttpClient class.")]
     public class HttpClientWrapper : IHttpClientWrapper
     {
         /// <summary>

@@ -76,9 +76,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             if (!FetchingTask.IsCompleted)
             {
-                Logger.LogInformation(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString());
+                Logger.LogInformation(Properties.Resources.WaitingForPreviousFetching, DataType.ToString());
                 await FetchingTask;
-                Logger.LogInformation(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString());
+                Logger.LogInformation(Properties.Resources.PreviousFetchingFinished, DataType.ToString());
             }
             else
             {
@@ -250,7 +250,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(error);
             }
 
-            Logger.LogInformation(Properties.Resources.StartFetching, DataType.ToString());
+            Logger.LogInformation(Properties.Resources.ApiDataFetching, DataType.ToString());
 
             string responseContent;
 
@@ -277,7 +277,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.FetchingError, DataType.ToString(), e);
+                string error = string.Format(Properties.Resources.ApiFetchingError, DataType.ToString(), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -292,7 +292,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             Result<T> deserializedDataResult = await DeserializeData(isolatedDataResult.Value);
 
-            Logger.LogInformation(Properties.Resources.EndFetching, DataType.ToString());
+            Logger.LogInformation(Properties.Resources.ApiDataFetched, DataType.ToString());
 
             return deserializedDataResult;
         }

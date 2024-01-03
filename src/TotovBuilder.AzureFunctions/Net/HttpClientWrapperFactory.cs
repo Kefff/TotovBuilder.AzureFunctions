@@ -6,7 +6,7 @@ namespace TotovBuilder.AzureFunctions.Net
     /// <summary>
     /// Represents an HTTP client wrapper factory.
     /// </summary>
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Wrapper to be able to create mocks of the HttpClient class.")]
     public class HttpClientWrapperFactory : IHttpClientWrapperFactory
     {
         /// <summary>
@@ -17,7 +17,7 @@ namespace TotovBuilder.AzureFunctions.Net
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpClientWrapperFactory"/> class.
         /// </summary>
-        /// <param name="httpClientFactory"></param>
+        /// <param name="httpClientFactory">HTTP client factory.</param>
         public HttpClientWrapperFactory(IHttpClientFactory httpClientFactory)
         {
             HttpClientFactory = httpClientFactory;
