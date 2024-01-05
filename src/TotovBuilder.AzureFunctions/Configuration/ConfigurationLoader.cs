@@ -34,7 +34,7 @@ namespace TotovBuilder.AzureFunctions.Configuration
         /// Loading task.
         /// Used to avoid launching multiple loading operations at the same time.
         /// </summary>
-        private Task LoadingTask = Task.CompletedTask;
+        private readonly Task<Result> LoadingTask = Task.FromResult(Result.Ok());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFunctionsConfigurationInitializer"/> class.
@@ -59,29 +59,29 @@ namespace TotovBuilder.AzureFunctions.Configuration
                 AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
             };
 
-            _ = Load();
+            LoadingTask = Load();
         }
 
         /// <inheritdoc/>
-        public async Task Load()
+        public Task<Result> WaitForLoading()
         {
-            if (!LoadingTask.IsCompleted)
-            {
-                await LoadingTask;
+            return LoadingTask;
+        }
 
-                return;
+        /// <summary>
+        /// Load the configuration.
+        /// </summary>
+        /// <returns>Result of the configuration loading.</returns>
+        private async Task<Result> Load()
+        {
+            Result<AzureFunctionsConfiguration> azureFunctionsConfigurationResult = await AzureFunctionsConfigurationFetcher.Fetch();
+
+            if (azureFunctionsConfigurationResult.IsSuccess)
+            {
+                ConfigurationWrapper.Values = azureFunctionsConfigurationResult.Value;
             }
 
-            LoadingTask = Task.Run(async () =>
-            {
-                Result<AzureFunctionsConfiguration> azureFunctionsConfigurationResult = await AzureFunctionsConfigurationFetcher.Fetch();
-
-                if (azureFunctionsConfigurationResult.IsSuccess)
-                {
-                    ConfigurationWrapper.Values = azureFunctionsConfigurationResult.Value;
-                }
-            });
-            await LoadingTask;
+            return azureFunctionsConfigurationResult.ToResult();
         }
 
         /// <summary>

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentResults;
-using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
@@ -39,14 +38,14 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             };
 
             Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
-            configurationLoaderMock.Setup(m => m.Load()).Verifiable();
+            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
                 .Returns(new AzureFunctionsConfiguration()
                 {
-                    AzureBlobStorageWebsiteDataContainerName = "$web",
+                    AzureBlobStorageWebsiteContainerName = "$web",
                     WebsiteChangelogBlobName = "data/changelog.json",
                     WebsiteItemCategoriesBlobName = "data/item-categories.json",
                     WebsiteItemsBlobName = "data/items.json",
@@ -145,7 +144,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 changelogFetcherMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemsFetcherMock.Object,
-                new Mock<ILogger<GenerateWebsiteData>>().Object,
                 presetsFetcherMock.Object,
                 pricesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object,
@@ -168,6 +166,63 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         }
 
         [Fact]
+        public async Task Run_WithFailedConfigurationLoading_ShouldDoNothing()
+        {
+            // Arrange
+            ScheduleTrigger scheduleTrigger = new ScheduleTrigger()
+            {
+                IsPastDue = false,
+                ScheduleStatus = new ScheduleStatus()
+                {
+                    Last = new DateTime(2023, 12, 1, 8, 0, 0),
+                    LastUpdated = new DateTime(2023, 12, 1, 8, 30, 0),
+                    Next = new DateTime(2023, 12, 2, 8, 0, 0)
+                }
+            };
+
+            Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
+            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Fail("Error"))).Verifiable();
+
+            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new Mock<IWebsiteConfigurationFetcher>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+
+            GenerateWebsiteData function = new GenerateWebsiteData(
+                configurationLoaderMock.Object,
+                configurationWrapperMock.Object,
+                azureBlobStorageManagerMock.Object,
+                changelogFetcherMock.Object,
+                itemCategoriesFetcherMock.Object,
+                itemsFetcherMock.Object,
+                presetsFetcherMock.Object,
+                pricesFetcherMock.Object,
+                tarkovValuesFetcherMock.Object,
+                websiteConfigurationFetcherMock.Object);
+
+            // Act
+            await function.Run(scheduleTrigger);
+
+            // Assert
+            azureBlobStorageManagerMock.Verify(m => m.UpdateBlob(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            configurationLoaderMock.Verify();
+            configurationWrapperMock.Verify(m => m.Values, Times.Never);
+            changelogFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            itemCategoriesFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            itemsFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            presetsFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            pricesFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            tarkovValuesFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            websiteConfigurationFetcherMock.Verify(m => m.Fetch(), Times.Never);
+
+        }
+
+        [Fact]
         public async Task Run_WithFailedFetch_ShouldDoNothing()
         {
             // Arrange
@@ -183,14 +238,14 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             };
 
             Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
-            configurationLoaderMock.Setup(m => m.Load()).Verifiable();
+            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
                 .Returns(new AzureFunctionsConfiguration()
                 {
-                    AzureBlobStorageWebsiteDataContainerName = "$web",
+                    AzureBlobStorageWebsiteContainerName = "$web",
                     WebsiteChangelogBlobName = "data/changelog.json",
                     WebsiteItemCategoriesBlobName = "data/item-categories.json",
                     WebsiteItemsBlobName = "data/items.json",
@@ -252,7 +307,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 changelogFetcherMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemsFetcherMock.Object,
-                new Mock<ILogger<GenerateWebsiteData>>().Object,
                 presetsFetcherMock.Object,
                 pricesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object,
@@ -290,14 +344,14 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             };
 
             Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
-            configurationLoaderMock.Setup(m => m.Load()).Verifiable();
+            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
                 .Returns(new AzureFunctionsConfiguration()
                 {
-                    AzureBlobStorageWebsiteDataContainerName = "$web",
+                    AzureBlobStorageWebsiteContainerName = "$web",
                     WebsiteChangelogBlobName = "data/changelog.json",
                     WebsiteItemCategoriesBlobName = "data/item-categories.json",
                     WebsiteItemsBlobName = "data/items.json",
@@ -396,7 +450,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 changelogFetcherMock.Object,
                 itemCategoriesFetcherMock.Object,
                 itemsFetcherMock.Object,
-                new Mock<ILogger<GenerateWebsiteData>>().Object,
                 presetsFetcherMock.Object,
                 pricesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object,

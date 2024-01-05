@@ -35,8 +35,8 @@ namespace TotovBuilder.AzureFunctions.Test.Configuration
                 new Mock<ILogger<ConfigurationLoader>>().Object,
                 configurationWrapper,
                 azureFunctionsConfigurationFetcherMock.Object);
-            _ = configurationLoader.Load();
-            await configurationLoader.Load();
+            await configurationLoader.WaitForLoading();
+            await configurationLoader.WaitForLoading();
 
             // Assert
             configurationWrapper.Values.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);

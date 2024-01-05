@@ -2,7 +2,6 @@ using System.Collections;
 using System.Text.Json;
 using FluentResults;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Items;
@@ -86,7 +85,6 @@ namespace TotovBuilder.AzureFunctions.Functions
             IChangelogFetcher changelogFetcher,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemsFetcher itemsFetcher,
-            ILogger<GenerateWebsiteData> logger,
             IPresetsFetcher presetsFetcher,
             IPricesFetcher pricesFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher,
@@ -112,7 +110,13 @@ namespace TotovBuilder.AzureFunctions.Functions
         public async Task Run([TimerTrigger("%TOTOVBUILDER_GenerateWebsiteDataSchedule%")] ScheduleTrigger scheduleTrigger)
 #endif
         {
-            await ConfigurationLoader.Load();
+            Result configurationLoadingResult = await ConfigurationLoader.WaitForLoading();
+
+            if (!configurationLoadingResult.IsSuccess)
+            {
+                return;
+            }
+
             Task.WaitAll(
                 FetchAndUpload(ChangelogFetcher, ConfigurationWrapper.Values.WebsiteChangelogBlobName),
                 FetchAndUpload(
@@ -177,7 +181,7 @@ namespace TotovBuilder.AzureFunctions.Functions
                     serializationOptions);
             }
 
-            Result updateResult = await AzureBlobStorageManager.UpdateBlob(ConfigurationWrapper.Values.AzureBlobStorageWebsiteDataContainerName, azureBlobName, serializedData);
+            Result updateResult = await AzureBlobStorageManager.UpdateBlob(ConfigurationWrapper.Values.AzureBlobStorageWebsiteContainerName, azureBlobName, serializedData);
 
             if (updateResult.IsFailed)
             {

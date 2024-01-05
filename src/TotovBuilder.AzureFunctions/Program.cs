@@ -13,30 +13,38 @@ using TotovBuilder.Shared.Extensions;
 
 IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices((HostBuilderContext hopstBuilderContext, IServiceCollection serviceCollection) =>
+    .ConfigureServices((HostBuilderContext hopstBuilderContext, IServiceCollection services) =>
     {
-        serviceCollection.AddHttpClient();
+        services.AddHttpClient();
 
-        serviceCollection.AddApplicationInsightsTelemetryWorkerService();
-        serviceCollection.ConfigureFunctionsApplicationInsights();
+        services.AddApplicationInsightsTelemetryWorkerService();
+        services.ConfigureFunctionsApplicationInsights();
 
-        serviceCollection.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
-        serviceCollection.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
-        serviceCollection.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
+        services.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
+        services.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
+        services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
 
-        serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
-        serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
-        serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
-        serviceCollection.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
-        serviceCollection.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
-        serviceCollection.AddSingleton<IItemsFetcher, ItemsFetcher>();
-        serviceCollection.AddSingleton<IPresetsFetcher, PresetsFetcher>();
-        serviceCollection.AddSingleton<IPricesFetcher, PricesFetcher>();
-        serviceCollection.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
-        serviceCollection.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
+        services.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
+        services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
+        services.AddSingleton<IBartersFetcher, BartersFetcher>();
+        services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
+        services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
+        services.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
+        services.AddSingleton<IItemsFetcher, ItemsFetcher>();
+        services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
+        services.AddSingleton<IPricesFetcher, PricesFetcher>();
+        services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
+        services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
 
-        serviceCollection.Configure<LoggerFilterOptions>(options =>
+        services.AddAzureBlobStorageManager(
+            (IServiceProvider serviceProvider) =>
+            {
+                IConfigurationWrapper configurationWrapper = serviceProvider.GetRequiredService<IConfigurationWrapper>();
+
+                return new AzureBlobStorageManagerOptions(configurationWrapper.Values.AzureBlobStorageConnectionString, configurationWrapper.Values.ExecutionTimeout);
+            });
+
+        services.Configure<LoggerFilterOptions>(options =>
         {
             // Removing default filters that only allow warnings and errors to be logged
             // Cf https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide#application-insights
@@ -48,14 +56,6 @@ IHost host = new HostBuilder()
                 options.Rules.Remove(filtersToRemove);
             }
         });
-
-        serviceCollection.ConfigureAzureBlobStorageManager(
-            (IServiceProvider serviceProvider) =>
-            {
-                IConfigurationWrapper configurationWrapper = serviceProvider.GetRequiredService<IConfigurationWrapper>();
-
-                return new AzureBlobStorageManagerOptions(configurationWrapper.Values.AzureBlobStorageConnectionString, configurationWrapper.Values.ExecutionTimeout);
-            });
     })
     .Build();
 
