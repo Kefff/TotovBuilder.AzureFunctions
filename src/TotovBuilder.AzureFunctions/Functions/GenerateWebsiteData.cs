@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text.Json;
+using Azure.Storage.Blobs.Models;
 using FluentResults;
 using Microsoft.Azure.Functions.Worker;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
@@ -145,7 +146,8 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Fetches data for the website, transforms and uploads it to a blob storage.
         /// </summary>
-        /// <typeparam name="TData">Type of data.</typeparam>
+        /// <typeparam name="TIn">Type of data before transformation.</typeparam>
+        /// <typeparam name="TOut">Type of data after transformation.</typeparam>
         /// <param name="fetcher">Fetcher.</param>
         /// <param name="azureBlobName">Blob name.</param>
         /// <param name="transformationFunction">Function for transforming data before uploading.</param>
@@ -181,7 +183,11 @@ namespace TotovBuilder.AzureFunctions.Functions
                     serializationOptions);
             }
 
-            Result updateResult = await AzureBlobStorageManager.UpdateBlob(ConfigurationWrapper.Values.AzureBlobStorageWebsiteContainerName, azureBlobName, serializedData);
+            BlobHttpHeaders httpHeaders = new BlobHttpHeaders()
+            {
+                CacheControl = ConfigurationWrapper.Values.WebsiteDataCacheControl
+            };
+            Result updateResult = await AzureBlobStorageManager.UpdateBlob(ConfigurationWrapper.Values.AzureBlobStorageWebsiteContainerName, azureBlobName, serializedData, httpHeaders);
 
             if (updateResult.IsFailed)
             {
