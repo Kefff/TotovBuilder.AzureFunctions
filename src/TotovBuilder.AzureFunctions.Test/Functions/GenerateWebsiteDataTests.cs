@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs.Models;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
@@ -14,7 +15,6 @@ using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Test;
 using TotovBuilder.Shared.Abstractions.Azure;
-using TotovBuilder.Shared.Azure;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Functions
@@ -140,6 +140,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Verifiable();
 
             GenerateWebsiteData function = new GenerateWebsiteData(
+                new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,
@@ -196,6 +197,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
 
             GenerateWebsiteData function = new GenerateWebsiteData(
+                new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,
@@ -303,6 +305,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
 
             GenerateWebsiteData function = new GenerateWebsiteData(
+                new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,
@@ -446,6 +449,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Verifiable();
 
             GenerateWebsiteData function = new GenerateWebsiteData(
+                new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,

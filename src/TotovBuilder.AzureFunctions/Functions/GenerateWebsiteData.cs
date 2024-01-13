@@ -3,6 +3,7 @@ using System.Text.Json;
 using Azure.Storage.Blobs.Models;
 using FluentResults;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.Model.Items;
@@ -46,6 +47,11 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IItemsFetcher ItemsFetcher;
 
         /// <summary>
+        /// Logger.
+        /// </summary>
+        private readonly ILogger<GenerateWebsiteData> Logger;
+
+        /// <summary>
         /// Presets fetcher.
         /// </summary>
         private readonly IPresetsFetcher PresetsFetcher;
@@ -80,6 +86,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         /// <param name="websiteConfigurationFetcher">Website configuration fetcher.</param>
         public GenerateWebsiteData(
+            ILogger<GenerateWebsiteData> logger,
             IConfigurationLoader configurationLoader,
             IConfigurationWrapper configurationWrapper,
             IAzureBlobStorageManager azureBlobStorageManager,
@@ -97,6 +104,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             ChangelogFetcher = changelogFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
             ItemsFetcher = itemsFetcher;
+            Logger = logger;
             PresetsFetcher = presetsFetcher;
             PricesFetcher = pricesFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
@@ -118,6 +126,8 @@ namespace TotovBuilder.AzureFunctions.Functions
                 return;
             }
 
+            Logger.LogInformation(Properties.Resources.GeneratingWebsiteData);
+
             Task.WaitAll(
                 FetchAndUpload(ChangelogFetcher, ConfigurationWrapper.Values.WebsiteChangelogBlobName),
                 FetchAndUpload(
@@ -129,6 +139,8 @@ namespace TotovBuilder.AzureFunctions.Functions
                 FetchAndUpload(PricesFetcher, ConfigurationWrapper.Values.WebsitePricesBlobName),
                 FetchAndUpload(TarkovValuesFetcher, ConfigurationWrapper.Values.WebsiteTarkovValuesBlobName),
                 FetchAndUpload(WebsiteConfigurationFetcher, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName));
+
+            Logger.LogInformation(Properties.Resources.WebsiteDataGenerated);
         }
 
         /// <summary>

@@ -250,7 +250,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(error);
             }
 
-            Logger.LogInformation(Properties.Resources.ApiDataFetching, DataType.ToString());
+            Logger.LogInformation(Properties.Resources.FetchingApiData, DataType.ToString());
 
             string responseContent;
 
@@ -277,7 +277,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.ApiFetchingError, DataType.ToString(), e);
+                string error = string.Format(Properties.Resources.ApiFetchError, DataType.ToString(), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);

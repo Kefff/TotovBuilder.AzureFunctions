@@ -70,21 +70,12 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Fetching data from the API..
-        /// </summary>
-        internal static string ApiDataFetching {
-            get {
-                return ResourceManager.GetString("ApiDataFetching", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} - Error while fetching data from the API :
         ///{1}.
         /// </summary>
-        internal static string ApiFetchingError {
+        internal static string ApiFetchError {
             get {
-                return ResourceManager.GetString("ApiFetchingError", resourceCulture);
+                return ResourceManager.GetString("ApiFetchError", resourceCulture);
             }
         }
         
@@ -138,12 +129,20 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Invalid API query :
-        ///{1}.
+        ///   Looks up a localized string similar to {0} - Fetching data from the API..
         /// </summary>
-        internal static string InvalidApiQuery {
+        internal static string FetchingApiData {
             get {
-                return ResourceManager.GetString("InvalidApiQuery", resourceCulture);
+                return ResourceManager.GetString("FetchingApiData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generating website data..
+        /// </summary>
+        internal static string GeneratingWebsiteData {
+            get {
+                return ResourceManager.GetString("GeneratingWebsiteData", resourceCulture);
             }
         }
         
@@ -158,29 +157,11 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Invalid cache..
-        /// </summary>
-        internal static string InvalidCache {
-            get {
-                return ResourceManager.GetString("InvalidCache", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid configuration..
         /// </summary>
         internal static string InvalidConfiguration {
             get {
                 return ResourceManager.GetString("InvalidConfiguration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid &quot;{0}&quot; integer configuration value..
-        /// </summary>
-        internal static string InvalidIntegerConfigurationValue {
-            get {
-                return ResourceManager.GetString("InvalidIntegerConfigurationValue", resourceCulture);
             }
         }
         
@@ -290,16 +271,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while deserializing quest :
-        ///{0}.
-        /// </summary>
-        internal static string QuestDeserializationError {
-            get {
-                return ResourceManager.GetString("QuestDeserializationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing Tarkov values :
         ///{0}.
         /// </summary>
@@ -334,15 +305,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         internal static string WebsiteDataGenerated {
             get {
                 return ResourceManager.GetString("WebsiteDataGenerated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Generating website data..
-        /// </summary>
-        internal static string WebsiteDataGenerating {
-            get {
-                return ResourceManager.GetString("WebsiteDataGenerating", resourceCulture);
             }
         }
     }

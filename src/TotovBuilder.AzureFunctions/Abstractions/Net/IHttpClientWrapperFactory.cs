@@ -1,14 +1,14 @@
 ﻿namespace TotovBuilder.AzureFunctions.Abstractions.Net
 {
     /// <summary>
-    /// Provides the functionnalities of an HTTP client wrapper factory.
+    /// Provides the functionnalities of a <see cref="IHttpClientWrapper"/> factory.
     /// </summary>
     public interface IHttpClientWrapperFactory
     {
         /// <summary>
-        /// Creates an instance of an HTTP client wrapper.
+        /// Creates an instance of an <see cref="IHttpClientWrapper"/>.
         /// </summary>
-        /// <returns>Instance of an HTTP client wrapper.</returns>
+        /// <returns>Instance.</returns>
         IHttpClientWrapper Create();
     }
 }

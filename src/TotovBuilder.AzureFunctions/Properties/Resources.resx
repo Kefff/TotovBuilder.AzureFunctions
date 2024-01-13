@@ -120,10 +120,7 @@
   <data name="ApiDataFetched" xml:space="preserve">
     <value>{0} - Data fetched from the API.</value>
   </data>
-  <data name="ApiDataFetching" xml:space="preserve">
-    <value>{0} - Fetching data from the API.</value>
-  </data>
-  <data name="ApiFetchingError" xml:space="preserve">
+  <data name="ApiFetchError" xml:space="preserve">
     <value>{0} - Error while fetching data from the API :
 {1}</value>
   </data>
@@ -146,22 +143,18 @@
   <data name="ExecutionDelayExceeded" xml:space="preserve">
     <value>{0} - Execution delay exceeded.</value>
   </data>
-  <data name="InvalidApiQuery" xml:space="preserve">
-    <value>{0} - Invalid API query :
-{1}</value>
+  <data name="FetchingApiData" xml:space="preserve">
+    <value>{0} - Fetching data from the API.</value>
+  </data>
+  <data name="GeneratingWebsiteData" xml:space="preserve">
+    <value>Generating website data.</value>
   </data>
   <data name="InvalidApiResponseData" xml:space="preserve">
     <value>{0} - Invalid API response data :
 {1}</value>
   </data>
-  <data name="InvalidCache" xml:space="preserve">
-    <value>{0} - Invalid cache.</value>
-  </data>
   <data name="InvalidConfiguration" xml:space="preserve">
     <value>Invalid configuration.</value>
-  </data>
-  <data name="InvalidIntegerConfigurationValue" xml:space="preserve">
-    <value>Invalid "{0}" integer configuration value.</value>
   </data>
   <data name="InvalidStringConfigurationValue" xml:space="preserve">
     <value>Invalid "{0}" string configuration value.</value>
@@ -202,10 +195,6 @@ Cannot find a slot for items "{1}".</value>
     <value>Error while deserializing price :
 {0}</value>
   </data>
-  <data name="QuestDeserializationError" xml:space="preserve">
-    <value>Error while deserializing quest :
-{0}</value>
-  </data>
   <data name="TarkovValuesDeserializationError" xml:space="preserve">
     <value>Error while deserializing Tarkov values :
 {0}</value>
@@ -219,8 +208,5 @@ Cannot find a slot for items "{1}".</value>
   </data>
   <data name="WebsiteDataGenerated" xml:space="preserve">
     <value>Website data generated</value>
-  </data>
-  <data name="WebsiteDataGenerating" xml:space="preserve">
-    <value>Generating website data.</value>
   </data>
 </root>
