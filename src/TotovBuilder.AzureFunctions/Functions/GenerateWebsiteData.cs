@@ -4,8 +4,9 @@ using Azure.Storage.Blobs.Models;
 using FluentResults;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Shared.Abstractions.Azure;
 

@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 
-namespace TotovBuilder.AzureFunctions.Abstractions.Configuration
+namespace TotovBuilder.AzureFunctions.Abstractions.Utils
 {
     /// <summary>
     /// Provides the functionalities of a loader for the configuration of the application.

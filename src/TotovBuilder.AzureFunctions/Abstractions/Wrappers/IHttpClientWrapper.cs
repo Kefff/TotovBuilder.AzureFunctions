@@ -1,6 +1,6 @@
-﻿using TotovBuilder.AzureFunctions.Net;
+﻿using TotovBuilder.AzureFunctions.Wrappers;
 
-namespace TotovBuilder.AzureFunctions.Abstractions.Net
+namespace TotovBuilder.AzureFunctions.Abstractions.Wrappers
 {
     /// <summary>
     /// Provides the functionalities of a <see cref="HttpClientWrapper"/> wrapper.

@@ -1,4 +1,4 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstractions.Net
+﻿namespace TotovBuilder.AzureFunctions.Abstractions.Wrappers
 {
     /// <summary>
     /// Provides the functionnalities of a <see cref="IHttpClientWrapper"/> factory.

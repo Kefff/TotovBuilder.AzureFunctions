@@ -1,10 +1,11 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.Model.Configuration;
 
-namespace TotovBuilder.AzureFunctions.Configuration
+namespace TotovBuilder.AzureFunctions.Utils
 {
     /// <summary>
     /// Represents a loader for the configuration of the application.
