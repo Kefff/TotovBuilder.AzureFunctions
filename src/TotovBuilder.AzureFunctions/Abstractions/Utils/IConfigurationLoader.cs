@@ -1,4 +1,6 @@
-﻿namespace TotovBuilder.AzureFunctions.Abstractions.Configuration
+﻿using FluentResults;
+
+namespace TotovBuilder.AzureFunctions.Abstractions.Utils
 {
     /// <summary>
     /// Provides the functionalities of a loader for the configuration of the application.
@@ -6,8 +8,8 @@
     public interface IConfigurationLoader
     {
         /// <summary>
-        /// Loads the configuration of the application.
+        /// Waits for the configuration to be loaded.
         /// </summary>
-        Task Load();
+        Task<Result> WaitForLoading();
     }
 }

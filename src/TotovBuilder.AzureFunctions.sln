@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		coverlet.runsettings = coverlet.runsettings
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.Shared", "..\..\TotovBuilder.Shared\src\TotovBuilder.Shared\TotovBuilder.Shared.csproj", "{94D43F09-E7F6-4274-8FC6-8952DCED20F0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.Shared.Test", "..\..\TotovBuilder.Shared\src\TotovBuilder.Shared.Test\TotovBuilder.Shared.Test.csproj", "{72E00FA1-F536-43F2-A0E4-56D16324E6FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{B7939986-234F-45E3-A9BD-CD28AAD275D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7939986-234F-45E3-A9BD-CD28AAD275D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7939986-234F-45E3-A9BD-CD28AAD275D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94D43F09-E7F6-4274-8FC6-8952DCED20F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94D43F09-E7F6-4274-8FC6-8952DCED20F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94D43F09-E7F6-4274-8FC6-8952DCED20F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94D43F09-E7F6-4274-8FC6-8952DCED20F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72E00FA1-F536-43F2-A0E4-56D16324E6FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72E00FA1-F536-43F2-A0E4-56D16324E6FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72E00FA1-F536-43F2-A0E4-56D16324E6FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72E00FA1-F536-43F2-A0E4-56D16324E6FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

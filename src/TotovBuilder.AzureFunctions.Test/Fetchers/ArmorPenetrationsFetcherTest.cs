@@ -5,11 +5,11 @@ using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Test;
+using TotovBuilder.Shared.Abstractions.Azure;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
@@ -29,12 +29,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 RawArmorPenetrationsBlobName = "armor-penetrations.json"
             });
 
-            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ArmorPenetrationsJson)));
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ArmorPenetrationsJson)));
 
             ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(
                 new Mock<ILogger<ArmorPenetrationsFetcher>>().Object,
-                blobDataFetcherMock.Object,
+                azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act
@@ -55,8 +55,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 RawArmorPenetrationsBlobName = "armor-penetrations.json"
             });
 
-            Mock<IAzureBlobManager> blobDataFetcherMock = new Mock<IAzureBlobManager>();
-            blobDataFetcherMock.Setup(m => m.Fetch(It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
   },
@@ -70,7 +70,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             ArmorPenetrationsFetcher fetcher = new ArmorPenetrationsFetcher(
                 new Mock<ILogger<ArmorPenetrationsFetcher>>().Object,
-                blobDataFetcherMock.Object,
+                azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act

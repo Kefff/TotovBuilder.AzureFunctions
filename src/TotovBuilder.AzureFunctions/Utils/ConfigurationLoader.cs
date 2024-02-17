@@ -1,10 +1,11 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
+using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.Model.Configuration;
 
-namespace TotovBuilder.AzureFunctions.Configuration
+namespace TotovBuilder.AzureFunctions.Utils
 {
     /// <summary>
     /// Represents a loader for the configuration of the application.
@@ -34,7 +35,7 @@ namespace TotovBuilder.AzureFunctions.Configuration
         /// Loading task.
         /// Used to avoid launching multiple loading operations at the same time.
         /// </summary>
-        private Task LoadingTask = Task.CompletedTask;
+        private readonly Task<Result> LoadingTask = Task.FromResult(Result.Ok());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFunctionsConfigurationInitializer"/> class.
@@ -58,28 +59,30 @@ namespace TotovBuilder.AzureFunctions.Configuration
                 AzureBlobStorageRawDataContainerName = ReadString(AzureBlobStorageContainerNameKey),
                 AzureFunctionsConfigurationBlobName = ReadString(AzureFunctionsConfigurationBlobNameKey)
             };
+
+            LoadingTask = Load();
         }
 
         /// <inheritdoc/>
-        public async Task Load()
+        public Task<Result> WaitForLoading()
         {
-            if (!LoadingTask.IsCompleted)
-            {
-                await LoadingTask;
+            return LoadingTask;
+        }
 
-                return;
+        /// <summary>
+        /// Load the configuration.
+        /// </summary>
+        /// <returns>Result of the configuration loading.</returns>
+        private async Task<Result> Load()
+        {
+            Result<AzureFunctionsConfiguration> azureFunctionsConfigurationResult = await AzureFunctionsConfigurationFetcher.Fetch();
+
+            if (azureFunctionsConfigurationResult.IsSuccess)
+            {
+                ConfigurationWrapper.Values = azureFunctionsConfigurationResult.Value;
             }
 
-            LoadingTask = Task.Run(async () =>
-            {
-                Result<AzureFunctionsConfiguration> azureFunctionsConfigurationResult = await AzureFunctionsConfigurationFetcher.Fetch();
-
-                if (azureFunctionsConfigurationResult.IsSuccess)
-                {
-                    ConfigurationWrapper.Values = azureFunctionsConfigurationResult.Value;
-                }
-            });
-            await LoadingTask;
+            return azureFunctionsConfigurationResult.ToResult();
         }
 
         /// <summary>

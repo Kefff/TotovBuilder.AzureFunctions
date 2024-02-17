@@ -2,9 +2,10 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Configuration;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
+using TotovBuilder.AzureFunctions.Utils;
+using TotovBuilder.AzureFunctions.Wrappers;
 using TotovBuilder.Model.Test;
 using Xunit;
 
@@ -35,8 +36,8 @@ namespace TotovBuilder.AzureFunctions.Test.Configuration
                 new Mock<ILogger<ConfigurationLoader>>().Object,
                 configurationWrapper,
                 azureFunctionsConfigurationFetcherMock.Object);
-            _ = configurationLoader.Load();
-            await configurationLoader.Load();
+            await configurationLoader.WaitForLoading();
+            await configurationLoader.WaitForLoading();
 
             // Assert
             configurationWrapper.Values.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);

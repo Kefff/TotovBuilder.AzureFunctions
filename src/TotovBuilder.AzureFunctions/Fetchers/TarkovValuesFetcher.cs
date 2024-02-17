@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
+using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -36,13 +36,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="azureBlobManager">Azure blob manager.</param>
+        /// <param name="azureBlobStorageManager">Azure blob storage manager.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         public TarkovValuesFetcher(
             ILogger<TarkovValuesFetcher> logger,
-            IAzureBlobManager azureBlobManager,
+            IAzureBlobStorageManager azureBlobStorageManager,
             IConfigurationWrapper configurationWrapper)
-            : base(logger, azureBlobManager, configurationWrapper)
+            : base(logger, azureBlobStorageManager, configurationWrapper)
         {
         }
 
