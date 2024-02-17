@@ -206,7 +206,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armor.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
                 armor.ArmoredAreas = GetArmoredAreas(propertiesJson);
                 armor.Durability = propertiesJson.GetProperty("durability").GetDouble();
-                armor.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+                armor.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
                 armor.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
                 armor.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 //armor.RicochetChance = ; // TODO : MISSING FROM API
@@ -232,7 +232,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armorMod.ArmoredAreas = GetArmoredAreas(propertiesJson);
                 armorMod.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
                 armorMod.Durability = propertiesJson.GetProperty("durability").GetDouble();
-                armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+                armorMod.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
                 armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
                 armorMod.ModSlots = DeserializeModSlots(propertiesJson);
                 armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
@@ -355,7 +355,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
                 backpack.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
-                backpack.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+                backpack.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
                 backpack.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 backpack.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
             }
@@ -480,7 +480,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 headwear.BlocksHeadphones = propertiesJson.GetProperty("blocksHeadset").GetBoolean();
                 headwear.Deafening = propertiesJson.GetProperty("deafening").GetString()!;
                 headwear.Durability = propertiesJson.GetProperty("durability").GetDouble();
-                headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
+                headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
                 headwear.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
                 headwear.ModSlots = DeserializeModSlots(propertiesJson);
                 headwear.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
@@ -919,7 +919,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeDouble(propertiesJson, "ergoPenalty", out double ergonomicsPercentageModifier))
                 {
-                    vest.ErgonomicsPercentageModifier = ergonomicsPercentageModifier / 100;
+                    vest.ErgonomicsPercentageModifier = ergonomicsPercentageModifier;
                 }
 
                 if (TryDeserializeString(propertiesJson.GetProperty("material"), "name", out string material))
