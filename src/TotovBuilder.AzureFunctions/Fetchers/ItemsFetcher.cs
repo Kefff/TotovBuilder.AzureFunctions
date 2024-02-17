@@ -255,7 +255,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armorMod.Material = propertiesJson.GetProperty("material").GetProperty("name").GetString()!.ToPascalCase();
                 armorMod.ModSlots = DeserializeModSlots(propertiesJson);
                 armorMod.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                armorMod.RicochetChance = GetRicochetChance(propertiesJson.GetProperty("ricochetX").GetDouble());
                 armorMod.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
             }
 
@@ -279,7 +278,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
             presetItem.Material = baseItem.Material;
             presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
-            presetItem.RicochetChance = baseItem.RicochetChance;
             presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
 
             return presetItem;
@@ -499,6 +497,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 headwear.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble() / 100;
                 headwear.ModSlots = DeserializeModSlots(propertiesJson);
                 headwear.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
+                headwear.RicochetChance = GetRicochetChance(propertiesJson.GetProperty("ricochetX").GetDouble());
                 headwear.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
 
                 if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
@@ -526,6 +525,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             presetItem.Deafening = baseItem.Deafening;
             presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
             presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
+            presetItem.RicochetChance = baseItem.RicochetChance;
             presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
 
             return presetItem;

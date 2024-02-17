@@ -30,7 +30,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiPresetsQuery = "{ items(type: preset) { id } }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -76,7 +76,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiPresetsQuery = "{ items(type: preset) { id } }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -152,7 +152,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiPresetsQuery = "{ items(type: preset) { id } }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -309,7 +309,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiPresetsQuery = "{ items(type: preset) { id } }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -432,7 +432,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiPresetsQuery = "{ items(type: preset) { id } }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -510,7 +510,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiPresetsQuery = "{ items(type: preset) { id } }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -607,7 +607,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPresetsQuery = "{ items(type: preset) { id properties { ... on ItemPropertiesPreset { baseItem { id } moa } } containsItems { item { id } quantity } } }",
+                ApiPresetsQuery = "{ items(type: preset) { id } }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });

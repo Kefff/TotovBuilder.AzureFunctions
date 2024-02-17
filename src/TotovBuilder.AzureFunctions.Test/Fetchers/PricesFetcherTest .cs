@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPricesQuery = "{ items { id name buyFor { vendor { ... on TraderOffer { trader { normalizedName } minTraderLevel taskUnlock { id } } ... on FleaMarket { normalizedName } } price currency priceRUB } } }",
+                ApiPricesQuery = "{ items { id }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -77,7 +77,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPricesQuery = "{ items { id name buyFor { vendor { ... on TraderOffer { trader { normalizedName } minTraderLevel taskUnlock { id } } ... on FleaMarket { normalizedName } } price currency priceRUB } } }",
+                ApiPricesQuery = "{ items { id }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
@@ -154,7 +154,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
-                ApiPricesQuery = "{ items { id name buyFor { vendor { ... on TraderOffer { trader { normalizedName } minTraderLevel taskUnlock { id } } ... on FleaMarket { normalizedName } } price currency priceRUB } } }",
+                ApiPricesQuery = "{ items { id }",
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
