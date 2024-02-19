@@ -176,11 +176,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.MaxStackableAmount = propertiesJson.GetProperty("stackMaxSize").GetDouble();
                 ammunition.PenetrationPower = propertiesJson.GetProperty("penetrationPower").GetDouble();
                 ammunition.Projectiles = propertiesJson.GetProperty("projectileCount").GetDouble();
-                ammunition.RecoilModifier = propertiesJson.GetProperty("recoilModifier").GetDouble();
+                ammunition.RecoilPercentageModifier = propertiesJson.GetProperty("recoilModifier").GetDouble();
                 ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
 
-                ammunition.Subsonic = ammunition.Velocity <= 340;
+                ammunition.Subsonic = ammunition.Velocity < 343; // Speed of sound in the air at 20°C at sea level
+
+                if (ammunition.RecoilPercentageModifier > 1)
+                {
+                    ammunition.RecoilPercentageModifier = Math.Round(ammunition.RecoilPercentageModifier - 1, 2); // Only usefull for 12/70 8.5mm Magnum buckshot which has a recoil modifier of 1.15 instead or 0.15
+                }
             }
 
             return ammunition;
@@ -199,17 +204,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                //armor.ArmorClass = // MISSING FROM API : This should be the base armor of the item without armor plates
-                armor.Durability = propertiesJson.GetProperty("durability").GetDouble();
                 armor.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
                 armor.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
                 armor.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
 
-                // MISSING FROM API : Armored items should have a "defaultPreset". For now, we set it when deserializing a preset and we find an item that has the same name minus " Default"
-                //if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
-                //{
-                //    armor.DefaultPresetId = defaultPresetJson.GetProperty("id").GetString();
-                //}
+                if (TryDeserializeDouble(propertiesJson, "class", out double armorClass))
+                {
+                    // The value returned by the API is the value with the default ballistic plates.
+                    // This should instead be the base armor of the item without armor plates.
+                    armor.ArmorClass = armorClass;
+                }
+
+                if (TryDeserializeDouble(propertiesJson, "durability", out double durability))
+                {
+                    armor.Durability = durability;
+                }
 
                 if (TryDeserializeObject(propertiesJson, "material", out JsonElement materialJson))
                 {
@@ -217,6 +226,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
 
                 DeserializeArmorModSlots(armor, propertiesJson);
+
+                // MISSING FROM API : Armored items should have a "defaultPreset". For now, we set it when deserializing a preset and we find an item that has the same name minus " Default"
+                //if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
+                //{
+                //    armor.DefaultPresetId = defaultPresetJson.GetProperty("id").GetString();
+                //}
             }
 
             return armor;
