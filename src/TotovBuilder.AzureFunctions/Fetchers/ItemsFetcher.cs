@@ -204,9 +204,20 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                armor.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
-                armor.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                armor.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
+                if (TryDeserializeDouble(propertiesJson, "ergoPenalty", out double ergonomicsPercentageModifier))
+                {
+                    armor.ErgonomicsPercentageModifier = ergonomicsPercentageModifier;
+                }
+
+                if (TryDeserializeDouble(propertiesJson, "speedPenalty", out double movementSpeedPercentageModifier))
+                {
+                    armor.MovementSpeedPercentageModifier = movementSpeedPercentageModifier;
+                }
+
+                if (TryDeserializeDouble(propertiesJson, "turnPenalty", out double turningSpeedPercentageModifier))
+                {
+                    armor.TurningSpeedPercentageModifier = turningSpeedPercentageModifier;
+                }
 
                 if (TryDeserializeDouble(propertiesJson, "class", out double armorClass))
                 {
@@ -300,17 +311,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="item">Item to update with deserialized data.</param>
         /// <param name="propertiesJson">Json element representing the properties of an item.</param>
-        private static void DeserializeArmorModSlots(IArmor item, JsonElement propertiesJson)
+        private void DeserializeArmorModSlots(IArmor item, JsonElement propertiesJson)
         {
-            List<string> armoredAreas = new List<string>();
-            List<ModSlot> armorModSlots = new List<ModSlot>();
-
-            if (!propertiesJson.TryGetProperty("armorSlots", out JsonElement armorModSlotsJson))
+            if (!TryDeserializeArray(propertiesJson, "armorSlots", out ArrayEnumerator armorModSlotsJson))
             {
                 return;
             }
 
-            foreach (JsonElement modSlotJson in armorModSlotsJson.EnumerateArray())
+            List<string> armoredAreas = new List<string>();
+            List<ModSlot> armorModSlots = new List<ModSlot>();
+
+            foreach (JsonElement modSlotJson in armorModSlotsJson)
             {
                 string armorSlotType = modSlotJson.GetProperty("__typename").GetString()!;
 
@@ -556,10 +567,22 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                headwear.BlocksHeadphones = propertiesJson.GetProperty("blocksHeadset").GetBoolean();
-                headwear.Deafening = propertiesJson.GetProperty("deafening").GetString()!;
+                if (TryDeserializeBoolean(propertiesJson, "blocksHeadset", out bool blocksHeadphones))
+                {
+                    headwear.BlocksHeadphones = blocksHeadphones;
+                }
+
+                if (TryDeserializeString(propertiesJson, "deafening", out string deafening))
+                {
+                    headwear.Deafening = deafening;
+                }
+
                 headwear.ModSlots = headwear.ModSlots.Concat(DeserializeModSlots(propertiesJson)).ToArray();
-                headwear.RicochetChance = GetRicochetChance(propertiesJson.GetProperty("ricochetX").GetDouble());
+
+                if (TryDeserializeDouble(propertiesJson, "ricochetX", out double ricochetChance))
+                {
+                    headwear.RicochetChance = GetRicochetChance(ricochetChance);
+                }
             }
 
             return headwear;

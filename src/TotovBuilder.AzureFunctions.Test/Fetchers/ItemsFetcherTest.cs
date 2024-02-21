@@ -91,7 +91,35 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.ItemsJson) }));
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+  ""data"": {
+    ""items"": [
+      {
+        ""categories"": [
+          {
+            ""id"": ""543be5dd4bdc2deb348b4569""
+          },
+          {
+            ""id"": ""5661632d4bdc2d903d8b456b""
+          },
+          {
+            ""id"": ""54009119af1c881c07000029""
+          }
+        ],
+        ""conflictingItems"": [],
+        ""iconLink"": ""https://assets.tarkov.dev/569668774bdc2da2298b4568-icon.webp"",
+        ""id"": ""569668774bdc2da2298b4568"",
+        ""inspectImageLink"": ""https://assets.tarkov.dev/569668774bdc2da2298b4568-image.webp"",
+        ""link"": ""https://tarkov.dev/item/euros"",
+        ""name"": ""Euros"",
+        ""properties"": null,
+        ""shortName"": ""EUR"",
+        ""weight"": 0,
+        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Euros""
+      }
+    ]
+  }
+}") }));
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
@@ -124,7 +152,22 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.IsSuccess.Should().BeTrue();
 
             IEnumerable<Item> orderedResult = result.Value.OrderBy(i => i.Id);
-            IEnumerable<Item> expected = TestData.ItemsWithoutMissingProperties;
+            Item[] expected = new Item[]
+            {
+                new Item()
+                {
+                    CategoryId = "currency",
+                    IconLink = "https://assets.tarkov.dev/569668774bdc2da2298b4568-icon.webp",
+                    Id = "569668774bdc2da2298b4568",
+                    ImageLink = "https://assets.tarkov.dev/569668774bdc2da2298b4568-image.webp",
+                    MarketLink = "https://tarkov.dev/item/euros",
+                    MaxStackableAmount = 1,
+                    Name = "Euros",
+                    ShortName = "EUR",
+                    Weight = 0,
+                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/Euros"
+                }
+            };
 
             result.Value.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
         }

@@ -145,6 +145,37 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Tries to deserialize a boolean value.
+        /// </summary>
+        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
+        /// <param name="propertyName">Name of the property to deserialize.</param>
+        /// <param name="value">Deserialized value when successful.</param>
+        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
+        protected bool TryDeserializeBoolean(JsonElement jsonElement, string propertyName, out bool value)
+        {
+            value = false;
+
+            if (jsonElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
+            {
+                return false;
+            }
+
+            if (propertyJson.ValueKind == JsonValueKind.False || propertyJson.ValueKind == JsonValueKind.True)
+            {
+                value = propertyJson.GetBoolean();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Tries to deserialize a double value.
         /// </summary>
         /// <param name="jsonElement">Json element containing the property to deserialize.</param>
