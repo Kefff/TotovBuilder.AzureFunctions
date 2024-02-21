@@ -181,11 +181,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
 
                 ammunition.Subsonic = ammunition.Velocity < 343; // Speed of sound in the air at 20°C at sea level
-
-                if (ammunition.RecoilPercentageModifier > 1)
-                {
-                    ammunition.RecoilPercentageModifier = Math.Round(ammunition.RecoilPercentageModifier - 1, 2); // Only usefull for 12/70 8.5mm Magnum buckshot which has a recoil modifier of 1.15 instead or 0.15
-                }
             }
 
             return ammunition;
@@ -289,17 +284,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeArray(propertiesJson, "headZones", out ArrayEnumerator headArmoredAreasJson))
                 {
-                    List<string> armoredAreas = new List<string>();
-
-                    foreach (JsonElement headArmoredAreaJson in headArmoredAreasJson)
-                    {
-                        if (headArmoredAreaJson.ValueKind == JsonValueKind.String)
-                        {
-                            armoredAreas.Add(headArmoredAreaJson.GetString()!.ToPascalCase());
-                        }
-                    }
-
-                    armorMod.ArmoredAreas = armoredAreas.ToArray();
+                    armorMod.ArmoredAreas = headArmoredAreasJson.Select(z => GetArmoredAreaName(z)).ToArray();
                 }
             }
 
@@ -335,7 +320,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     armorModSlots.Add(armorModSlot);
                 }
 
-                IEnumerable<string> zones = modSlotJson.GetProperty("zones").EnumerateArray().Select(z => z.GetString()!);
+
+                IEnumerable<string> zones = modSlotJson
+                    .GetProperty("zones")
+                    .EnumerateArray()
+                    .Select(z => GetArmoredAreaName(z));
                 armoredAreas.AddRange(zones);
             }
 
@@ -1016,6 +1005,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             presetItem.Capacity = baseItem.Capacity;
 
             return presetItem;
+        }
+
+        /// <summary>
+        /// Gets the name of an armored area from a JSON property.
+        /// </summary>
+        /// <param name="armoredAreaJson">Armored area from a JSON property</param>
+        /// <returns>Armored area name.</returns>
+        private static string GetArmoredAreaName(JsonElement armoredAreaJson)
+        {
+            string armoredArea = armoredAreaJson.GetString()!
+                .ToPascalCase()
+                .Replace(",", string.Empty)
+                .Replace(".", string.Empty);
+
+            return armoredArea;
         }
 
         /// <summary>

@@ -70,8 +70,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeTrue();
 
-            IEnumerable<Item> orderedResult = result.Value.OrderBy(i => i.Id);
-            IEnumerable<Item> expected = TestData.Items.OrderBy(i => i.Id);
+            IEnumerable<Item> orderedResult = result.Value.OrderBy(i => $"{i.CategoryId} - {i.Name}");
+            IEnumerable<Item> expected = TestData.Items.OrderBy(i => $"{i.CategoryId} - {i.Name}");
 
             orderedResult.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
         }
@@ -151,7 +151,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeTrue();
 
-            IEnumerable<Item> orderedResult = result.Value.OrderBy(i => i.Id);
+            IEnumerable<Item> orderedResult = result.Value.OrderBy(i => $"{i.CategoryId} - {i.Name}");
             Item[] expected = new Item[]
             {
                 new Item()
