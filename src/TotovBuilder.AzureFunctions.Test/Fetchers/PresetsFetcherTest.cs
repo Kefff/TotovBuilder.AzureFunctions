@@ -101,7 +101,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ""quantity"": 1
             }
         ],
-        ""id"": ""preset-not-existing""
+        ""id"": ""test-preset-not-existing""
       },
       {
         ""containsItems"": [
@@ -112,7 +112,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ""quantity"": 1
             }
         ],
-        ""id"": ""preset-face-shield-alone""
+        ""id"": ""test-preset-face-shield-alone""
       }
     ]
   }
@@ -140,7 +140,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     new InventoryItem()
                     {
-                        ItemId = "preset-face-shield-alone"
+                        ItemId = "test-preset-face-shield-alone"
                     }
                 });
         }
@@ -175,7 +175,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ""quantity"": 30
             }
         ],
-        ""id"": ""preset-magazine-with-incompatible-ammunition""
+        ""id"": ""test-preset-magazine-with-incompatible-ammunition""
       }
     ]
   }
@@ -271,7 +271,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     CategoryId = "magazine",
                     ErgonomicsModifier = -3,
                     IconLink = "https://assets.tarkov.dev/preset-magazine-with-incompatible-ammunition.jpg",
-                    Id = "preset-magazine-with-incompatible-ammunition",
+                    Id = "test-preset-magazine-with-incompatible-ammunition",
                     ImageLink = "https://assets.tarkov.dev/preset-magazine-with-incompatible-ammunition.jpg",
                     MalfunctionPercentage = 0.07,
                     MarketLink = "https://tarkov.dev/item/preset-magazine-with-incompatible-ammunition",
@@ -297,7 +297,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 new InventoryItem()
                 {
-                    ItemId = "preset-magazine-with-incompatible-ammunition"
+                    ItemId = "test-preset-magazine-with-incompatible-ammunition"
                 }
             });
         }
@@ -332,7 +332,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
               ""quantity"": 30
             }
         ],
-        ""id"": ""preset-non-magazine-item-with-ammunition""
+        ""id"": ""test-preset-non-magazine-item-with-ammunition""
       }
     ]
   }
@@ -394,7 +394,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     CategoryId = "rangedWeaponMod",
                     ErgonomicsModifier = -2,
                     IconLink = "https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg",
-                    Id = "preset-non-magazine-item-with-ammunition",
+                    Id = "test-preset-non-magazine-item-with-ammunition",
                     ImageLink = "https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg",
                     MarketLink = "https://tarkov.dev/item/preset-non-magazine-item-with-ammunition",
                     Name = "Non magazine with ammunition",
@@ -420,7 +420,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 new InventoryItem()
                 {
-                    ItemId = "preset-non-magazine-item-with-ammunition"
+                    ItemId = "test-preset-non-magazine-item-with-ammunition"
                 }
             });
         }

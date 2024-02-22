@@ -284,7 +284,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeArray(propertiesJson, "headZones", out ArrayEnumerator headArmoredAreasJson))
                 {
-                    armorMod.ArmoredAreas = headArmoredAreasJson.Select(z => GetArmoredAreaName(z)).ToArray();
+                    armorMod.ArmoredAreas = headArmoredAreasJson.Select(z => GetArmoredAreaName(z)).Distinct().ToArray();
                 }
             }
 
@@ -328,7 +328,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armoredAreas.AddRange(zones);
             }
 
-            item.ArmoredAreas = armoredAreas.ToArray();
+            item.ArmoredAreas = armoredAreas.Distinct().ToArray();
             item.ModSlots = item.ModSlots.Concat(armorModSlots).ToArray();
         }
 
