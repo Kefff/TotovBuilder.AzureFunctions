@@ -148,6 +148,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             Task.WaitAll(deserializationTasks.ToArray());
 
+            // MISSING FROM API
+            // Since the API does not indicate on armor mod slots the compatible items,
+            // we add as compatible items all armor mods that protects the same zone as the armor mod slot
+            SetArmorModsCompatibleItems(items);
+
             return Task.FromResult(Result.Ok(items.AsEnumerable()));
         }
 
@@ -1078,6 +1083,42 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             return TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson)
                 && propertiesJson.EnumerateObject().Any()
                 && propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesPreset";
+        }
+
+        /// <summary>
+        /// Sets the compatible item IDs or armor slots since it is missible from the API.
+        /// Add as compatible items all armor mods that protects the same zone as the armor mod slot.
+        /// </summary>
+        /// <param name="items">List of all the items.</param>
+        private static void SetArmorModsCompatibleItems(ConcurrentBag<Item> items)
+        {
+            IEnumerable<IArmor> armors = items.Where(i => i is IArmor a && a.ModSlots.Any()).Cast<IArmor>();
+            string[] backPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("FRPLATE")).Select(i => i.Id).ToArray();
+            string[] frontPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("BCKPLATE")).Select(i => i.Id).ToArray();
+            string[] leftPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("LPLATE")).Select(i => i.Id).ToArray();
+            string[] rightPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("RPLATE")).Select(i => i.Id).ToArray();
+
+            foreach (IArmor armor in armors)
+            {
+                foreach (ModSlot modSlot in armor.ModSlots)
+                {
+                    switch (modSlot.Name.ToLowerInvariant())
+                    {
+                        case "back_plate":
+                            modSlot.CompatibleItemIds = backPlateIds;
+                            break;
+                        case "front_plate":
+                            modSlot.CompatibleItemIds = frontPlateIds;
+                            break;
+                        case "left_side_plate":
+                            modSlot.CompatibleItemIds = leftPlateIds;
+                            break;
+                        case "right_side_plate":
+                            modSlot.CompatibleItemIds = rightPlateIds;
+                            break;
+                    }
+                }
+            }
         }
 
         /// <summary>
