@@ -255,6 +255,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             T presetItem = DeserializeBasePresetProperties<T>(presetId, presetJson, baseItem);
 
+            if (presetItem.Name.EndsWith(" Default"))
+            {
+                baseItem.DefaultPresetId = presetItem.Id; // MISSING FROM API
+            }
+
             presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.ArmorClass = baseItem.ArmorClass;
             presetItem.Durability = baseItem.Durability;
@@ -319,7 +324,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     };
                     armorModSlots.Add(armorModSlot);
                 }
-
 
                 IEnumerable<string> zones = modSlotJson
                     .GetProperty("zones")
