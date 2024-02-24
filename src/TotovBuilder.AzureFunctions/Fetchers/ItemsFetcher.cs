@@ -325,7 +325,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     ModSlot armorModSlot = new ModSlot()
                     {
                         //CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),  // TODO : MISSING FROM API
-                        Name = modSlotJson.GetProperty("nameId").GetString()!
+                        Name = modSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
                     };
                     armorModSlots.Add(armorModSlot);
                 }
@@ -809,7 +809,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     ModSlot modSlot = new ModSlot()
                     {
                         CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),
-                        Name = modSlotJson.GetProperty("nameId").GetString()!
+                        Name = modSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
                     };
                     modSlots.Add(modSlot);
                 }
@@ -1094,8 +1094,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private static void SetArmorModsCompatibleItems(ConcurrentBag<Item> items)
         {
             IEnumerable<IArmor> armors = items.Where(i => i is IArmor a && a.ModSlots.Any()).Cast<IArmor>();
-            string[] backPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("FRPLATE")).Select(i => i.Id).ToArray();
-            string[] frontPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("BCKPLATE")).Select(i => i.Id).ToArray();
+            string[] backPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("BCKPLATE")).Select(i => i.Id).ToArray();
+            string[] frontPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("FRPLATE")).Select(i => i.Id).ToArray();
             string[] leftPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("LPLATE")).Select(i => i.Id).ToArray();
             string[] rightPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("RPLATE")).Select(i => i.Id).ToArray();
 
@@ -1103,7 +1103,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 foreach (ModSlot modSlot in armor.ModSlots)
                 {
-                    switch (modSlot.Name.ToLowerInvariant())
+                    switch (modSlot.Name)
                     {
                         case "back_plate":
                             modSlot.CompatibleItemIds = backPlateIds;

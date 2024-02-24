@@ -72,7 +72,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             IEnumerable<Item> orderedResult = result.Value.OrderBy(i => $"{i.CategoryId} - {i.Name}");
             IEnumerable<Item> expected = TestData.Items.OrderBy(i => $"{i.CategoryId} - {i.Name}");
-
             orderedResult.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
         }
 

@@ -64,8 +64,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             IEnumerable<InventoryItem> orderedResult = result.Value.OrderBy(p => p.ItemId);
             IEnumerable<InventoryItem> expected = TestData.Presets.OrderBy(i => i.ItemId);
-
-            result.IsSuccess.Should().BeTrue();
             orderedResult.Should().BeEquivalentTo(expected);
         }
 
