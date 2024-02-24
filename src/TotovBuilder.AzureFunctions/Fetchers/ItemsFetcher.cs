@@ -165,12 +165,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private Ammunition DeserializeAmmunition(JsonElement itemJson, string itemCategoryId)
         {
             Ammunition ammunition = DeserializeBaseItemProperties<Ammunition>(itemJson, itemCategoryId);
+            ammunition.ArmorPenetrations = ArmorPenetrations.FirstOrDefault(ac => ac.AmmunitionId == ammunition.Id)?.Values ?? Array.Empty<double>(); // TODO : OBTAIN FROM WIKI
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
                 ammunition.AccuracyPercentageModifier = propertiesJson.GetProperty("accuracyModifier").GetDouble();
                 ammunition.ArmorDamagePercentage = propertiesJson.GetProperty("armorDamage").GetDouble() / 100;
-                ammunition.ArmorPenetrations = ArmorPenetrations.FirstOrDefault(ac => ac.AmmunitionId == ammunition.Id)?.Values ?? Array.Empty<double>(); // TODO : OBTAIN FROM WIKI
                 //ammunition.Blinding = ; // TODO : MISSING FROM API
                 ammunition.Caliber = propertiesJson.GetProperty("caliber").GetString()!;
                 ammunition.DurabilityBurnPercentageModifier = Math.Round(propertiesJson.GetProperty("durabilityBurnFactor").GetDouble() - 1, 2);
@@ -1062,16 +1062,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Ricochet chance.</returns>
         private string GetRicochetChance(double ricochetXValue)
         {
-            RicochetChance? ricochetChance = TarkovValues.RicochetChances.FirstOrDefault((rc) =>
+            RicochetChance ricochetChance = TarkovValues.RicochetChances.First((rc) =>
             {
-                // Forced to do this for code coverage
+                // Forced write the condition this way for code coverage
                 bool isGreaterThanMin = rc.XMinValue <= ricochetXValue;
                 bool isLesserThanMax = rc.XMaxValue >= ricochetXValue;
 
                 return isGreaterThanMin && isLesserThanMax;
             });
 
-            return (ricochetChance?.Name ?? string.Empty).ToPascalCase();
+            return ricochetChance.Name.ToPascalCase();
         }
 
         /// <summary>
