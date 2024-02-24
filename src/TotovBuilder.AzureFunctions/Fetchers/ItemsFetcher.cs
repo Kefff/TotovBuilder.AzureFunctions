@@ -1024,6 +1024,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private static string GetArmoredAreaName(JsonElement armoredAreaJson)
         {
             string armoredArea = armoredAreaJson.GetString()!
+                .Replace("F. PLATE", "FR. PLATE") // Some items have "F. PLATE" instead of "FR. PLATE"
                 .ToPascalCase()
                 .Replace(",", string.Empty)
                 .Replace(".", string.Empty);
