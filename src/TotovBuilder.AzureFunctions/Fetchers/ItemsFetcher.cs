@@ -1062,7 +1062,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Ricochet chance.</returns>
         private string GetRicochetChance(double ricochetXValue)
         {
-            RicochetChance ricochetChance = TarkovValues.RicochetChances.First((rc) =>
+            RicochetChance? ricochetChance = TarkovValues.RicochetChances.FirstOrDefault((rc) =>
             {
                 // Forced write the condition this way for code coverage
                 bool isGreaterThanMin = rc.XMinValue <= ricochetXValue;
@@ -1071,7 +1071,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return isGreaterThanMin && isLesserThanMax;
             });
 
-            return ricochetChance.Name.ToPascalCase();
+            return ricochetChance != null ? ricochetChance.Name.ToPascalCase() : string.Empty;
         }
 
         /// <summary>
