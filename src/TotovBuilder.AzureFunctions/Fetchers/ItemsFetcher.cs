@@ -233,7 +233,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeObject(propertiesJson, "material", out JsonElement materialJson))
                 {
-                    armor.Material = materialJson.GetProperty("name").GetString()!;
+                    armor.Material = materialJson.GetProperty("id").GetString()!;
                 }
 
                 DeserializeArmorModSlots(armor, propertiesJson);
