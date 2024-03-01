@@ -86,7 +86,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<Price>>(TestData.Prices)))
+                .Returns(Task.FromResult(Result.Ok(TestData.Prices.Concat(TestData.Barters))))
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
@@ -106,7 +106,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories.Select(ic => ic.Id) as IEnumerable<object>, serializationOptions);
             string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
             string expectedPresets = JsonSerializer.Serialize(TestData.Presets as IEnumerable<object>, serializationOptions);
-            string expectedPrices = JsonSerializer.Serialize(TestData.Prices as IEnumerable<object>, serializationOptions);
+            string expectedPrices = JsonSerializer.Serialize(TestData.Prices.Concat(TestData.Barters) as IEnumerable<object>, serializationOptions);
             string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues as object, serializationOptions);
             string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration as object, serializationOptions);
 
@@ -395,7 +395,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<Price>>(TestData.Prices)))
+                .Returns(Task.FromResult(Result.Ok(TestData.Prices.Concat(TestData.Barters))))
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
@@ -415,7 +415,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories.Select(ic => ic.Id) as IEnumerable<object>, serializationOptions);
             string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
             string expectedPresets = JsonSerializer.Serialize(TestData.Presets as IEnumerable<object>, serializationOptions);
-            string expectedPrices = JsonSerializer.Serialize(TestData.Prices as IEnumerable<object>, serializationOptions);
+            string expectedPrices = JsonSerializer.Serialize(TestData.Prices.Concat(TestData.Barters) as IEnumerable<object>, serializationOptions);
             string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues as object, serializationOptions);
             string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration as object, serializationOptions);
 
