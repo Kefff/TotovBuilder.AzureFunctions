@@ -66,14 +66,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private readonly IItemMissingPropertiesFetcher ItemMissingPropertiesFetcher;
 
         /// <summary>
-        /// Tarkov values.
-        /// </summary>
-        private TarkovValues TarkovValues = new TarkovValues();
-
-        /// <summary>
         /// Tarkov values fetcher.
         /// </summary>
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
+
+        /// <summary>
+        /// Tarkov values.
+        /// </summary>
+        private TarkovValues TarkovValues = new TarkovValues();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemsFetcher"/> class.
@@ -104,9 +104,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
-            List<Task> deserializationTasks = new List<Task>();
-            ConcurrentBag<Item> items = new ConcurrentBag<Item>();
-
             Result<IEnumerable<ArmorPenetration>>? armorPenetrationsResult = null;
             Result<IEnumerable<ItemCategory>>? itemCategoriesResult = null;
             Result<IEnumerable<ItemMissingProperties>>? itemMissingPropertiesResult = null;
@@ -131,6 +128,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Task.FromResult(allTasksResult.ToResult<IEnumerable<Item>>());
             }
 
+            List<Task> deserializationTasks = new List<Task>();
+            ConcurrentBag<Item> items = new ConcurrentBag<Item>();
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
