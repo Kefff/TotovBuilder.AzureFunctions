@@ -1,9 +1,8 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
@@ -34,9 +33,19 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Barters fetcher.
+        /// </summary>
+        private readonly IBartersFetcher BartersFetcher;
+
+        /// <summary>
         /// Tarkov values fetcher.
         /// </summary>
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
+
+        /// <summary>
+        /// Tarkov values.
+        /// </summary>
+        private TarkovValues TarkovValues = new TarkovValues();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QuestsFetcher"/> class.
@@ -44,22 +53,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
-        /// <param name="cache">Cache.</param>
+        /// <param name="bartersFetcher">Barters fetcher.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         public PricesFetcher(
             ILogger<PricesFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
+            IBartersFetcher bartersFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher)
             : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
+            BartersFetcher = bartersFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
         }
 
         /// <inheritdoc/>
         protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Price> prices = new List<Price>();
             Result<TarkovValues> tarkovValuesResult = await TarkovValuesFetcher.Fetch();
 
             if (tarkovValuesResult.IsFailed)
@@ -67,8 +77,32 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return tarkovValuesResult.ToResult();
             }
 
-            TarkovValues tarkovValues = tarkovValuesResult.Value;
-            JsonElement pricesJson = JsonDocument.Parse(responseContent).RootElement;
+            TarkovValues = tarkovValuesResult.Value;
+
+            List<Price> pricesAndBarters = new List<Price>();
+            Result<IEnumerable<Price>>? bartersResult = null;
+
+            Task.WaitAll(
+                Task.Run(() => pricesAndBarters.AddRange(GetPrices(responseContent))),
+                BartersFetcher.Fetch().ContinueWith(r => bartersResult = r.Result));
+
+            if (bartersResult!.IsSuccess)
+            {
+                pricesAndBarters.AddRange(bartersResult.Value);
+            }
+
+            return Result.Ok<IEnumerable<Price>>(pricesAndBarters);
+        }
+
+        /// <summary>
+        /// Gets prices.
+        /// </summary>
+        /// <param name="pricesResponseContent">Content of the price fetch response.</param>
+        /// <returns>Prices.</returns>
+        private IEnumerable<Price> GetPrices(string pricesResponseContent)
+        {
+            List<Price> prices = new List<Price>();
+            JsonElement pricesJson = JsonDocument.Parse(pricesResponseContent).RootElement;
 
             foreach (JsonElement itemJson in pricesJson.EnumerateArray())
             {
@@ -133,7 +167,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             // Adding a price to the main currency item
-            Currency? mainCurrency = tarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
+            Currency? mainCurrency = TarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
 
             if (mainCurrency != null)
             {
@@ -148,7 +182,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 });
             }
 
-            return Result.Ok(prices.AsEnumerable());
+            return prices.AsEnumerable();
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿using TotovBuilder.AzureFunctions.Configuration;
+﻿using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 
-namespace TotovBuilder.AzureFunctions.Abstractions.Configuration
+namespace TotovBuilder.AzureFunctions.Abstractions.Wrappers
 {
     /// <summary>
     /// Provides the functionalities of a wrapper for the configuration of the application.

@@ -9,8 +9,7 @@ using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
-using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
@@ -297,6 +296,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         }
 
         [Theory]
+        [InlineData("{ \"value\": true }", true)]
+        [InlineData("{ \"value\": \"123456789\"}", false)]
+        [InlineData("{ \"invalid\": true }", false)]
+        [InlineData("[123456789]", false)]
+        public void TryDeserializeBoolean_ShouldTryToDeserializeBoolean(string json, bool expected)
+        {
+            // Arrange
+            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+                new Mock<ILogger<ApiFetcherImplementation>>().Object,
+                new Mock<IHttpClientWrapperFactory>().Object,
+                new Mock<IConfigurationWrapper>().Object);
+
+            JsonElement jsonElement = JsonDocument.Parse(json).RootElement;
+
+            // Act
+            bool result = apiFetcher.TestTryDeserializeBoolean(jsonElement, "value", out bool resultValue);
+
+            // Assert
+            result.Should().Be(expected);
+
+            if (result)
+            {
+                resultValue.Should().Be(true);
+            }
+        }
+
+        [Theory]
         [InlineData("{ \"value\": 123456789 }", true)]
         [InlineData("{ \"value\": \"123456789\"}", false)]
         [InlineData("{ \"invalid\": 123456789 }", false)]
@@ -406,6 +432,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             public bool TestTryDeserializeArray(JsonElement jsonElement, string propertyName, out ArrayEnumerator value)
             {
                 return TryDeserializeArray(jsonElement, propertyName, out value);
+            }
+
+            public bool TestTryDeserializeBoolean(JsonElement jsonElement, string propertyName, out bool value)
+            {
+                return TryDeserializeBoolean(jsonElement, propertyName, out value);
             }
 
             public bool TestTryDeserializeDouble(JsonElement jsonElement, string propertyName, out double value)

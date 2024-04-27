@@ -2,45 +2,49 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Net;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
-using TotovBuilder.AzureFunctions.Configuration;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.AzureFunctions.Net;
 using TotovBuilder.AzureFunctions.Utils;
+using TotovBuilder.AzureFunctions.Wrappers;
+using TotovBuilder.Shared.Azure;
+using TotovBuilder.Shared.Extensions;
 
 IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices((HostBuilderContext hopstBuilderContext, IServiceCollection serviceCollection) =>
+    .ConfigureServices((HostBuilderContext hopstBuilderContext, IServiceCollection services) =>
     {
-        serviceCollection.AddHttpClient();
+        services.AddHttpClient();
 
-        serviceCollection.AddApplicationInsightsTelemetryWorkerService();
-        serviceCollection.ConfigureFunctionsApplicationInsights();
+        services.AddApplicationInsightsTelemetryWorkerService();
+        services.ConfigureFunctionsApplicationInsights();
 
-        serviceCollection.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
-        serviceCollection.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
-        serviceCollection.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
+        services.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
+        services.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
+        services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
 
-        serviceCollection.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
-        serviceCollection.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
-        serviceCollection.AddSingleton<IBartersFetcher, BartersFetcher>();
-        serviceCollection.AddSingleton<IAzureBlobManager, AzureBlobManager>();
-        serviceCollection.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
-        serviceCollection.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
-        serviceCollection.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
-        serviceCollection.AddSingleton<IItemsFetcher, ItemsFetcher>();
-        serviceCollection.AddSingleton<IPresetsFetcher, PresetsFetcher>();
-        serviceCollection.AddSingleton<IPricesFetcher, PricesFetcher>();
-        serviceCollection.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
-        serviceCollection.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
+        services.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
+        services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
+        services.AddSingleton<IBartersFetcher, BartersFetcher>();
+        services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
+        services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
+        services.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
+        services.AddSingleton<IItemsFetcher, ItemsFetcher>();
+        services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
+        services.AddSingleton<IPricesFetcher, PricesFetcher>();
+        services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
+        services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
 
-        //serviceCollection.AddSingleton<IWebsiteDataGenerator, WebsiteDataGenerator>();
-        //serviceCollection.AddSingleton<IWebsiteDataUploader, WebsiteDataUploader>();
+        services.AddAzureBlobStorageManager(
+            (IServiceProvider serviceProvider) =>
+            {
+                IConfigurationWrapper configurationWrapper = serviceProvider.GetRequiredService<IConfigurationWrapper>();
 
-        serviceCollection.Configure<LoggerFilterOptions>(options =>
+                return new AzureBlobStorageManagerOptions(configurationWrapper.Values.AzureBlobStorageConnectionString, configurationWrapper.Values.ExecutionTimeout);
+            });
+
+        services.Configure<LoggerFilterOptions>(options =>
         {
             // Removing default filters that only allow warnings and errors to be logged
             // Cf https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide#application-insights

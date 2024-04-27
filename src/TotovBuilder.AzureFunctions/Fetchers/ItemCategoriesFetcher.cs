@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Utils;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Items;
+using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -36,13 +36,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Initializes a new instance of the <see cref="ItemCategoriesFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="blobDataFetcher">Blob data fetcher.</param>
+        /// <param name="azureBlobStorageManager">Azure blob storage manager.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         public ItemCategoriesFetcher(
             ILogger<ItemCategoriesFetcher> logger,
-            IAzureBlobManager blobDataFetcher,
+            IAzureBlobStorageManager azureBlobStorageManager,
             IConfigurationWrapper configurationWrapper)
-            : base(logger, blobDataFetcher, configurationWrapper)
+            : base(logger, azureBlobStorageManager, configurationWrapper)
         {
         }
 

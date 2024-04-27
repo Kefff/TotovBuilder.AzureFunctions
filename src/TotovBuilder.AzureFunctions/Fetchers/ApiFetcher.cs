@@ -4,9 +4,8 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Configuration;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using static System.Text.Json.JsonElement;
 
@@ -76,9 +75,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             if (!FetchingTask.IsCompleted)
             {
-                Logger.LogInformation(Properties.Resources.StartWaitingForPreviousFetching, DataType.ToString());
+                Logger.LogInformation(Properties.Resources.WaitingForPreviousFetching, DataType.ToString());
                 await FetchingTask;
-                Logger.LogInformation(Properties.Resources.EndWaitingForPreviousFetching, DataType.ToString());
+                Logger.LogInformation(Properties.Resources.PreviousFetchingFinished, DataType.ToString());
             }
             else
             {
@@ -138,6 +137,37 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (propertyJson.ValueKind == JsonValueKind.Array)
             {
                 value = propertyJson.EnumerateArray();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to deserialize a boolean value.
+        /// </summary>
+        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
+        /// <param name="propertyName">Name of the property to deserialize.</param>
+        /// <param name="value">Deserialized value when successful.</param>
+        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
+        protected bool TryDeserializeBoolean(JsonElement jsonElement, string propertyName, out bool value)
+        {
+            value = false;
+
+            if (jsonElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
+            {
+                return false;
+            }
+
+            if (propertyJson.ValueKind == JsonValueKind.False || propertyJson.ValueKind == JsonValueKind.True)
+            {
+                value = propertyJson.GetBoolean();
 
                 return true;
             }
@@ -250,7 +280,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(error);
             }
 
-            Logger.LogInformation(Properties.Resources.StartFetching, DataType.ToString());
+            Logger.LogInformation(Properties.Resources.FetchingApiData, DataType.ToString());
 
             string responseContent;
 
@@ -277,7 +307,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
             catch (Exception e)
             {
-                string error = string.Format(Properties.Resources.FetchingError, DataType.ToString(), e);
+                string error = string.Format(Properties.Resources.ApiFetchError, DataType.ToString(), e);
                 Logger.LogError(error);
 
                 return Result.Fail(error);
@@ -292,7 +322,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             Result<T> deserializedDataResult = await DeserializeData(isolatedDataResult.Value);
 
-            Logger.LogInformation(Properties.Resources.EndFetching, DataType.ToString());
+            Logger.LogInformation(Properties.Resources.ApiDataFetched, DataType.ToString());
 
             return deserializedDataResult;
         }

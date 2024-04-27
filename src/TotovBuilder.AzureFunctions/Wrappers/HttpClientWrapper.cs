@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TotovBuilder.AzureFunctions.Abstractions.Net;
+using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 
-namespace TotovBuilder.AzureFunctions.Net
+namespace TotovBuilder.AzureFunctions.Wrappers
 {
     /// <summary>
     /// Represents an HTTP client wrapper.
     /// </summary>
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Wrapper to be able to create mocks of the HttpClient class.")]
     public class HttpClientWrapper : IHttpClientWrapper
     {
         /// <summary>
