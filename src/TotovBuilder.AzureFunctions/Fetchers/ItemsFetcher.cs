@@ -643,15 +643,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized item category.</returns>
         private ItemCategory DeserializeItemCategory(JsonElement itemJson)
         {
-            List<string> tarkovItemCategoryIds = new List<string>();
+            List<string> tarkovItemCategoryIds = [];
             JsonElement tarkovItemCategoriesJson = itemJson.GetProperty("categories");
 
             foreach (JsonElement tarkovItemCategoryJson in tarkovItemCategoriesJson.EnumerateArray())
             {
                 tarkovItemCategoryIds.Add(tarkovItemCategoryJson.GetProperty("id").GetString()!);
             }
-
-            ItemCategory itemCategory = GetItemCategoryFromTarkovCategoryId(tarkovItemCategoryIds);
+            
+            string itemId = itemJson.GetProperty("id").GetString()!;
+            ItemCategory itemCategory = GetItemItemCategory(itemId, tarkovItemCategoryIds);
 
             return itemCategory;
         }
@@ -1033,17 +1034,25 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Gets an item category from a tarkov item category ID.
-        /// When no matching item category is found, return the "other" item category.
+        /// Gets an the item category of an item.
+        /// It return the first item category that contains the item in its additional items.
+        /// If no item category is found, it searches for the first item category that contains one of the item tarkov item categories.
         /// </summary>
+        /// <param name="itemId">Item ID.</param>
         /// <param name="tarkovItemCategoryIds">Tarkov item category IDs.</param>
         /// <returns>Item category.</returns>
-        private ItemCategory GetItemCategoryFromTarkovCategoryId(IEnumerable<string> tarkovItemCategoryIds)
+        private ItemCategory GetItemItemCategory(string itemId, IEnumerable<string> tarkovItemCategoryIds)
         {
-            ItemCategory? result;
+            ItemCategory? result = ItemCategories.FirstOrDefault(ic => ic.AdditionalItemIds.Any(aii => aii == itemId));
+
+            if (result != null)
+            {
+                return result;
+            }
 
             foreach (string tarkovItemCategoryId in tarkovItemCategoryIds)
             {
+
                 result = ItemCategories.FirstOrDefault(ic => ic.Types.Any(tic => tic.Id == tarkovItemCategoryId));
 
                 if (result != null)
