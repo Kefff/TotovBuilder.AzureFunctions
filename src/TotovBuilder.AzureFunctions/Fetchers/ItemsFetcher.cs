@@ -168,19 +168,19 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                ammunition.AccuracyPercentageModifier = propertiesJson.GetProperty("accuracyModifier").GetDouble();
+                ammunition.AccuracyModifierPercentage = propertiesJson.GetProperty("accuracyModifier").GetDouble();
                 ammunition.ArmorDamagePercentage = propertiesJson.GetProperty("armorDamage").GetDouble() / 100;
                 //ammunition.Blinding = ; // TODO : MISSING FROM API
                 ammunition.Caliber = propertiesJson.GetProperty("caliber").GetString()!;
-                ammunition.DurabilityBurnPercentageModifier = Math.Round(propertiesJson.GetProperty("durabilityBurnFactor").GetDouble() - 1, 2);
+                ammunition.DurabilityBurnModifierPercentage = Math.Round(propertiesJson.GetProperty("durabilityBurnFactor").GetDouble() - 1, 2);
                 ammunition.FleshDamage = propertiesJson.GetProperty("damage").GetDouble();
-                ammunition.FragmentationChancePercentage = propertiesJson.GetProperty("fragmentationChance").GetDouble();
-                ammunition.HeavyBleedingPercentageChance = propertiesJson.GetProperty("heavyBleedModifier").GetDouble();
-                ammunition.LightBleedingPercentageChance = propertiesJson.GetProperty("lightBleedModifier").GetDouble();
+                ammunition.FragmentationChance = propertiesJson.GetProperty("fragmentationChance").GetDouble();
+                ammunition.HeavyBleedingChance = propertiesJson.GetProperty("heavyBleedModifier").GetDouble();
+                ammunition.LightBleedingChance = propertiesJson.GetProperty("lightBleedModifier").GetDouble();
                 ammunition.MaxStackableAmount = propertiesJson.GetProperty("stackMaxSize").GetDouble();
                 ammunition.PenetrationPower = propertiesJson.GetProperty("penetrationPower").GetDouble();
                 ammunition.Projectiles = propertiesJson.GetProperty("projectileCount").GetDouble();
-                ammunition.RecoilPercentageModifier = propertiesJson.GetProperty("recoilModifier").GetDouble();
+                ammunition.RecoilModifierPercentage = propertiesJson.GetProperty("recoilModifier").GetDouble();
                 ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
 
@@ -203,19 +203,19 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                if (TryDeserializeDouble(propertiesJson, "ergoPenalty", out double ergonomicsPercentageModifier))
+                if (TryDeserializeDouble(propertiesJson, "ergoPenalty", out double ergonomicsModifierPercentage))
                 {
-                    armor.ErgonomicsPercentageModifier = ergonomicsPercentageModifier;
+                    armor.ErgonomicsModifierPercentage = ergonomicsModifierPercentage;
                 }
 
-                if (TryDeserializeDouble(propertiesJson, "speedPenalty", out double movementSpeedPercentageModifier))
+                if (TryDeserializeDouble(propertiesJson, "speedPenalty", out double movementSpeedModifierPercentage))
                 {
-                    armor.MovementSpeedPercentageModifier = movementSpeedPercentageModifier;
+                    armor.MovementSpeedModifierPercentage = movementSpeedModifierPercentage;
                 }
 
-                if (TryDeserializeDouble(propertiesJson, "turnPenalty", out double turningSpeedPercentageModifier))
+                if (TryDeserializeDouble(propertiesJson, "turnPenalty", out double turningSpeedModifierPercentage))
                 {
-                    armor.TurningSpeedPercentageModifier = turningSpeedPercentageModifier;
+                    armor.TurningSpeedModifierPercentage = turningSpeedModifierPercentage;
                 }
 
                 if (TryDeserializeDouble(propertiesJson, "class", out double armorClass))
@@ -267,10 +267,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.ArmorClass = baseItem.ArmorClass;
             presetItem.Durability = baseItem.Durability;
-            presetItem.ErgonomicsPercentageModifier = baseItem.ErgonomicsPercentageModifier;
+            presetItem.ErgonomicsModifierPercentage = baseItem.ErgonomicsModifierPercentage;
             presetItem.Material = baseItem.Material;
-            presetItem.MovementSpeedPercentageModifier = baseItem.MovementSpeedPercentageModifier;
-            presetItem.TurningSpeedPercentageModifier = baseItem.TurningSpeedPercentageModifier;
+            presetItem.MovementSpeedModifierPercentage = baseItem.MovementSpeedModifierPercentage;
+            presetItem.TurningSpeedModifierPercentage = baseItem.TurningSpeedModifierPercentage;
 
             return presetItem;
         }
@@ -444,10 +444,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
                 backpack.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
-                backpack.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
-                backpack.ErgonomicsPercentageModifier = propertiesJson.GetProperty("ergoPenalty").GetDouble();
-                backpack.MovementSpeedPercentageModifier = propertiesJson.GetProperty("speedPenalty").GetDouble();
-                backpack.TurningSpeedPercentageModifier = propertiesJson.GetProperty("turnPenalty").GetDouble();
+                backpack.ErgonomicsModifierPercentage = propertiesJson.GetProperty("ergoPenalty").GetDouble();
+                backpack.ErgonomicsModifierPercentage = propertiesJson.GetProperty("ergoPenalty").GetDouble();
+                backpack.MovementSpeedModifierPercentage = propertiesJson.GetProperty("speedPenalty").GetDouble();
+                backpack.TurningSpeedModifierPercentage = propertiesJson.GetProperty("turnPenalty").GetDouble();
             }
 
             return backpack;
@@ -617,9 +617,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             presetItem.AcceptedAmmunitionIds = baseItem.AcceptedAmmunitionIds;
             presetItem.Capacity = baseItem.Capacity;
-            presetItem.CheckSpeedPercentageModifier = baseItem.CheckSpeedPercentageModifier;
+            presetItem.CheckSpeedModifierPercentage = baseItem.CheckSpeedModifierPercentage;
             presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
-            presetItem.LoadSpeedPercentageModifier = baseItem.LoadSpeedPercentageModifier;
+            presetItem.LoadSpeedModifierPercentage = baseItem.LoadSpeedModifierPercentage;
             presetItem.MalfunctionPercentage = baseItem.MalfunctionPercentage;
 
             return presetItem;
@@ -729,9 +729,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 magazine.AcceptedAmmunitionIds = propertiesJson.GetProperty("allowedAmmo")!.EnumerateArray().Select(allowedAmmoJson => allowedAmmoJson.GetProperty("id").GetString()!).ToArray();
                 magazine.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
-                magazine.CheckSpeedPercentageModifier = propertiesJson.GetProperty("ammoCheckModifier").GetDouble();
+                magazine.CheckSpeedModifierPercentage = propertiesJson.GetProperty("ammoCheckModifier").GetDouble();
                 magazine.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
-                magazine.LoadSpeedPercentageModifier = propertiesJson.GetProperty("loadModifier").GetDouble();
+                magazine.LoadSpeedModifierPercentage = propertiesJson.GetProperty("loadModifier").GetDouble();
                 magazine.MalfunctionPercentage = propertiesJson.GetProperty("malfunctionChance").GetDouble();
                 magazine.ModSlots = DeserializeModSlots(propertiesJson);
             }
@@ -955,12 +955,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 if (propertiesJson.TryGetProperty("accuracyModifier", out JsonElement accuracyModifierJson))
                 {
-                    rangedWeaponMod.AccuracyPercentageModifier = accuracyModifierJson.GetDouble();
+                    rangedWeaponMod.AccuracyModifierPercentage = accuracyModifierJson.GetDouble();
                 }
 
                 rangedWeaponMod.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
                 rangedWeaponMod.ModSlots = DeserializeModSlots(propertiesJson);
-                rangedWeaponMod.RecoilPercentageModifier = propertiesJson.GetProperty("recoilModifier").GetDouble();
+                rangedWeaponMod.RecoilModifierPercentage = propertiesJson.GetProperty("recoilModifier").GetDouble();
             }
 
             return rangedWeaponMod;
@@ -978,7 +978,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             RangedWeaponMod presetItem = DeserializeBasePresetProperties<RangedWeaponMod>(presetId, presetJson, baseItem);
 
             presetItem.ErgonomicsModifier = baseItem.ErgonomicsModifier;
-            presetItem.RecoilPercentageModifier = baseItem.RecoilPercentageModifier;
+            presetItem.RecoilModifierPercentage = baseItem.RecoilModifierPercentage;
 
             return presetItem;
         }

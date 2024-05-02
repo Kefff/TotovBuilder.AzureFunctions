@@ -188,26 +188,26 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 new Ammunition()
                 {
-                    AccuracyPercentageModifier = -0.05,
+                    AccuracyModifierPercentage = -0.05,
                     ArmorDamagePercentage = 0.76,
                     ArmorPenetrations = new double[] { 6, 6, 6, 6, 6, 5 }, // TODO : OBTAIN FROM WIKI
                     //Blinding = , // TODO : MISSING FROM API
                     Caliber = "Caliber762x39",
                     CategoryId = "ammunition",
-                    DurabilityBurnPercentageModifier = 0.7,
+                    DurabilityBurnModifierPercentage = 0.7,
                     FleshDamage = 47,
-                    FragmentationChancePercentage = 0.05,
-                    HeavyBleedingPercentageChance = 0.1,
+                    FragmentationChance = 0.05,
+                    HeavyBleedingChance = 0.1,
                     IconLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg",
                     Id = "601aa3d2b2bcb34913271e6d",
                     ImageLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg",
-                    LightBleedingPercentageChance = 0.1,
+                    LightBleedingChance = 0.1,
                     MarketLink = "https://tarkov.dev/item/762x39mm-mai-ap",
                     MaxStackableAmount = 60,
                     Name = "7.62x39mm MAI AP",
                     PenetrationPower = 58,
                     Projectiles = 1,
-                    RecoilPercentageModifier = 0.10,
+                    RecoilModifierPercentage = 0.10,
                     ShortName = "MAI AP",
                     Subsonic = false,
                     Tracer = false,
@@ -345,26 +345,26 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 new Ammunition()
                 {
-                    AccuracyPercentageModifier = -0.05,
+                    AccuracyModifierPercentage = -0.05,
                     ArmorDamagePercentage = 0.76,
                     ArmorPenetrations = new double[] { 6, 6, 6, 6, 6, 5 }, // TODO : OBTAIN FROM WIKI
                     //Blinding = , // TODO : MISSING FROM API
                     Caliber = "Caliber762x39",
                     CategoryId = "ammunition",
-                    DurabilityBurnPercentageModifier = 0.7,
+                    DurabilityBurnModifierPercentage = 0.7,
                     FleshDamage = 47,
-                    FragmentationChancePercentage = 0.05,
-                    HeavyBleedingPercentageChance = 0.1,
+                    FragmentationChance = 0.05,
+                    HeavyBleedingChance = 0.1,
                     IconLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg",
                     Id = "601aa3d2b2bcb34913271e6d",
                     ImageLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg",
-                    LightBleedingPercentageChance = 0.1,
+                    LightBleedingChance = 0.1,
                     MarketLink = "https://tarkov.dev/item/762x39mm-mai-ap",
                     MaxStackableAmount = 60,
                     Name = "7.62x39mm MAI AP",
                     PenetrationPower = 58,
                     Projectiles = 1,
-                    RecoilPercentageModifier = 0.10,
+                    RecoilModifierPercentage = 0.10,
                     ShortName = "MAI AP",
                     Subsonic = false,
                     Tracer = false,
@@ -381,7 +381,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ImageLink = "https://assets.tarkov.dev/57dc324a24597759501edc20-image.jpg",
                     MarketLink = "https://tarkov.dev/item/aks-74u-545x39-muzzle-brake-6p26-0-20",
                     Name = "AKS-74U 5.45x39 muzzle brake (6P26 0-20)",
-                    RecoilPercentageModifier = -0.08,
+                    RecoilModifierPercentage = -0.08,
                     ShortName = "6P26 0-20",
                     Weight = 0.1,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_5.45x39_muzzle_brake_(6P26_0-20)"
@@ -396,7 +396,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ImageLink = "https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg",
                     MarketLink = "https://tarkov.dev/item/preset-non-magazine-item-with-ammunition",
                     Name = "Non magazine with ammunition",
-                    RecoilPercentageModifier = -0.08,
+                    RecoilModifierPercentage = -0.08,
                     ShortName = "NMWA",
                     Weight = 0.1,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-non-magazine-item-with-ammunition"
