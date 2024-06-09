@@ -321,8 +321,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (armorSlotType == "ItemArmorSlotOpen")
                 {
+                    // For now, when an armor has armor plate slots, we consider its armor value is 0.
+                    // In reality, it should be the value of the aramid inserts but the API does not provide it.
+                    item.ArmorClass = 0;
+
                     ModSlot armorModSlot = new ModSlot()
                     {
+                        // Compatible items are not listed in the API
                         //CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),  // TODO : MISSING FROM API
                         Name = modSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
                     };
