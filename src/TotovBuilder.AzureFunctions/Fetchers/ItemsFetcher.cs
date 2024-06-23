@@ -291,7 +291,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armorMod.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
                 armorMod.ModSlots = armorMod.ModSlots.Concat(DeserializeModSlots(propertiesJson)).ToArray();
 
-                if (TryDeserializeArray(propertiesJson, "headZones", out ArrayEnumerator headArmoredAreasJson))
+                if (TryDeserializeArray(propertiesJson, "zones", out ArrayEnumerator headArmoredAreasJson))
                 {
                     armorMod.ArmoredAreas = headArmoredAreasJson.Select(z => GetArmoredAreaName(z)).Distinct().ToArray();
                 }
