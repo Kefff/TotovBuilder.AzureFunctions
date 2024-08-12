@@ -190,7 +190,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     AccuracyModifierPercentage = -0.05,
                     ArmorDamagePercentage = 0.76,
-                    ArmorPenetrations = new double[] { 6, 6, 6, 6, 6, 5 }, // TODO : OBTAIN FROM WIKI
+                    ArmorPenetrations = [6, 6, 6, 6, 6, 5], // TODO : OBTAIN FROM WIKI
                     //Blinding = , // TODO : MISSING FROM API
                     Caliber = "Caliber762x39",
                     CategoryId = "ammunition",
@@ -217,8 +217,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new Magazine()
                 {
-                    AcceptedAmmunitionIds = new string[]
-                    {
+                    AcceptedAmmunitionIds =
+                    [
                         "5c0d5e4486f77478390952fe",
                         "61962b617c6c7b169525f168",
                         "56dfef82d2720bbd668b4567",
@@ -232,7 +232,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                         "56dff421d2720b5f5a8b4567",
                         "56dff4a2d2720bbd668b456a",
                         "56dff4ecd2720b5f5a8b4568"
-                    },
+                    ],
                     Capacity = 30,
                     CategoryId = "magazine",
                     ErgonomicsModifier = -3,
@@ -248,8 +248,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new Magazine()
                 {
-                    AcceptedAmmunitionIds = new string[]
-                    {
+                    AcceptedAmmunitionIds =
+                    [
                         "5c0d5e4486f77478390952fe",
                         "61962b617c6c7b169525f168",
                         "56dfef82d2720bbd668b4567",
@@ -263,7 +263,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                         "56dff421d2720b5f5a8b4567",
                         "56dff4a2d2720bbd668b456a",
                         "56dff4ecd2720b5f5a8b4568"
-                    },
+                    ],
                     BaseItemId = "564ca99c4bdc2d16268b4589",
                     Capacity = 30,
                     CategoryId = "magazine",
@@ -347,7 +347,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     AccuracyModifierPercentage = -0.05,
                     ArmorDamagePercentage = 0.76,
-                    ArmorPenetrations = new double[] { 6, 6, 6, 6, 6, 5 }, // TODO : OBTAIN FROM WIKI
+                    ArmorPenetrations = [6, 6, 6, 6, 6, 5], // TODO : OBTAIN FROM WIKI
                     //Blinding = , // TODO : MISSING FROM API
                     Caliber = "Caliber762x39",
                     CategoryId = "ammunition",
@@ -484,8 +484,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new InventoryItem()
                 {
                     ItemId = "584147732459775a2b6d9f12",
-                    ModSlots = new InventoryItemModSlot[]
-                    {
+                    ModSlots =
+                    [
                         new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
@@ -494,7 +494,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                             },
                             ModSlotName = "mod_pistol_grip"
                         }
-                    }
+                    ]
                 }
             };
 
@@ -573,25 +573,25 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new InventoryItem()
                 {
                     ItemId = "5a8ae43686f774377b73cfb3",
-                    ModSlots = new InventoryItemModSlot[]
-                    {
+                    ModSlots =
+                    [
                         new InventoryItemModSlot()
                         {
                             Item = new InventoryItem()
                             {
-                                Content = new InventoryItem[]
-                                {
+                                Content =
+                                [
                                     new InventoryItem()
                                     {
                                         ItemId = "5efb0da7a29a85116f6ea05f",
                                         Quantity = 30
                                     }
-                                },
+                                ],
                                 ItemId = "5894a05586f774094708ef75",
                             },
                             ModSlotName = "mod_magazine"
                         }
-                    }
+                    ]
                 }
             };
 

@@ -152,8 +152,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.IsSuccess.Should().BeTrue();
 
             IEnumerable<Item> orderedResult = result.Value.OrderBy(i => $"{i.CategoryId} - {i.Name}");
-            Item[] expected = new Item[]
-            {
+            Item[] expected =
+            [
                 new Item()
                 {
                     CategoryId = "currency",
@@ -167,7 +167,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Weight = 0,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/Euros"
                 }
-            };
+            ];
 
             result.Value.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
         }
@@ -313,14 +313,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                         new ItemCategory()
                         {
                             Id = "NotImplementedItemCategory",
-                            Types = new ItemType[]
-                            {
+                            Types =
+                            [
                                 new ItemType()
                                 {
                                     Id = "NotImplementedItemType",
                                     Name = "Not implemented item type"
                                 }
-                            }
+                            ]
                         }
             })));
 

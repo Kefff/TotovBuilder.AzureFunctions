@@ -51,10 +51,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             try
             {
-                TarkovValues tarkovValues = JsonSerializer.Deserialize<TarkovValues>(responseContent, new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true
-                })!;
+                TarkovValues tarkovValues = JsonSerializer.Deserialize<TarkovValues>(responseContent, SerializationOptions)!;
 
                 return Task.FromResult(Result.Ok(tarkovValues));
             }

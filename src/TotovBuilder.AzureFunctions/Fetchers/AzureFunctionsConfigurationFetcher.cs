@@ -53,10 +53,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                azureFunctionsConfiguration = JsonSerializer.Deserialize<AzureFunctionsConfiguration>(responseContent, new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true
-                })!;
+                azureFunctionsConfiguration = JsonSerializer.Deserialize<AzureFunctionsConfiguration>(responseContent, SerializationOptions)!;
 
                 return Task.FromResult(Result.Ok(azureFunctionsConfiguration));
             }

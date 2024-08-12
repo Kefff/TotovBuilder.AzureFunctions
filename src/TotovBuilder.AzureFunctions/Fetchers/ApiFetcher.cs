@@ -14,9 +14,17 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a base class for API fetchers.
     /// </summary>
-    public abstract class ApiFetcher<T> : IApiFetcher<T>
+    public abstract partial class ApiFetcher<T> : IApiFetcher<T>
         where T : class
     {
+        /// <summary>
+        /// Serialization options.
+        /// </summary>
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
         /// <summary>
         /// API query.
         /// </summary>
@@ -289,7 +297,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                string content = JsonSerializer.Serialize(new { Query = ApiQuery }, SerializerOptions);
                 request.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
                 IHttpClientWrapper client = HttpClientWrapperFactory.Create();
@@ -346,7 +354,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     return Result.Fail(error);
                 }
 
-                Match usefulDataKeyMatch = Regex.Match(ApiQuery, "^{ ?([a-zA-Z]+)");
+                Match usefulDataKeyMatch = GetDataRegex().Match(ApiQuery);
 
                 if (!data.TryGetProperty(usefulDataKeyMatch.Groups[1].Value, out JsonElement isolatedData))
                 {
@@ -376,5 +384,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(error);
             }
         }
+
+        [GeneratedRegex("^{ ?([a-zA-Z]+)")]
+        private static partial Regex GetDataRegex();
     }
 }

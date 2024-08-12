@@ -128,8 +128,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Task.FromResult(allTasksResult.ToResult<IEnumerable<Item>>());
             }
 
-            List<Task> deserializationTasks = new List<Task>();
-            ConcurrentBag<Item> items = new ConcurrentBag<Item>();
+            List<Task> deserializationTasks = [];
+            ConcurrentBag<Item> items = [];
             JsonElement itemsJson = JsonDocument.Parse(responseContent).RootElement;
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
@@ -137,7 +137,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Item, itemJson, items)));
             }
 
-            Task.WaitAll(deserializationTasks.ToArray());
+            Task.WaitAll([.. deserializationTasks]);
             deserializationTasks.Clear();
 
             foreach (JsonElement itemJson in itemsJson.EnumerateArray())
@@ -145,7 +145,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 deserializationTasks.Add(Task.Run(() => DeserializeData(DataDeserializationType.Preset, itemJson, items)));
             }
 
-            Task.WaitAll(deserializationTasks.ToArray());
+            Task.WaitAll([.. deserializationTasks]);
 
             // MISSING FROM API
             // Since the API does not indicate on armor mod slots the compatible items,
@@ -164,7 +164,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private Ammunition DeserializeAmmunition(JsonElement itemJson, string itemCategoryId)
         {
             Ammunition ammunition = DeserializeBaseItemProperties<Ammunition>(itemJson, itemCategoryId);
-            ammunition.ArmorPenetrations = ArmorPenetrations.FirstOrDefault(ac => ac.AmmunitionId == ammunition.Id)?.Values ?? Array.Empty<double>(); // TODO : OBTAIN FROM WIKI
+            ammunition.ArmorPenetrations = ArmorPenetrations.FirstOrDefault(ac => ac.AmmunitionId == ammunition.Id)?.Values ?? []; // TODO : OBTAIN FROM WIKI
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
@@ -289,7 +289,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 armorMod.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
                 armorMod.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
-                armorMod.ModSlots = armorMod.ModSlots.Concat(DeserializeModSlots(propertiesJson)).ToArray();
+                armorMod.ModSlots = [.. armorMod.ModSlots, .. DeserializeModSlots(propertiesJson)];
 
                 if (TryDeserializeArray(propertiesJson, "zones", out ArrayEnumerator headArmoredAreasJson))
                 {
@@ -312,8 +312,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return;
             }
 
-            List<string> armoredAreas = new List<string>();
-            List<ModSlot> armorModSlots = new List<ModSlot>();
+            List<string> armoredAreas = [];
+            List<ModSlot> armorModSlots = [];
 
             foreach (JsonElement modSlotJson in armorModSlotsJson)
             {
@@ -342,7 +342,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             item.ArmoredAreas = armoredAreas.Distinct().ToArray();
-            item.ModSlots = item.ModSlots.Concat(armorModSlots).ToArray();
+            item.ModSlots = [.. item.ModSlots, .. armorModSlots];
         }
 
         /// <summary>
@@ -385,14 +385,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeArray(itemJson, "conflictingItems", out ArrayEnumerator conflictingItemsJson))
             {
-                List<string> conflictingItemIds = new List<string>();
+                List<string> conflictingItemIds = [];
 
                 foreach (JsonElement conflictingItemJson in conflictingItemsJson)
                 {
                     conflictingItemIds.Add(conflictingItemJson.GetProperty("id").GetString()!);
                 }
 
-                item.ConflictingItemIds = conflictingItemIds.ToArray();
+                item.ConflictingItemIds = [.. conflictingItemIds];
             }
 
             ItemMissingProperties? itemForMissingProperties = ItemMissingProperties.FirstOrDefault(ifmp => ifmp.Id == item.Id);
@@ -580,7 +580,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     headwear.Deafening = deafening;
                 }
 
-                headwear.ModSlots = headwear.ModSlots.Concat(DeserializeModSlots(propertiesJson)).ToArray();
+                headwear.ModSlots = [.. headwear.ModSlots, .. DeserializeModSlots(propertiesJson)];
 
                 if (TryDeserializeDouble(propertiesJson, "ricochetX", out double ricochetChance))
                 {
@@ -655,7 +655,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 tarkovItemCategoryIds.Add(tarkovItemCategoryJson.GetProperty("id").GetString()!);
             }
-            
+
             string itemId = itemJson.GetProperty("id").GetString()!;
             ItemCategory itemCategory = GetItemItemCategory(itemId, tarkovItemCategoryIds);
 
@@ -806,7 +806,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized array of <see cref="ModSlot"/>.</returns>
         private static ModSlot[] DeserializeModSlots(JsonElement propertiesJson)
         {
-            List<ModSlot> modSlots = new List<ModSlot>();
+            List<ModSlot> modSlots = [];
 
             if (propertiesJson.TryGetProperty("slots", out JsonElement modSlotsJson))
             {
@@ -821,7 +821,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            return modSlots.ToArray();
+            return [.. modSlots];
         }
 
         /// <summary>
@@ -906,9 +906,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
                 rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
 
-                List<ModSlot> modSlots = new List<ModSlot>();
+                List<ModSlot> modSlots = [];
                 modSlots.AddRange(DeserializeModSlots(propertiesJson));
-                rangedWeapon.ModSlots = modSlots.ToArray();
+                rangedWeapon.ModSlots = [.. modSlots];
 
                 if (TryDeserializeObject(propertiesJson, "defaultPreset", out JsonElement defaultPresetJson))
                 {
@@ -1107,7 +1107,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="items">List of all the items.</param>
         private static void SetArmorModsCompatibleItems(ConcurrentBag<Item> items)
         {
-            IEnumerable<IArmor> armors = items.Where(i => i is IArmor a && a.ModSlots.Any()).Cast<IArmor>();
+            IEnumerable<IArmor> armors = items.Where(i => i is IArmor a && a.ModSlots.Length != 0).Cast<IArmor>();
             string[] backPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("BCKPLATE")).Select(i => i.Id).ToArray();
             string[] frontPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("FRPLATE")).Select(i => i.Id).ToArray();
             string[] leftPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("LPLATE")).Select(i => i.Id).ToArray();

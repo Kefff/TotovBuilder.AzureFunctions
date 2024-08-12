@@ -42,7 +42,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
-            
+
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
@@ -191,7 +191,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
-            
+
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
@@ -238,7 +238,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
-            
+
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())

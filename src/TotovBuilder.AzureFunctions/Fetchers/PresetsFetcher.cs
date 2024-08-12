@@ -63,8 +63,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override async Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
         {
-            List<Task> deserializationTasks = new List<Task>();
-            ConcurrentBag<InventoryItem> presets = new ConcurrentBag<InventoryItem>();
+            List<Task> deserializationTasks = [];
+            ConcurrentBag<InventoryItem> presets = [];
             Result<IEnumerable<Item>> itemsResult = await ItemsFetcher.Fetch();
 
             if (itemsResult.IsFailed)
@@ -110,10 +110,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     ItemId = containedItem.Item.Id,
                     Quantity = containedItem.Quantity
                 };
-                inventoryItem.Content = new InventoryItem[]
-                {
-                    containedInventoryItem
-                };
+                inventoryItem.Content = [containedInventoryItem];
 
                 containedItems.Dequeue();
                 AddContent(containedInventoryItem, containedItem.Item, containedItems); // Continuing adding content while contained items are not moddable
@@ -245,7 +242,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            inventoryItem.ModSlots = inventoryItemModSlots.ToArray();
+            inventoryItem.ModSlots = [.. inventoryItemModSlots];
         }
 
         /// <summary>

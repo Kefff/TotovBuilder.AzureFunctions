@@ -6,7 +6,7 @@ namespace TotovBuilder.AzureFunctions.Utils
     /// <summary>
     /// Represents extension methods for the <see cref="string"/> type.
     /// </summary>
-    public static class StringExtensions
+    public static partial class StringExtensions
     {
         /// <summary>
         /// Changes the case of a string to match pascal case.
@@ -16,9 +16,7 @@ namespace TotovBuilder.AzureFunctions.Utils
         public static string ToPascalCase(this string stringToFormat)
         {
             stringToFormat = stringToFormat.Trim();
-            string camelCaseString = Regex.Replace(
-                stringToFormat, "((?'M1L1'^[A-Z])(?'M1R'[A-Z]+$))|(?'M2'[ ][a-zA-Z])|(?'M3'^[a-z])",
-                m =>
+            string camelCaseString = ToPascalCaseRegex().Replace(stringToFormat, m =>
                 {
                     StringBuilder result = new StringBuilder();
 
@@ -52,5 +50,8 @@ namespace TotovBuilder.AzureFunctions.Utils
 
             return camelCaseString.Replace(" ", string.Empty);
         }
+
+        [GeneratedRegex("((?'M1L1'^[A-Z])(?'M1R'[A-Z]+$))|(?'M2'[ ][a-zA-Z])|(?'M3'^[a-z])")]
+        private static partial Regex ToPascalCaseRegex();
     }
 }

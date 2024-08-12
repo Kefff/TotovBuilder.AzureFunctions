@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using System.Text.Json;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
@@ -13,6 +14,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public abstract class RawDataFetcher<T> : IApiFetcher<T>
         where T : class
     {
+        /// <summary>
+        /// Serialization options.
+        /// </summary>
+        protected static readonly JsonSerializerOptions SerializationOptions = new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         /// <summary>
         /// Configuration wrapper;
         /// </summary>

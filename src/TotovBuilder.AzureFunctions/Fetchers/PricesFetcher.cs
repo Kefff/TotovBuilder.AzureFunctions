@@ -79,7 +79,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             TarkovValues = tarkovValuesResult.Value;
 
-            List<Price> pricesAndBarters = new List<Price>();
+            List<Price> pricesAndBarters = [];
             Result<IEnumerable<Price>>? bartersResult = null;
 
             Task.WaitAll(
@@ -101,7 +101,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Prices.</returns>
         private IEnumerable<Price> GetPrices(string pricesResponseContent)
         {
-            List<Price> prices = new List<Price>();
+            List<Price> prices = [];
             JsonElement pricesJson = JsonDocument.Parse(pricesResponseContent).RootElement;
 
             foreach (JsonElement itemJson in pricesJson.EnumerateArray())

@@ -49,7 +49,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            List<Price> barters = new List<Price>();
+            List<Price> barters = [];
 
             JsonElement bartersJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -57,7 +57,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 try
                 {
-                    List<BarterItem> barterItems = new List<BarterItem>();
+                    List<BarterItem> barterItems = [];
                     string merchant = barterJson.GetProperty("trader").GetProperty("normalizedName").GetString()!;
                     int merchantLevel = barterJson.GetProperty("level").GetInt32();
 
@@ -87,7 +87,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                         int quantity = itemJson.GetProperty("quantity").GetInt32();
                         Price barter = new Price()
                         {
-                            BarterItems = barterItems.ToArray(),
+                            BarterItems = [.. barterItems],
                             CurrencyName = "barter",
                             ItemId = itemJson.GetProperty("item").GetProperty("id").GetString()!,
                             Merchant = merchant,

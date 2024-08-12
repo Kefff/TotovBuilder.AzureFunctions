@@ -53,10 +53,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                missingItemProperties = JsonSerializer.Deserialize<IEnumerable<ItemMissingProperties>>(responseContent, new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true
-                })!;
+                missingItemProperties = JsonSerializer.Deserialize<IEnumerable<ItemMissingProperties>>(responseContent, SerializationOptions)!;
 
                 return Task.FromResult(Result.Ok(missingItemProperties));
             }

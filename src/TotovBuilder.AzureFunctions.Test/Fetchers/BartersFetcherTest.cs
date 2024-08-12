@@ -139,14 +139,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     new Price()
                     {
-                        BarterItems = new BarterItem[]
-                        {
+                        BarterItems =
+                        [
                             new BarterItem()
                             {
                                 ItemId = "5448be9a4bdc2dfd2f8b456a",
                                 Quantity = 1
                             }
-                        },
+                        ],
                         CurrencyName = "barter",
                         ItemId = "545cdb794bdc2d3a198b456a",
                         Merchant = "mechanic",
@@ -230,8 +230,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             {
                 new Price()
                 {
-                    BarterItems = new BarterItem[]
-                    {
+                    BarterItems =
+                    [
                         new BarterItem()
                         {
                             ItemId = "5e32f56fcb6d5863cc5e5ee4",
@@ -242,7 +242,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                             ItemId = "5b432be65acfc433000ed01f",
                             Quantity = 1
                         }
-                    },
+                    ],
                     CurrencyName = "barter",
                     ItemId = "545cdb794bdc2d3a198b456a",
                     Merchant = "prapor",

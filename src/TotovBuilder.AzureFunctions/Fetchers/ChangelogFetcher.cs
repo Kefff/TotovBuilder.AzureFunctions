@@ -51,10 +51,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             try
             {
-                IEnumerable<ChangelogEntry> changelog = JsonSerializer.Deserialize<IEnumerable<ChangelogEntry>>(responseContent, new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true
-                })!;
+                IEnumerable<ChangelogEntry> changelog = JsonSerializer.Deserialize<IEnumerable<ChangelogEntry>>(responseContent, SerializationOptions)!;
 
                 return Task.FromResult(Result.Ok(changelog.OrderByDescending(c => c.Date).Take(5).AsEnumerable()));
             }
