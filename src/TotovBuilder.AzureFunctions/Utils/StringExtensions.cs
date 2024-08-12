@@ -18,7 +18,7 @@ namespace TotovBuilder.AzureFunctions.Utils
             stringToFormat = stringToFormat.Trim();
             string camelCaseString = ToPascalCaseRegex().Replace(stringToFormat, m =>
                 {
-                    StringBuilder result = new StringBuilder();
+                    StringBuilder result = new();
 
                     foreach (Group? group in m.Groups.Cast<Group?>())
                     {

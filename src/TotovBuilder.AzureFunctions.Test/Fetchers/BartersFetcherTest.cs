@@ -24,7 +24,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnBarters()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiBartersQuery = "{ barters { level } }",
@@ -32,15 +32,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.BartersJson) }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            BartersFetcher fetcher = new BartersFetcher(
+            BartersFetcher fetcher = new(
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -108,7 +108,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
   }
 }";
 
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiBartersQuery = "{ barters { level } }",
@@ -116,15 +116,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(bartersJson) }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            BartersFetcher fetcher = new BartersFetcher(
+            BartersFetcher fetcher = new(
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -137,7 +137,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.Value.Should().BeEquivalentTo(
                 new Price[]
                 {
-                    new Price()
+                    new()
                     {
                         BarterItems =
                         [
@@ -159,7 +159,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldReturnOnlyValidData()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiBartersQuery = "{ barters { level } }",
@@ -167,7 +167,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
@@ -213,10 +213,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
   }
 }") }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            BartersFetcher fetcher = new BartersFetcher(
+            BartersFetcher fetcher = new(
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -228,7 +228,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeEquivalentTo(new Price[]
             {
-                new Price()
+                new()
                 {
                     BarterItems =
                     [

@@ -45,7 +45,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Tarkov values.
         /// </summary>
-        private TarkovValues TarkovValues = new TarkovValues();
+        private TarkovValues TarkovValues = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QuestsFetcher"/> class.
@@ -117,7 +117,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             continue;
                         }
 
-                        Price price = new Price()
+                        Price price = new()
                         {
                             CurrencyName = priceJson.GetProperty("currency").GetString()!,
                             ItemId = itemJson.GetProperty("id").GetString()!,

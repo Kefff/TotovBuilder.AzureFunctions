@@ -24,16 +24,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturn5LastChangelogs()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 RawChangelogBlobName = "changelog.json"
             });
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
 
-            ChangelogFetcher fetcher = new ChangelogFetcher(
+            ChangelogFetcher fetcher = new(
                 new Mock<ILogger<ChangelogFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
@@ -45,7 +45,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeEquivalentTo(new ChangelogEntry[]
             {
-                new ChangelogEntry()
+                new()
                 {
                     Changes =
                     [
@@ -63,7 +63,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.5.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
                     Changes =
                     [
@@ -81,7 +81,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.4.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
                     Changes =
                     [
@@ -99,7 +99,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.3.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
                     Changes =
                     [
@@ -117,7 +117,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.2.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
                     Changes =
                     [
@@ -142,13 +142,13 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 RawChangelogBlobName = "changelog.json"
             });
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
@@ -170,7 +170,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 ]
 ")));
 
-            ChangelogFetcher fetcher = new ChangelogFetcher(
+            ChangelogFetcher fetcher = new(
                 new Mock<ILogger<ChangelogFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);

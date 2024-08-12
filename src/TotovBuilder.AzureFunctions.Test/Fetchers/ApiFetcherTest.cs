@@ -29,14 +29,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldFetchedData()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -45,10 +45,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -66,14 +66,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithPreviousFetchingTask_ShouldWaitForItToEndAndReturnFetchedData()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -82,10 +82,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -104,14 +104,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_AlreadyFetchedData_ShouldReturnFetchedData()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -120,10 +120,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) };
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -142,12 +142,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidConfiguration_ShouldFail()
         {
             // Arrange
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
 
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration());
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 new Mock<IHttpClientWrapperFactory>().Object,
                 configurationWrapperMock.Object);
@@ -165,14 +165,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithTimeout_ShouldFail()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 1
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(async () =>
@@ -181,10 +181,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     return new HttpResponseMessage(HttpStatusCode.OK);
                 });
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -202,22 +202,22 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithError_ShouldFail()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Throws<Exception>();
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -241,22 +241,22 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidDataWithoutCache_ShouldFail(string apiResponseData)
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 ApiUrl = "https://localhost/api",
                 ExecutionTimeout = 5
             });
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new Mock<IHttpClientWrapper>();
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
                 .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
                 .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(apiResponseData) }));
 
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new Mock<IHttpClientWrapperFactory>();
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
             httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
 
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object);
@@ -276,7 +276,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public void TryDeserializeArray_ShouldTryToDeserializeArray(string json, bool expected)
         {
             // Arrange
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 new Mock<IHttpClientWrapperFactory>().Object,
                 new Mock<IConfigurationWrapper>().Object);
@@ -303,7 +303,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public void TryDeserializeBoolean_ShouldTryToDeserializeBoolean(string json, bool expected)
         {
             // Arrange
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 new Mock<IHttpClientWrapperFactory>().Object,
                 new Mock<IConfigurationWrapper>().Object);
@@ -330,7 +330,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public void TryDeserializeDouble_ShouldTryToDeserializeDouble(string json, bool expected)
         {
             // Arrange
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 new Mock<IHttpClientWrapperFactory>().Object,
                 new Mock<IConfigurationWrapper>().Object);
@@ -357,7 +357,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public void TryDeserializeObject_ShouldTryToDeserializeObject(string json, bool expected)
         {
             // Arrange
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 new Mock<IHttpClientWrapperFactory>().Object,
                 new Mock<IConfigurationWrapper>().Object);
@@ -384,7 +384,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public void TryDeserializeString_ShouldTryToDeserializeString(string json, bool expected)
         {
             // Arrange
-            ApiFetcherImplementation apiFetcher = new ApiFetcherImplementation(
+            ApiFetcherImplementation apiFetcher = new(
                 new Mock<ILogger<ApiFetcherImplementation>>().Object,
                 new Mock<IHttpClientWrapperFactory>().Object,
                 new Mock<IConfigurationWrapper>().Object);

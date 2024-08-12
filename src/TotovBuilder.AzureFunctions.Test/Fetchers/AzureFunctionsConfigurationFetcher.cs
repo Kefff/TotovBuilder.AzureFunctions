@@ -22,16 +22,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnAzureFunctionsConfiguration()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
 
-            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(
+            AzureFunctionsConfigurationFetcher fetcher = new(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
@@ -48,16 +48,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
             });
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
 
-            AzureFunctionsConfigurationFetcher fetcher = new AzureFunctionsConfigurationFetcher(
+            AzureFunctionsConfigurationFetcher fetcher = new(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);

@@ -85,7 +85,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     foreach (JsonElement itemJson in barterJson.GetProperty("rewardItems").EnumerateArray())
                     {
                         int quantity = itemJson.GetProperty("quantity").GetInt32();
-                        Price barter = new Price()
+                        Price barter = new()
                         {
                             BarterItems = [.. barterItems],
                             CurrencyName = "barter",

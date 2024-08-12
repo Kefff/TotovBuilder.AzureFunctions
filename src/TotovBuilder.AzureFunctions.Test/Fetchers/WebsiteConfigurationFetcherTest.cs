@@ -22,16 +22,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnWebsiteConfiguration()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 RawWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfigurationJson)));
 
-            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(
+            WebsiteConfigurationFetcher fetcher = new(
                 new Mock<ILogger<WebsiteConfigurationFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
@@ -48,20 +48,20 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
             {
                 RawWebsiteConfigurationBlobName = "website-configuration.json"
             });
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
   invalid,
   ""bugReportUrl"": ""https://discord.gg/bugreport""
 }
 ")));
 
-            WebsiteConfigurationFetcher fetcher = new WebsiteConfigurationFetcher(
+            WebsiteConfigurationFetcher fetcher = new(
                 new Mock<ILogger<WebsiteConfigurationFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);

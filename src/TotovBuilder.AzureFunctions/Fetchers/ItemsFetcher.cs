@@ -73,7 +73,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Tarkov values.
         /// </summary>
-        private TarkovValues TarkovValues = new TarkovValues();
+        private TarkovValues TarkovValues = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemsFetcher"/> class.
@@ -325,7 +325,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     // In reality, it should be the value of the aramid inserts but the API does not provide it.
                     item.ArmorClass = 0;
 
-                    ModSlot armorModSlot = new ModSlot()
+                    ModSlot armorModSlot = new()
                     {
                         // Compatible items are not listed in the API
                         //CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),  // TODO : MISSING FROM API
@@ -370,7 +370,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private T DeserializeBaseItemProperties<T>(JsonElement itemJson, string itemCategoryId)
             where T : Item, new()
         {
-            T item = new T()
+            T item = new()
             {
                 CategoryId = itemCategoryId,
                 IconLink = itemJson.GetProperty("iconLink").GetString()!,
@@ -416,7 +416,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private static T DeserializeBasePresetProperties<T>(string presetId, JsonElement presetJson, IModdable baseItem)
             where T : IModdable, new()
         {
-            T preset = new T()
+            T preset = new()
             {
                 BaseItemId = baseItem.Id,
                 CategoryId = baseItem.CategoryId,
@@ -812,7 +812,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 foreach (JsonElement modSlotJson in modSlotsJson.EnumerateArray())
                 {
-                    ModSlot modSlot = new ModSlot()
+                    ModSlot modSlot = new()
                     {
                         CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),
                         Name = modSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()

@@ -20,7 +20,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Serialization options.
         /// </summary>
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
+        private static readonly JsonSerializerOptions SerializerOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
@@ -294,7 +294,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
+                using HttpRequestMessage request = new(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string content = JsonSerializer.Serialize(new { Query = ApiQuery }, SerializerOptions);

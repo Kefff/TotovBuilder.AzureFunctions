@@ -29,7 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_ShouldGenerateWebsiteData()
         {
             // Arrange
-            ScheduleTrigger scheduleTrigger = new ScheduleTrigger()
+            ScheduleTrigger scheduleTrigger = new()
             {
                 IsPastDue = false,
                 ScheduleStatus = new ScheduleStatus()
@@ -40,10 +40,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 }
             };
 
-            Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
+            Mock<IConfigurationLoader> configurationLoaderMock = new();
             configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
 
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
                 .Returns(new AzureFunctionsConfiguration()
@@ -59,49 +59,49 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 })
                 .Verifiable();
 
-            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
+            Mock<IChangelogFetcher> changelogFetcherMock = new();
             changelogFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<ChangelogEntry>>(TestData.Changelog)))
                 .Verifiable();
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)))
                 .Verifiable();
 
-            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            Mock<IItemsFetcher> itemsFetcherMock = new();
             itemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)))
                 .Verifiable();
 
-            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<InventoryItem>>(TestData.Presets)))
                 .Verifiable();
 
-            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            Mock<IPricesFetcher> pricesFetcherMock = new();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok(TestData.Prices.Concat(TestData.Barters))))
                 .Verifiable();
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)))
                 .Verifiable();
 
-            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new Mock<IWebsiteConfigurationFetcher>();
+            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfiguration)))
                 .Verifiable();
 
-            JsonSerializerOptions serializationOptions = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            JsonSerializerOptions serializationOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog as IEnumerable<object>, serializationOptions);
             string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories.Select(ic => ic.Id) as IEnumerable<object>, serializationOptions);
             string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
@@ -110,7 +110,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues as object, serializationOptions);
             string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration as object, serializationOptions);
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock
                 .Setup(m => m.UpdateBlob("$web", "data/changelog.json", expectedChangelog, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Ok()))
@@ -140,7 +140,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
 
-            GenerateWebsiteData function = new GenerateWebsiteData(
+            GenerateWebsiteData function = new(
                 new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,
@@ -173,7 +173,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_WithFailedConfigurationLoading_ShouldDoNothing()
         {
             // Arrange
-            ScheduleTrigger scheduleTrigger = new ScheduleTrigger()
+            ScheduleTrigger scheduleTrigger = new()
             {
                 IsPastDue = false,
                 ScheduleStatus = new ScheduleStatus()
@@ -184,20 +184,20 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 }
             };
 
-            Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
+            Mock<IConfigurationLoader> configurationLoaderMock = new();
             configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Fail("Error"))).Verifiable();
 
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
-            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
-            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
-            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
-            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new Mock<IWebsiteConfigurationFetcher>();
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            Mock<IChangelogFetcher> changelogFetcherMock = new();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
+            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<IPresetsFetcher> presetsFetcherMock = new();
+            Mock<IPricesFetcher> pricesFetcherMock = new();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
 
-            GenerateWebsiteData function = new GenerateWebsiteData(
+            GenerateWebsiteData function = new(
                 new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,
@@ -231,7 +231,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_WithFailedFetch_ShouldDoNothing()
         {
             // Arrange
-            ScheduleTrigger scheduleTrigger = new ScheduleTrigger()
+            ScheduleTrigger scheduleTrigger = new()
             {
                 IsPastDue = false,
                 ScheduleStatus = new ScheduleStatus()
@@ -242,10 +242,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 }
             };
 
-            Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
+            Mock<IConfigurationLoader> configurationLoaderMock = new();
             configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
 
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
                 .Returns(new AzureFunctionsConfiguration()
@@ -261,51 +261,51 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 })
                 .Verifiable();
 
-            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
+            Mock<IChangelogFetcher> changelogFetcherMock = new();
             changelogFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail<IEnumerable<ChangelogEntry>>("Error")))
                 .Verifiable();
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail<IEnumerable<ItemCategory>>("Error")))
                 .Verifiable();
 
-            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            Mock<IItemsFetcher> itemsFetcherMock = new();
             itemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail<IEnumerable<Item>>("Error")))
                 .Verifiable();
 
-            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail<IEnumerable<InventoryItem>>("Error")))
                 .Verifiable();
 
-            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            Mock<IPricesFetcher> pricesFetcherMock = new();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail<IEnumerable<Price>>("Error")))
                 .Verifiable();
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail<TarkovValues>("Error")))
                 .Verifiable();
 
-            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new Mock<IWebsiteConfigurationFetcher>();
+            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail<WebsiteConfiguration>("Error")))
                 .Verifiable();
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
 
-            GenerateWebsiteData function = new GenerateWebsiteData(
+            GenerateWebsiteData function = new(
                 new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,
@@ -338,7 +338,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
         public async Task Run_WithFailedUpdate_ShouldDoNothing()
         {
             // Arrange
-            ScheduleTrigger scheduleTrigger = new ScheduleTrigger()
+            ScheduleTrigger scheduleTrigger = new()
             {
                 IsPastDue = false,
                 ScheduleStatus = new ScheduleStatus()
@@ -349,10 +349,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 }
             };
 
-            Mock<IConfigurationLoader> configurationLoaderMock = new Mock<IConfigurationLoader>();
+            Mock<IConfigurationLoader> configurationLoaderMock = new();
             configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
 
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
                 .Returns(new AzureFunctionsConfiguration()
@@ -368,49 +368,49 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 })
                 .Verifiable();
 
-            Mock<IChangelogFetcher> changelogFetcherMock = new Mock<IChangelogFetcher>();
+            Mock<IChangelogFetcher> changelogFetcherMock = new();
             changelogFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<ChangelogEntry>>(TestData.Changelog)))
                 .Verifiable();
 
-            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new Mock<IItemCategoriesFetcher>();
+            Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)))
                 .Verifiable();
 
-            Mock<IItemsFetcher> itemsFetcherMock = new Mock<IItemsFetcher>();
+            Mock<IItemsFetcher> itemsFetcherMock = new();
             itemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)))
                 .Verifiable();
 
-            Mock<IPresetsFetcher> presetsFetcherMock = new Mock<IPresetsFetcher>();
+            Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok<IEnumerable<InventoryItem>>(TestData.Presets)))
                 .Verifiable();
 
-            Mock<IPricesFetcher> pricesFetcherMock = new Mock<IPricesFetcher>();
+            Mock<IPricesFetcher> pricesFetcherMock = new();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok(TestData.Prices.Concat(TestData.Barters))))
                 .Verifiable();
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new Mock<ITarkovValuesFetcher>();
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)))
                 .Verifiable();
 
-            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new Mock<IWebsiteConfigurationFetcher>();
+            Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfiguration)))
                 .Verifiable();
 
-            JsonSerializerOptions serializationOptions = new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            JsonSerializerOptions serializationOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             string expectedChangelog = JsonSerializer.Serialize(TestData.Changelog as IEnumerable<object>, serializationOptions);
             string expectedItemCategories = JsonSerializer.Serialize(TestData.ItemCategories.Select(ic => ic.Id) as IEnumerable<object>, serializationOptions);
             string expectedItems = JsonSerializer.Serialize(TestData.Items as IEnumerable<object>, serializationOptions);
@@ -419,7 +419,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             string expectedTarkovValues = JsonSerializer.Serialize(TestData.TarkovValues as object, serializationOptions);
             string expectedWebsiteConfiguration = JsonSerializer.Serialize(TestData.WebsiteConfiguration as object, serializationOptions);
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock
                 .Setup(m => m.UpdateBlob("$web", "data/changelog.json", expectedChangelog, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Fail("Error")))
@@ -449,7 +449,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
 
-            GenerateWebsiteData function = new GenerateWebsiteData(
+            GenerateWebsiteData function = new(
                 new Mock<ILogger<GenerateWebsiteData>>().Object,
                 configurationLoaderMock.Object,
                 configurationWrapperMock.Object,

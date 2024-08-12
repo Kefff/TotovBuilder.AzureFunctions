@@ -177,7 +177,7 @@ namespace TotovBuilder.AzureFunctions.Functions
 
             TOut transformedData = transformationFunction(fetchResult.Value);
 
-            JsonSerializerOptions serializationOptions = new JsonSerializerOptions()
+            JsonSerializerOptions serializationOptions = new()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
@@ -196,7 +196,7 @@ namespace TotovBuilder.AzureFunctions.Functions
                     serializationOptions);
             }
 
-            BlobHttpHeaders httpHeaders = new BlobHttpHeaders()
+            BlobHttpHeaders httpHeaders = new()
             {
                 CacheControl = ConfigurationWrapper.Values.WebsiteDataCacheControl
             };

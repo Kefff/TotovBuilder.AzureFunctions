@@ -17,7 +17,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Serialization options.
         /// </summary>
-        protected static readonly JsonSerializerOptions SerializationOptions = new JsonSerializerOptions()
+        protected static readonly JsonSerializerOptions SerializationOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };

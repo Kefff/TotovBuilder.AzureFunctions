@@ -20,7 +20,7 @@ namespace TotovBuilder.AzureFunctions.Test.Configuration
         public async Task Load_ShouldLoadConfiguration()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new Mock<IAzureFunctionsConfigurationFetcher>();
+            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new();
             azureFunctionsConfigurationFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(async () =>
@@ -32,7 +32,7 @@ namespace TotovBuilder.AzureFunctions.Test.Configuration
             IConfigurationWrapper configurationWrapper = new ConfigurationWrapper();
 
             // Act
-            ConfigurationLoader configurationLoader = new ConfigurationLoader(
+            ConfigurationLoader configurationLoader = new(
                 new Mock<ILogger<ConfigurationLoader>>().Object,
                 configurationWrapper,
                 azureFunctionsConfigurationFetcherMock.Object);

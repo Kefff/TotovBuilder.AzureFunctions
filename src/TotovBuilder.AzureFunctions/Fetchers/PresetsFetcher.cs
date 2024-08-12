@@ -105,7 +105,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 && item is IMagazine magazine
                 && magazine.AcceptedAmmunitionIds.Contains(containedItem.Item.Id))
             {
-                InventoryItem containedInventoryItem = new InventoryItem()
+                InventoryItem containedInventoryItem = new()
                 {
                     ItemId = containedItem.Item.Id,
                     Quantity = containedItem.Quantity
@@ -213,7 +213,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return;
             }
 
-            List<InventoryItemModSlot> inventoryItemModSlots = new List<InventoryItemModSlot>(inventoryItem.ModSlots);
+            List<InventoryItemModSlot> inventoryItemModSlots = new(inventoryItem.ModSlots);
 
             foreach (ModSlot modSlot in item.ModSlots)
             {
@@ -254,7 +254,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Preset.</returns>
         private InventoryItem ConstructPreset(string presetId, IItem baseItem, Queue<PresetContainedItem> containedItems)
         {
-            InventoryItem inventoryItem = new InventoryItem()
+            InventoryItem inventoryItem = new()
             {
                 ItemId = presetId
             };
@@ -316,7 +316,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             IModdable baseItem = (IModdable)Items.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
-            Queue<PresetContainedItem> containedItems = new Queue<PresetContainedItem>();
+            Queue<PresetContainedItem> containedItems = new();
 
             foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
             {
@@ -331,7 +331,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 Item containedItem = Items.First(i => i.Id == containedItemId);
                 int quantity = containedItemJson.GetProperty("quantity").GetInt32();
 
-                PresetContainedItem presetContainedItem = new PresetContainedItem(containedItem, quantity);
+                PresetContainedItem presetContainedItem = new(containedItem, quantity);
                 containedItems.Enqueue(presetContainedItem);
             }
 
