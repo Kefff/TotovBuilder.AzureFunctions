@@ -292,7 +292,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                armorMod.ModSlots = [.. armorMod.ModSlots, .. DeserializeModSlots(propertiesJson)];
+                ModSlot[] modsSlots = DeserializeModSlots(propertiesJson);
+                armorMod.ModSlots = [.. armorMod.ModSlots, .. modsSlots];
 
                 if (TryDeserializeArray(propertiesJson, "zones", out ArrayEnumerator headArmoredAreasJson))
                 {
@@ -578,7 +579,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     headwear.Deafening = deafening;
                 }
 
-                headwear.ModSlots = [.. headwear.ModSlots, .. DeserializeModSlots(propertiesJson)];
+                ModSlot[] modSlots = DeserializeModSlots(propertiesJson);
+                headwear.ModSlots = [.. headwear.ModSlots, .. modSlots];
 
                 if (TryDeserializeDouble(propertiesJson, "ricochetX", out double ricochetChance))
                 {
