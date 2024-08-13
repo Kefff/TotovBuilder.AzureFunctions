@@ -203,19 +203,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                if (TryDeserializeDouble(propertiesJson, "ergoPenalty", out double ergonomicsModifierPercentage))
+                if (TryDeserializeDouble(propertiesJson, "blindnessProtection", out double blindnessProtection))
                 {
-                    armor.ErgonomicsModifierPercentage = ergonomicsModifierPercentage;
-                }
-
-                if (TryDeserializeDouble(propertiesJson, "speedPenalty", out double movementSpeedModifierPercentage))
-                {
-                    armor.MovementSpeedModifierPercentage = movementSpeedModifierPercentage;
-                }
-
-                if (TryDeserializeDouble(propertiesJson, "turnPenalty", out double turningSpeedModifierPercentage))
-                {
-                    armor.TurningSpeedModifierPercentage = turningSpeedModifierPercentage;
+                    armor.BlindnessProtectionPercentage = blindnessProtection;
                 }
 
                 if (TryDeserializeDouble(propertiesJson, "class", out double armorClass))
@@ -230,9 +220,24 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     armor.Durability = durability;
                 }
 
+                if (TryDeserializeDouble(propertiesJson, "ergoPenalty", out double ergonomicsModifierPercentage))
+                {
+                    armor.ErgonomicsModifierPercentage = ergonomicsModifierPercentage;
+                }
+
                 if (TryDeserializeObject(propertiesJson, "material", out JsonElement materialJson))
                 {
                     armor.Material = materialJson.GetProperty("id").GetString()!;
+                }
+
+                if (TryDeserializeDouble(propertiesJson, "speedPenalty", out double movementSpeedModifierPercentage))
+                {
+                    armor.MovementSpeedModifierPercentage = movementSpeedModifierPercentage;
+                }
+
+                if (TryDeserializeDouble(propertiesJson, "turnPenalty", out double turningSpeedModifierPercentage))
+                {
+                    armor.TurningSpeedModifierPercentage = turningSpeedModifierPercentage;
                 }
 
                 DeserializeArmorModSlots(armor, propertiesJson);
@@ -287,8 +292,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                armorMod.ArmorClass = propertiesJson.GetProperty("class").GetDouble();
-                armorMod.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
                 armorMod.ModSlots = [.. armorMod.ModSlots, .. DeserializeModSlots(propertiesJson)];
 
                 if (TryDeserializeArray(propertiesJson, "zones", out ArrayEnumerator headArmoredAreasJson))
@@ -516,12 +519,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized <see cref="Eyewear"/>.</returns>
         private Eyewear DeserializeEyewear(JsonElement itemJson, string itemCategoryId)
         {
-            Eyewear eyewear = DeserializeBaseItemProperties<Eyewear>(itemJson, itemCategoryId);
-
-            if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
-            {
-                eyewear.BlindnessProtectionPercentage = propertiesJson.GetProperty("blindnessProtection").GetDouble();
-            }
+            Eyewear eyewear = DeserializeArmor<Eyewear>(itemJson, itemCategoryId);
 
             return eyewear;
         }
