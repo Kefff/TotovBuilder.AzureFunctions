@@ -180,7 +180,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.MaxStackableAmount = propertiesJson.GetProperty("stackMaxSize").GetDouble();
                 ammunition.PenetrationPower = propertiesJson.GetProperty("penetrationPower").GetDouble();
                 ammunition.Projectiles = propertiesJson.GetProperty("projectileCount").GetDouble();
-                ammunition.RecoilModifierPercentage = propertiesJson.GetProperty("recoilModifier").GetDouble();
+                ammunition.RecoilModifier = Math.Round(propertiesJson.GetProperty("recoilModifier").GetDouble() * 100); // The API returns it has a percentage but in reality it is a flat value added to the weapon recoil before mods
                 ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
 
