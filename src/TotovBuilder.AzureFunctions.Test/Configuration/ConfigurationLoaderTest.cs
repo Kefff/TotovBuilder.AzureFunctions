@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
@@ -26,8 +27,14 @@ namespace TotovBuilder.AzureFunctions.Test.Configuration
                 .Returns(async () =>
                 {
                     await Task.Delay(1000);
-                    return TestData.AzureFunctionsConfiguration;
-                });
+
+                    return Result.Ok();
+                })
+                .Verifiable();
+            azureFunctionsConfigurationFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.AzureFunctionsConfiguration)
+                .Verifiable();
 
             IConfigurationWrapper configurationWrapper = new ConfigurationWrapper();
 

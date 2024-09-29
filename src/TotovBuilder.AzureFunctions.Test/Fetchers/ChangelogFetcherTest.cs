@@ -25,13 +25,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawChangelogBlobName = "changelog.json"
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawChangelogBlobName = "changelog.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)))
+                .Verifiable();
 
             ChangelogFetcher fetcher = new(
                 new Mock<ILogger<ChangelogFetcher>>().Object,
@@ -39,11 +45,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 configurationWrapperMock.Object);
 
             // Act
-            Result<IEnumerable<ChangelogEntry>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(new ChangelogEntry[]
+            fetcher.FetchedData.Should().BeEquivalentTo(new ChangelogEntry[]
             {
                 new()
                 {
@@ -143,13 +149,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawChangelogBlobName = "changelog.json"
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawChangelogBlobName = "changelog.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
   },
@@ -168,7 +179,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ]
   }
 ]
-")));
+")))
+                .Verifiable();
 
             ChangelogFetcher fetcher = new(
                 new Mock<ILogger<ChangelogFetcher>>().Object,

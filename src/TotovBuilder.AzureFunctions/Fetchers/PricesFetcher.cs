@@ -43,11 +43,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
 
         /// <summary>
-        /// Tarkov values.
-        /// </summary>
-        private TarkovValues TarkovValues = new();
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="QuestsFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
@@ -70,14 +65,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            Result<TarkovValues> tarkovValuesResult = await TarkovValuesFetcher.Fetch();
+            Result tarkovValuesResult = await TarkovValuesFetcher.Fetch();
 
             if (tarkovValuesResult.IsFailed)
             {
-                return tarkovValuesResult.ToResult();
+                return tarkovValuesResult;
             }
-
-            TarkovValues = tarkovValuesResult.Value;
 
             List<Price> pricesAndBarters = [];
             Result<IEnumerable<Price>>? bartersResult = null;
@@ -88,7 +81,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (bartersResult!.IsSuccess)
             {
-                pricesAndBarters.AddRange(bartersResult.Value);
+                pricesAndBarters.AddRange(BartersFetcher.FetchedData!);
             }
 
             return Result.Ok<IEnumerable<Price>>(pricesAndBarters);
@@ -167,7 +160,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             // Adding a price to the main currency item
-            Currency? mainCurrency = TarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
+            Currency? mainCurrency = TarkovValuesFetcher.FetchedData!.Currencies.FirstOrDefault(c => c.MainCurrency);
 
             if (mainCurrency != null)
             {

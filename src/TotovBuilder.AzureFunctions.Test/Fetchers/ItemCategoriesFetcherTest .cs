@@ -25,13 +25,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawItemCategoriesBlobName = "item-categories.json"
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawItemCategoriesBlobName = "item-categories.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ItemCategoriesJson)));
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(TestData.ItemCategoriesJson)))
+                .Verifiable();
 
             ItemCategoriesFetcher fetcher = new(
                 new Mock<ILogger<ItemCategoriesFetcher>>().Object,
@@ -39,11 +45,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 configurationWrapperMock.Object);
 
             // Act
-            Result<IEnumerable<ItemCategory>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(TestData.ItemCategories);
+            fetcher.FetchedData.Should().BeEquivalentTo(TestData.ItemCategories);
         }
 
         [Fact]
@@ -51,13 +57,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawItemCategoriesBlobName = "item-categories.json"
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawItemCategoriesBlobName = "item-categories.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
   },
@@ -71,7 +82,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ]
   }
 ]
-")));
+")))
+                .Verifiable();
 
             ItemCategoriesFetcher fetcher = new(
                 new Mock<ILogger<ItemCategoriesFetcher>>().Object,

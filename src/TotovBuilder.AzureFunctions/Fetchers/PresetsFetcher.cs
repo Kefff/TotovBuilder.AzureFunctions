@@ -36,11 +36,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// List of items.
-        /// </summary>
-        private IEnumerable<Item> Items = Array.Empty<Item>();
-
-        /// <summary>
         /// Items fetcher.
         /// </summary>
         private readonly IItemsFetcher ItemsFetcher;
@@ -65,14 +60,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = [];
             ConcurrentBag<InventoryItem> presets = [];
-            Result<IEnumerable<Item>> itemsResult = await ItemsFetcher.Fetch();
+            Result itemsResult = await ItemsFetcher.Fetch();
 
             if (itemsResult.IsFailed)
             {
-                return itemsResult.ToResult();
+                return itemsResult;
             }
-
-            Items = itemsResult.Value;
 
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -87,7 +80,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Adds the first of a list of contained items as the content of an inventory item if possible.
+        /// Adds the first item of a list of contained items as the content of an inventory item if possible.
         /// </summary>
         /// <param name="inventoryItem">Inventory item.</param>
         /// <param name="item">Item.</param>
@@ -192,7 +185,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
                 else
                 {
-                    if (Items.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
+                    if (ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
                     {
                         AddModSlots(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
                     }
@@ -307,7 +300,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private InventoryItem? DeserializePresetData(JsonElement presetJson)
         {
             string presetId = presetJson.GetProperty("id").GetString()!;
-            IItem? item = Items.FirstOrDefault(i => i.Id == presetId);
+            IItem? item = ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == presetId);
 
             if (item is not IModdable presetItem)
             {
@@ -315,7 +308,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return null;
             }
 
-            IModdable baseItem = (IModdable)Items.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
+            IModdable baseItem = (IModdable)ItemsFetcher.FetchedData!.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
             Queue<PresetContainedItem> containedItems = new();
 
             foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
@@ -328,7 +321,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     continue;
                 }
 
-                Item containedItem = Items.First(i => i.Id == containedItemId);
+                Item containedItem = ItemsFetcher.FetchedData!.First(i => i.Id == containedItemId);
                 int quantity = containedItemJson.GetProperty("quantity").GetInt32();
 
                 PresetContainedItem presetContainedItem = new(containedItem, quantity);
@@ -336,8 +329,46 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
+            UpdateItemProperties(preset);
 
             return preset;
+        }
+
+        /// <summary>
+        /// Updates the properties of the item of a preset.
+        /// </summary>
+        /// <param name="preset">Preset.</param>
+        private void UpdateItemProperties(InventoryItem preset)
+        {
+            if (ItemsFetcher.FetchedData == null)
+            {
+                return;
+            }
+
+            Item? presetItem = ItemsFetcher.FetchedData.FirstOrDefault(i => i.Id == preset.ItemId);
+
+            if (presetItem is IArmor armoredPresetItem
+                && (presetItem.CategoryId == "armor" || presetItem.CategoryId == "vest")
+                && armoredPresetItem.Name.EndsWith(" Default"))
+            {
+                // The durability returned by the API is the sum of the aramid inserts durability + default armor plates durability.
+                // We substract the default armor plates durability to find the real durability of the item.
+                double armorPlatesDurability = 0;
+                IArmor baseItem = (IArmor)ItemsFetcher.FetchedData!.First(i => i.Id == armoredPresetItem.BaseItemId);
+
+                foreach (InventoryItemModSlot inventoryItemModSlot in preset.ModSlots.Where(iims => iims.Item != null))
+                {
+                    Item modSlotItem = ItemsFetcher.FetchedData!.First(i => i.Id == inventoryItemModSlot.Item!.ItemId);
+
+                    if (modSlotItem is IArmorMod armoredModSlotItem)
+                    {
+                        armorPlatesDurability += armoredModSlotItem.Durability;
+                    }
+                }
+
+                armoredPresetItem.Durability = baseItem.Durability - armorPlatesDurability;
+                baseItem.Durability = armoredPresetItem.Durability;
+            }
         }
     }
 }

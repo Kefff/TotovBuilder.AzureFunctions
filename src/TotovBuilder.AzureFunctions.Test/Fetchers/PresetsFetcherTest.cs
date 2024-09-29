@@ -28,12 +28,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                ApiPresetsQuery = "{ items(type: preset) { id } }",
-                ApiUrl = "https://localhost/api",
-                ExecutionTimeout = 5
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
@@ -42,13 +45,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     await Task.Delay(1000);
                     return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PresetsJson) };
-                });
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)));
+            itemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Items)
+                .Verifiable();
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -57,13 +71,14 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
 
-            IEnumerable<InventoryItem> orderedResult = result.Value.OrderBy(p => p.ItemId);
+            IEnumerable<InventoryItem> orderedResult = fetcher.FetchedData!.OrderBy(p => p.ItemId);
             IEnumerable<InventoryItem> expected = TestData.Presets.OrderBy(i => i.ItemId);
+
             orderedResult.Should().BeEquivalentTo(expected);
         }
 
@@ -72,12 +87,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                ApiPresetsQuery = "{ items(type: preset) { id } }",
-                ApiUrl = "https://localhost/api",
-                ExecutionTimeout = 5
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
@@ -115,13 +133,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ]
   }
 }") };
-                });
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)));
+            itemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Items)
+                .Verifiable();
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -130,11 +159,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(new InventoryItem[]
+            fetcher.FetchedData.Should().BeEquivalentTo(new InventoryItem[]
                 {
                     new()
                     {
@@ -148,12 +177,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                ApiPresetsQuery = "{ items(type: preset) { id } }",
-                ApiUrl = "https://localhost/api",
-                ExecutionTimeout = 5
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
@@ -178,107 +210,117 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ]
   }
 }") };
-                });
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(new Item[]
-            {
-                new Ammunition()
+            itemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock.SetupGet(m => m.FetchedData)
+                .Returns(new Item[]
                 {
-                    AccuracyModifierPercentage = -0.05,
-                    ArmorDamagePercentage = 0.76,
-                    ArmorPenetrations = [6, 6, 6, 6, 6, 5], // TODO : OBTAIN FROM WIKI
-                    //Blinding = , // TODO : MISSING FROM API
-                    Caliber = "Caliber762x39",
-                    CategoryId = "ammunition",
-                    DurabilityBurnModifierPercentage = 0.7,
-                    FleshDamage = 47,
-                    FragmentationChance = 0.05,
-                    HeavyBleedingChance = 0.1,
-                    IconLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg",
-                    Id = "601aa3d2b2bcb34913271e6d",
-                    ImageLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg",
-                    LightBleedingChance = 0.1,
-                    MarketLink = "https://tarkov.dev/item/762x39mm-mai-ap",
-                    MaxStackableAmount = 60,
-                    Name = "7.62x39mm MAI AP",
-                    PenetrationPower = 58,
-                    Projectiles = 1,
-                    RecoilModifier = 10,
-                    ShortName = "MAI AP",
-                    Subsonic = false,
-                    Tracer = false,
-                    Velocity = 730,
-                    Weight = 0.012,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/7.62x39mm_MAI_AP"
-                },
-                new Magazine()
-                {
-                    AcceptedAmmunitionIds =
-                    [
-                        "5c0d5e4486f77478390952fe",
-                        "61962b617c6c7b169525f168",
-                        "56dfef82d2720bbd668b4567",
-                        "56dff026d2720bb8668b4567",
-                        "56dff061d2720bb5668b4567",
-                        "56dff0bed2720bb0668b4567",
-                        "56dff216d2720bbd668b4568",
-                        "56dff2ced2720bb4668b4567",
-                        "56dff338d2720bbd668b4569",
-                        "56dff3afd2720bba668b4567",
-                        "56dff421d2720b5f5a8b4567",
-                        "56dff4a2d2720bbd668b456a",
-                        "56dff4ecd2720b5f5a8b4568"
-                    ],
-                    Capacity = 30,
-                    CategoryId = "magazine",
-                    ErgonomicsModifier = -3,
-                    IconLink = "https://assets.tarkov.dev/564ca99c4bdc2d16268b4589-icon.jpg",
-                    Id = "564ca99c4bdc2d16268b4589",
-                    ImageLink = "https://assets.tarkov.dev/564ca99c4bdc2d16268b4589-image.jpg",
-                    MalfunctionPercentage = 0.07,
-                    MarketLink = "https://tarkov.dev/item/ak-74-545x39-6l20-30-round-magazine",
-                    Name = "AK-74 5.45x39 6L20 30-round magazine",
-                    ShortName = "6L20",
-                    Weight = 0.215,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AK-74_5.45x39_6L20_30-round_magazine"
-                },
-                new Magazine()
-                {
-                    AcceptedAmmunitionIds =
-                    [
-                        "5c0d5e4486f77478390952fe",
-                        "61962b617c6c7b169525f168",
-                        "56dfef82d2720bbd668b4567",
-                        "56dff026d2720bb8668b4567",
-                        "56dff061d2720bb5668b4567",
-                        "56dff0bed2720bb0668b4567",
-                        "56dff216d2720bbd668b4568",
-                        "56dff2ced2720bb4668b4567",
-                        "56dff338d2720bbd668b4569",
-                        "56dff3afd2720bba668b4567",
-                        "56dff421d2720b5f5a8b4567",
-                        "56dff4a2d2720bbd668b456a",
-                        "56dff4ecd2720b5f5a8b4568"
-                    ],
-                    BaseItemId = "564ca99c4bdc2d16268b4589",
-                    Capacity = 30,
-                    CategoryId = "magazine",
-                    ErgonomicsModifier = -3,
-                    IconLink = "https://assets.tarkov.dev/preset-magazine-with-incompatible-ammunition.jpg",
-                    Id = "test-preset-magazine-with-incompatible-ammunition",
-                    ImageLink = "https://assets.tarkov.dev/preset-magazine-with-incompatible-ammunition.jpg",
-                    MalfunctionPercentage = 0.07,
-                    MarketLink = "https://tarkov.dev/item/preset-magazine-with-incompatible-ammunition",
-                    Name = "Magazine with incompatible ammunition",
-                    ShortName = "MWIA",
-                    Weight = 0.215,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-magazine-with-incompatible-ammunition"
-                }
-            })));
+                    new Ammunition()
+                    {
+                        AccuracyModifierPercentage = -0.05,
+                        ArmorDamagePercentage = 0.76,
+                        //Blinding = , // TODO : MISSING FROM API
+                        Caliber = "Caliber762x39",
+                        CategoryId = "ammunition",
+                        DurabilityBurnModifierPercentage = 0.7,
+                        FleshDamage = 47,
+                        FragmentationChance = 0.05,
+                        HeavyBleedingChance = 0.1,
+                        IconLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg",
+                        Id = "601aa3d2b2bcb34913271e6d",
+                        ImageLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg",
+                        LightBleedingChance = 0.1,
+                        MarketLink = "https://tarkov.dev/item/762x39mm-mai-ap",
+                        MaxStackableAmount = 60,
+                        Name = "7.62x39mm MAI AP",
+                        PenetratedArmorLevel = 5,
+                        PenetrationPower = 58,
+                        Projectiles = 1,
+                        RecoilModifier = 10,
+                        ShortName = "MAI AP",
+                        Subsonic = false,
+                        Tracer = false,
+                        Velocity = 730,
+                        Weight = 0.012,
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/7.62x39mm_MAI_AP"
+                    },
+                    new Magazine()
+                    {
+                        AcceptedAmmunitionIds =
+                        [
+                            "5c0d5e4486f77478390952fe",
+                            "61962b617c6c7b169525f168",
+                            "56dfef82d2720bbd668b4567",
+                            "56dff026d2720bb8668b4567",
+                            "56dff061d2720bb5668b4567",
+                            "56dff0bed2720bb0668b4567",
+                            "56dff216d2720bbd668b4568",
+                            "56dff2ced2720bb4668b4567",
+                            "56dff338d2720bbd668b4569",
+                            "56dff3afd2720bba668b4567",
+                            "56dff421d2720b5f5a8b4567",
+                            "56dff4a2d2720bbd668b456a",
+                            "56dff4ecd2720b5f5a8b4568"
+                        ],
+                        Capacity = 30,
+                        CategoryId = "magazine",
+                        ErgonomicsModifier = -3,
+                        IconLink = "https://assets.tarkov.dev/564ca99c4bdc2d16268b4589-icon.jpg",
+                        Id = "564ca99c4bdc2d16268b4589",
+                        ImageLink = "https://assets.tarkov.dev/564ca99c4bdc2d16268b4589-image.jpg",
+                        MalfunctionPercentage = 0.07,
+                        MarketLink = "https://tarkov.dev/item/ak-74-545x39-6l20-30-round-magazine",
+                        Name = "AK-74 5.45x39 6L20 30-round magazine",
+                        ShortName = "6L20",
+                        Weight = 0.215,
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/AK-74_5.45x39_6L20_30-round_magazine"
+                    },
+                    new Magazine()
+                    {
+                        AcceptedAmmunitionIds =
+                        [
+                            "5c0d5e4486f77478390952fe",
+                            "61962b617c6c7b169525f168",
+                            "56dfef82d2720bbd668b4567",
+                            "56dff026d2720bb8668b4567",
+                            "56dff061d2720bb5668b4567",
+                            "56dff0bed2720bb0668b4567",
+                            "56dff216d2720bbd668b4568",
+                            "56dff2ced2720bb4668b4567",
+                            "56dff338d2720bbd668b4569",
+                            "56dff3afd2720bba668b4567",
+                            "56dff421d2720b5f5a8b4567",
+                            "56dff4a2d2720bbd668b456a",
+                            "56dff4ecd2720b5f5a8b4568"
+                        ],
+                        BaseItemId = "564ca99c4bdc2d16268b4589",
+                        Capacity = 30,
+                        CategoryId = "magazine",
+                        ErgonomicsModifier = -3,
+                        IconLink = "https://assets.tarkov.dev/preset-magazine-with-incompatible-ammunition.jpg",
+                        Id = "test-preset-magazine-with-incompatible-ammunition",
+                        ImageLink = "https://assets.tarkov.dev/preset-magazine-with-incompatible-ammunition.jpg",
+                        MalfunctionPercentage = 0.07,
+                        MarketLink = "https://tarkov.dev/item/preset-magazine-with-incompatible-ammunition",
+                        Name = "Magazine with incompatible ammunition",
+                        ShortName = "MWIA",
+                        Weight = 0.215,
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-magazine-with-incompatible-ammunition"
+                    }
+                })
+                .Verifiable();
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -287,11 +329,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(new InventoryItem[]
+            fetcher.FetchedData.Should().BeEquivalentTo(new InventoryItem[]
             {
                 new()
                 {
@@ -305,12 +347,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                ApiPresetsQuery = "{ items(type: preset) { id } }",
-                ApiUrl = "https://localhost/api",
-                ExecutionTimeout = 5
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
@@ -335,73 +380,82 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ]
   }
 }") };
-                });
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(new Item[]
-            {
-                new Ammunition()
+            itemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock.SetupGet(m => m.FetchedData).Returns(new Item[]
                 {
-                    AccuracyModifierPercentage = -0.05,
-                    ArmorDamagePercentage = 0.76,
-                    ArmorPenetrations = [6, 6, 6, 6, 6, 5], // TODO : OBTAIN FROM WIKI
-                    //Blinding = , // TODO : MISSING FROM API
-                    Caliber = "Caliber762x39",
-                    CategoryId = "ammunition",
-                    DurabilityBurnModifierPercentage = 0.7,
-                    FleshDamage = 47,
-                    FragmentationChance = 0.05,
-                    HeavyBleedingChance = 0.1,
-                    IconLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg",
-                    Id = "601aa3d2b2bcb34913271e6d",
-                    ImageLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg",
-                    LightBleedingChance = 0.1,
-                    MarketLink = "https://tarkov.dev/item/762x39mm-mai-ap",
-                    MaxStackableAmount = 60,
-                    Name = "7.62x39mm MAI AP",
-                    PenetrationPower = 58,
-                    Projectiles = 1,
-                    RecoilModifier = 10,
-                    ShortName = "MAI AP",
-                    Subsonic = false,
-                    Tracer = false,
-                    Velocity = 730,
-                    Weight = 0.012,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/7.62x39mm_MAI_AP"
-                },
-                new RangedWeaponMod()
-                {
-                    CategoryId = "rangedWeaponMod",
-                    ErgonomicsModifier = -2,
-                    IconLink = "https://assets.tarkov.dev/57dc324a24597759501edc20-icon.jpg",
-                    Id = "57dc324a24597759501edc20",
-                    ImageLink = "https://assets.tarkov.dev/57dc324a24597759501edc20-image.jpg",
-                    MarketLink = "https://tarkov.dev/item/aks-74u-545x39-muzzle-brake-6p26-0-20",
-                    Name = "AKS-74U 5.45x39 muzzle brake (6P26 0-20)",
-                    RecoilModifierPercentage = -0.08,
-                    ShortName = "6P26 0-20",
-                    Weight = 0.1,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_5.45x39_muzzle_brake_(6P26_0-20)"
-                },
-                new RangedWeaponMod()
-                {
-                    BaseItemId = "57dc324a24597759501edc20",
-                    CategoryId = "rangedWeaponMod",
-                    ErgonomicsModifier = -2,
-                    IconLink = "https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg",
-                    Id = "test-preset-non-magazine-item-with-ammunition",
-                    ImageLink = "https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg",
-                    MarketLink = "https://tarkov.dev/item/preset-non-magazine-item-with-ammunition",
-                    Name = "Non magazine with ammunition",
-                    RecoilModifierPercentage = -0.08,
-                    ShortName = "NMWA",
-                    Weight = 0.1,
-                    WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-non-magazine-item-with-ammunition"
-                }
-            })));
+                    new Ammunition()
+                    {
+                        AccuracyModifierPercentage = -0.05,
+                        ArmorDamagePercentage = 0.76,
+                        //Blinding = , // TODO : MISSING FROM API
+                        Caliber = "Caliber762x39",
+                        CategoryId = "ammunition",
+                        DurabilityBurnModifierPercentage = 0.7,
+                        FleshDamage = 47,
+                        FragmentationChance = 0.05,
+                        HeavyBleedingChance = 0.1,
+                        IconLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-icon.jpg",
+                        Id = "601aa3d2b2bcb34913271e6d",
+                        ImageLink = "https://assets.tarkov.dev/601aa3d2b2bcb34913271e6d-image.jpg",
+                        LightBleedingChance = 0.1,
+                        MarketLink = "https://tarkov.dev/item/762x39mm-mai-ap",
+                        MaxStackableAmount = 60,
+                        Name = "7.62x39mm MAI AP",
+                        PenetratedArmorLevel = 5,
+                        PenetrationPower = 58,
+                        Projectiles = 1,
+                        RecoilModifier = 10,
+                        ShortName = "MAI AP",
+                        Subsonic = false,
+                        Tracer = false,
+                        Velocity = 730,
+                        Weight = 0.012,
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/7.62x39mm_MAI_AP"
+                    },
+                    new RangedWeaponMod()
+                    {
+                        CategoryId = "rangedWeaponMod",
+                        ErgonomicsModifier = -2,
+                        IconLink = "https://assets.tarkov.dev/57dc324a24597759501edc20-icon.jpg",
+                        Id = "57dc324a24597759501edc20",
+                        ImageLink = "https://assets.tarkov.dev/57dc324a24597759501edc20-image.jpg",
+                        MarketLink = "https://tarkov.dev/item/aks-74u-545x39-muzzle-brake-6p26-0-20",
+                        Name = "AKS-74U 5.45x39 muzzle brake (6P26 0-20)",
+                        RecoilModifierPercentage = -0.08,
+                        ShortName = "6P26 0-20",
+                        Weight = 0.1,
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/AKS-74U_5.45x39_muzzle_brake_(6P26_0-20)"
+                    },
+                    new RangedWeaponMod()
+                    {
+                        BaseItemId = "57dc324a24597759501edc20",
+                        CategoryId = "rangedWeaponMod",
+                        ErgonomicsModifier = -2,
+                        IconLink = "https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg",
+                        Id = "test-preset-non-magazine-item-with-ammunition",
+                        ImageLink = "https://assets.tarkov.dev/preset-non-magazine-item-with-ammunition.jpg",
+                        MarketLink = "https://tarkov.dev/item/preset-non-magazine-item-with-ammunition",
+                        Name = "Non magazine with ammunition",
+                        RecoilModifierPercentage = -0.08,
+                        ShortName = "NMWA",
+                        Weight = 0.1,
+                        WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-non-magazine-item-with-ammunition"
+                    }
+                })
+                .Verifiable();
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -410,11 +464,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(new InventoryItem[]
+            fetcher.FetchedData.Should().BeEquivalentTo(new InventoryItem[]
             {
                 new()
                 {
@@ -428,12 +482,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                ApiPresetsQuery = "{ items(type: preset) { id } }",
-                ApiUrl = "https://localhost/api",
-                ExecutionTimeout = 5
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
@@ -458,13 +515,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ]
           }
         }") };
-                });
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)));
+            itemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Items)
+                .Verifiable();
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -473,12 +541,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
 
-            IEnumerable<InventoryItem> orderedResult = result.Value.OrderBy(p => p.ItemId);
+            IEnumerable<InventoryItem> orderedResult = fetcher.FetchedData!.OrderBy(p => p.ItemId);
             IEnumerable<InventoryItem> expected = new InventoryItem[]
             {
                 new()
@@ -506,12 +574,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                ApiPresetsQuery = "{ items(type: preset) { id } }",
-                ApiUrl = "https://localhost/api",
-                ExecutionTimeout = 5
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
@@ -548,13 +619,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             ]
           }
         }") };
-                });
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)));
+            itemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Items)
+                .Verifiable();
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -563,12 +645,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
 
-            IEnumerable<InventoryItem> orderedResult = result.Value.OrderBy(p => p.ItemId);
+            IEnumerable<InventoryItem> orderedResult = fetcher.FetchedData!.OrderBy(p => p.ItemId);
             IEnumerable<InventoryItem> expected = new InventoryItem[]            {
                 new()
                 {
@@ -603,12 +685,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                ApiPresetsQuery = "{ items(type: preset) { id } }",
-                ApiUrl = "https://localhost/api",
-                ExecutionTimeout = 5
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
             httpClientWrapperMock
@@ -617,13 +702,20 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     await Task.Delay(1000);
                     return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PresetsJson) };
-                });
+                })
+                .Verifiable();
 
             Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock.Setup(m => m.Create()).Returns(httpClientWrapperMock.Object);
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock.Setup(m => m.Fetch()).Returns(Task.FromResult(Result.Fail<IEnumerable<Item>>("Error"))).Verifiable();
+            itemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
@@ -632,7 +724,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemsFetcherMock.Object);
 
             // Act
-            Result<IEnumerable<InventoryItem>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeFalse();

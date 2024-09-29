@@ -24,7 +24,6 @@ IHost host = new HostBuilder()
         services.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
         services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
 
-        services.AddSingleton<IArmorPenetrationsFetcher, ArmorPenetrationsFetcher>();
         services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
         services.AddSingleton<IBartersFetcher, BartersFetcher>();
         services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();

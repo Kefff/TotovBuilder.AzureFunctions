@@ -14,6 +14,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public abstract class RawDataFetcher<T> : IApiFetcher<T>
         where T : class
     {
+        /// <inheritdoc/>
+        public T? FetchedData { get; private set; }
+
         /// <summary>
         /// Serialization options.
         /// </summary>
@@ -48,12 +51,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private readonly IAzureBlobStorageManager AzureBlobStorageManager;
 
         /// <summary>
-        /// Fetched data.
-        /// Once data has been fetched and stored in this property, it is never fetched again.
-        /// </summary>
-        private T? FetchedData { get; set; } = null;
-
-        /// <summary>
         /// Fetching task.
         /// Used to avoid launching multiple fetch operations at the same time.
         /// </summary>
@@ -76,7 +73,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        public async Task<Result<T>> Fetch()
+        public async Task<Result> Fetch()
         {
             if (!FetchingTask.IsCompleted)
             {
@@ -108,7 +105,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
             }
 
-            return Result.Ok(FetchedData);
+            return Result.Ok();
         }
 
         /// <summary>

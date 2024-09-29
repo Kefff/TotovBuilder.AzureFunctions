@@ -23,13 +23,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperWrapper = new();
-            configurationWrapperWrapper.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawTarkovValuesBlobName = "tarkov-values.json"
-            });
+            configurationWrapperWrapper
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawTarkovValuesBlobName = "tarkov-values.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.TarkovValuesJson)));
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(TestData.TarkovValuesJson)))
+                .Verifiable();
 
             TarkovValuesFetcher fetcher = new(
                 new Mock<ILogger<TarkovValuesFetcher>>().Object,
@@ -37,11 +43,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 configurationWrapperWrapper.Object);
 
             // Act
-            Result<TarkovValues> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(TestData.TarkovValues);
+            fetcher.FetchedData.Should().BeEquivalentTo(TestData.TarkovValues);
         }
 
         [Fact]
@@ -49,13 +55,18 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawTarkovValuesBlobName = "tarkov-values.json"
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawTarkovValuesBlobName = "tarkov-values.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"{
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(@"{
   ""invalid"": {
     invalid
   },
@@ -69,7 +80,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ""< 1""
   ]
 }
-")));
+")))
+                .Verifiable();
 
             TarkovValuesFetcher fetcher = new(
                 new Mock<ILogger<TarkovValuesFetcher>>().Object,

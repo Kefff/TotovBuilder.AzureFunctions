@@ -36,16 +36,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// List of armor penetrations.
-        /// </summary>
-        private IEnumerable<ArmorPenetration> ArmorPenetrations = Array.Empty<ArmorPenetration>();
-
-        /// <summary>
-        /// Armor penetrations fetcher.
-        /// </summary>
-        private readonly IArmorPenetrationsFetcher ArmorPenetrationsFetcher;
-
-        /// <summary>
         /// List of item categories.
         /// </summary>
         private IEnumerable<ItemCategory> ItemCategories = Array.Empty<ItemCategory>();
@@ -83,7 +73,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
         /// <param name="itemMissingPropertiesFetcher">Item missing properties fetcher.</param>
-        /// <param name="armorPenetrationsFetcher">Armor penetrations fetcher.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         public ItemsFetcher(
             ILogger<ItemsFetcher> logger,
@@ -91,11 +80,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             IConfigurationWrapper configurationWrapper,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IItemMissingPropertiesFetcher itemMissingPropertiesFetcher,
-            IArmorPenetrationsFetcher armorPenetrationsFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher
         ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
-            ArmorPenetrationsFetcher = armorPenetrationsFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
             ItemMissingPropertiesFetcher = itemMissingPropertiesFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
@@ -104,24 +91,21 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
         {
-            Result<IEnumerable<ArmorPenetration>>? armorPenetrationsResult = null;
-            Result<IEnumerable<ItemCategory>>? itemCategoriesResult = null;
-            Result<IEnumerable<ItemMissingProperties>>? itemMissingPropertiesResult = null;
-            Result<TarkovValues>? tarkovValuesResult = null;
+            Result? itemCategoriesResult = null;
+            Result? itemMissingPropertiesResult = null;
+            Result? tarkovValuesResult = null;
 
             Task.WaitAll(
-                ArmorPenetrationsFetcher.Fetch().ContinueWith(r => armorPenetrationsResult = r.Result),
                 ItemCategoriesFetcher.Fetch().ContinueWith(r => itemCategoriesResult = r.Result),
                 ItemMissingPropertiesFetcher.Fetch().ContinueWith(r => itemMissingPropertiesResult = r.Result),
                 TarkovValuesFetcher.Fetch().ContinueWith(r => tarkovValuesResult = r.Result));
-            Result allTasksResult = Result.Merge(armorPenetrationsResult, itemCategoriesResult, itemMissingPropertiesResult, tarkovValuesResult);
+            Result allTasksResult = Result.Merge(itemCategoriesResult, itemMissingPropertiesResult, tarkovValuesResult);
 
             if (allTasksResult.IsSuccess)
             {
-                ArmorPenetrations = armorPenetrationsResult!.Value;
-                ItemCategories = itemCategoriesResult!.Value;
-                ItemMissingProperties = itemMissingPropertiesResult!.Value;
-                TarkovValues = tarkovValuesResult!.Value;
+                ItemCategories = ItemCategoriesFetcher.FetchedData!;
+                ItemMissingProperties = ItemMissingPropertiesFetcher.FetchedData!;
+                TarkovValues = TarkovValuesFetcher.FetchedData!;
             }
             else
             {
@@ -164,7 +148,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private Ammunition DeserializeAmmunition(JsonElement itemJson, string itemCategoryId)
         {
             Ammunition ammunition = DeserializeBaseItemProperties<Ammunition>(itemJson, itemCategoryId);
-            ammunition.ArmorPenetrations = ArmorPenetrations.FirstOrDefault(ac => ac.AmmunitionId == ammunition.Id)?.Values ?? []; // TODO : OBTAIN FROM WIKI
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
@@ -184,6 +167,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
 
+                ammunition.PenetratedArmorLevel = Math.Floor(ammunition.PenetrationPower / 10); // Cf. https://youtu.be/8DUN-5--xes?feature=shared&t=141
                 ammunition.Subsonic = ammunition.Velocity < 343; // Speed of sound in the air at 20°C at sea level
             }
 
@@ -217,6 +201,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeDouble(propertiesJson, "durability", out double durability))
                 {
+                    // The value returned by the API is the value with the default ballistic plates.
+                    // This should instead be the base durability of the item without armor plates.
                     armor.Durability = durability;
                 }
 
@@ -264,18 +250,19 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             T presetItem = DeserializeBasePresetProperties<T>(presetId, presetJson, baseItem);
 
-            if (presetItem.Name.EndsWith(" Default"))
-            {
-                baseItem.DefaultPresetId = presetItem.Id; // MISSING FROM API
-            }
-
-            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
             presetItem.ArmorClass = baseItem.ArmorClass;
+            presetItem.ArmoredAreas = baseItem.ArmoredAreas;
+            presetItem.BlindnessProtectionPercentage = baseItem.BlindnessProtectionPercentage;
             presetItem.Durability = baseItem.Durability;
             presetItem.ErgonomicsModifierPercentage = baseItem.ErgonomicsModifierPercentage;
             presetItem.Material = baseItem.Material;
             presetItem.MovementSpeedModifierPercentage = baseItem.MovementSpeedModifierPercentage;
             presetItem.TurningSpeedModifierPercentage = baseItem.TurningSpeedModifierPercentage;
+
+            if (presetItem.Name.EndsWith(" Default"))
+            {
+                baseItem.DefaultPresetId = presetItem.Id; // MISSING FROM API
+            }
 
             return presetItem;
         }
@@ -326,7 +313,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 if (armorSlotType == "ItemArmorSlotOpen")
                 {
                     // For now, when an armor has armor plate slots, we consider its armor value is 0.
-                    // In reality, it should be the value of the aramid inserts but the API does not provide it.
+                    // In reality, it should be the value of the front aramid insert but the API does not provide it.
                     item.ArmorClass = 0;
 
                     ModSlot armorModSlot = new()

@@ -17,13 +17,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public abstract partial class ApiFetcher<T> : IApiFetcher<T>
         where T : class
     {
-        /// <summary>
-        /// Serialization options.
-        /// </summary>
-        private static readonly JsonSerializerOptions SerializerOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        /// <inheritdoc/>
+        public T? FetchedData { get; private set; } = null;
 
         /// <summary>
         /// API query.
@@ -46,10 +41,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected readonly ILogger<ApiFetcher<T>> Logger;
 
         /// <summary>
-        /// Fetched data.
-        /// Once data has been fetched and stored in this property, it is never fetched again.
+        /// Serialization options.
         /// </summary>
-        private T? FetchedData { get; set; } = null;
+        private static readonly JsonSerializerOptions SerializerOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
         /// <summary>
         /// Fetching task.
@@ -79,7 +76,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        public async Task<Result<T>> Fetch()
+        public async Task<Result> Fetch()
         {
             if (!FetchingTask.IsCompleted)
             {
@@ -111,7 +108,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
             }
 
-            return Result.Ok(FetchedData);
+            return Result.Ok();
         }
 
         /// <summary>

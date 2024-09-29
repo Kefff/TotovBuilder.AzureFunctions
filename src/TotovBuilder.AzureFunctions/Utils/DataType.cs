@@ -6,11 +6,6 @@
     public enum DataType
     {
         /// <summary>
-        /// Armor penetrations.
-        /// </summary>
-        ArmorPenetrations,
-
-        /// <summary>
         /// Totov Builder Azure Functions configuration.
         /// </summary>
         AzureFunctionsConfiguration,

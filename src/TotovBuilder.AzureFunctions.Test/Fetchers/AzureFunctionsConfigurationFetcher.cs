@@ -23,13 +23,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)));
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(TestData.AzureFunctionsConfigurationJson)))
+                .Verifiable();
 
             AzureFunctionsConfigurationFetcher fetcher = new(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,
@@ -37,11 +43,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 configurationWrapperMock.Object);
 
             // Act
-            Result<AzureFunctionsConfiguration> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
+            fetcher.FetchedData.Should().BeEquivalentTo(TestData.AzureFunctionsConfiguration);
         }
 
         [Fact]
@@ -49,13 +55,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
-            });
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
+                })
+                .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok("invalid")));
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok("invalid")))
+                .Verifiable();
 
             AzureFunctionsConfigurationFetcher fetcher = new(
                 new Mock<ILogger<AzureFunctionsConfigurationFetcher>>().Object,

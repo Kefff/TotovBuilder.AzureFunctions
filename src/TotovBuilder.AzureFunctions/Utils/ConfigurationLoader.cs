@@ -70,19 +70,19 @@ namespace TotovBuilder.AzureFunctions.Utils
         }
 
         /// <summary>
-        /// Load the configuration.
+        /// Loads the configuration.
         /// </summary>
         /// <returns>Result of the configuration loading.</returns>
         private async Task<Result> Load()
         {
-            Result<AzureFunctionsConfiguration> azureFunctionsConfigurationResult = await AzureFunctionsConfigurationFetcher.Fetch();
+            Result azureFunctionsConfigurationResult = await AzureFunctionsConfigurationFetcher.Fetch();
 
             if (azureFunctionsConfigurationResult.IsSuccess)
             {
-                ConfigurationWrapper.Values = azureFunctionsConfigurationResult.Value;
+                ConfigurationWrapper.Values = AzureFunctionsConfigurationFetcher.FetchedData!;
             }
 
-            return azureFunctionsConfigurationResult.ToResult();
+            return azureFunctionsConfigurationResult;
         }
 
         /// <summary>

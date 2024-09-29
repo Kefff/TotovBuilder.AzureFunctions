@@ -80,16 +80,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while deserializing armor penetrations :
-        ///{0}.
-        /// </summary>
-        internal static string ArmorPenetrationsDeserializationError {
-            get {
-                return ResourceManager.GetString("ArmorPenetrationsDeserializationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing Azure Functions configuration :
         ///{0}.
         /// </summary>

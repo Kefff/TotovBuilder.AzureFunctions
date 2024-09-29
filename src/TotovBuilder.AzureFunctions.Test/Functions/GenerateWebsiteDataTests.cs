@@ -41,7 +41,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             };
 
             Mock<IConfigurationLoader> configurationLoaderMock = new();
-            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
+            configurationLoaderMock
+                .Setup(m => m.WaitForLoading())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
@@ -62,43 +65,71 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IChangelogFetcher> changelogFetcherMock = new();
             changelogFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<ChangelogEntry>>(TestData.Changelog)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            changelogFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Changelog)
                 .Verifiable();
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemCategoriesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.ItemCategories)
                 .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
             itemsFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Items)
                 .Verifiable();
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<InventoryItem>>(TestData.Presets)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            presetsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Presets)
                 .Verifiable();
 
             Mock<IPricesFetcher> pricesFetcherMock = new();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok(TestData.Prices.Concat(TestData.Barters))))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            pricesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Prices.Concat(TestData.Barters))
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            tarkovValuesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.TarkovValues)
                 .Verifiable();
 
             Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfiguration)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            websiteConfigurationFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.WebsiteConfiguration)
                 .Verifiable();
 
             JsonSerializerOptions serializationOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -185,7 +216,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             };
 
             Mock<IConfigurationLoader> configurationLoaderMock = new();
-            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Fail("Error"))).Verifiable();
+            configurationLoaderMock
+                .Setup(m => m.WaitForLoading())
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             Mock<IChangelogFetcher> changelogFetcherMock = new();
@@ -243,7 +277,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             };
 
             Mock<IConfigurationLoader> configurationLoaderMock = new();
-            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
+            configurationLoaderMock
+                .Setup(m => m.WaitForLoading())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
@@ -264,43 +301,71 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IChangelogFetcher> changelogFetcherMock = new();
             changelogFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail<IEnumerable<ChangelogEntry>>("Error")))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            changelogFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((IEnumerable<ChangelogEntry>?)null)
                 .Verifiable();
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail<IEnumerable<ItemCategory>>("Error")))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            itemCategoriesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((IEnumerable<ItemCategory>?)null)
                 .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
             itemsFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail<IEnumerable<Item>>("Error")))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            itemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((IEnumerable<Item>?)null)
                 .Verifiable();
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail<IEnumerable<InventoryItem>>("Error")))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            presetsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((IEnumerable<InventoryItem>?)null)
                 .Verifiable();
 
             Mock<IPricesFetcher> pricesFetcherMock = new();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail<IEnumerable<Price>>("Error")))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            pricesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((IEnumerable<Price>?)null)
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail<TarkovValues>("Error")))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            tarkovValuesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((TarkovValues?)null)
                 .Verifiable();
 
             Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail<WebsiteConfiguration>("Error")))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            websiteConfigurationFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((WebsiteConfiguration?)null)
                 .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
@@ -350,7 +415,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             };
 
             Mock<IConfigurationLoader> configurationLoaderMock = new();
-            configurationLoaderMock.Setup(m => m.WaitForLoading()).Returns(Task.FromResult(Result.Ok())).Verifiable();
+            configurationLoaderMock
+                .Setup(m => m.WaitForLoading())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
@@ -371,43 +439,71 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IChangelogFetcher> changelogFetcherMock = new();
             changelogFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<ChangelogEntry>>(TestData.Changelog)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            changelogFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Changelog)
                 .Verifiable();
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<ItemCategory>>(TestData.ItemCategories)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemCategoriesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.ItemCategories)
                 .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
             itemsFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<Item>>(TestData.Items)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            itemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Items)
                 .Verifiable();
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
             presetsFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok<IEnumerable<InventoryItem>>(TestData.Presets)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            presetsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Presets)
                 .Verifiable();
 
             Mock<IPricesFetcher> pricesFetcherMock = new();
             pricesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok(TestData.Prices.Concat(TestData.Barters))))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            pricesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.Prices.Concat(TestData.Barters))
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok(TestData.TarkovValues)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            tarkovValuesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.TarkovValues)
                 .Verifiable();
 
             Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
             websiteConfigurationFetcherMock
                 .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok(TestData.WebsiteConfiguration)))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            websiteConfigurationFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.WebsiteConfiguration)
                 .Verifiable();
 
             JsonSerializerOptions serializationOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
