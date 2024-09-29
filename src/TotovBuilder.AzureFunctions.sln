@@ -14,7 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB215096-7BFE-4638-A0CF-B70207E6B6A3}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		coverlet.runsettings = coverlet.runsettings
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TotovBuilder.Shared", "..\..\TotovBuilder.Shared\src\TotovBuilder.Shared\TotovBuilder.Shared.csproj", "{94D43F09-E7F6-4274-8FC6-8952DCED20F0}"

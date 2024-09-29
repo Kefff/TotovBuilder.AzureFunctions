@@ -340,12 +340,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="preset">Preset.</param>
         private void UpdateItemProperties(InventoryItem preset)
         {
-            if (ItemsFetcher.FetchedData == null)
-            {
-                return;
-            }
-
-            Item? presetItem = ItemsFetcher.FetchedData.FirstOrDefault(i => i.Id == preset.ItemId);
+            Item? presetItem = ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == preset.ItemId);
 
             if (presetItem is IArmor armoredPresetItem
                 && (presetItem.CategoryId == "armor" || presetItem.CategoryId == "vest")
