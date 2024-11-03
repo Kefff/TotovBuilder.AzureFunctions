@@ -167,7 +167,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 ammunition.Tracer = propertiesJson.GetProperty("tracer").GetBoolean();
                 ammunition.Velocity = propertiesJson.GetProperty("initialSpeed").GetDouble();
 
-                ammunition.PenetratedArmorLevel = Math.Floor(ammunition.PenetrationPower / 10); // Cf. https://youtu.be/8DUN-5--xes?feature=shared&t=141
+                ammunition.PenetratedArmorLevel = Math.Min(Math.Floor(ammunition.PenetrationPower / 10), TarkovValues.MaxArmorLevel); // Cf. https://youtu.be/8DUN-5--xes?feature=shared&t=141
                 ammunition.Subsonic = ammunition.Velocity < 343; // Speed of sound in the air at 20°C at sea level
             }
 
