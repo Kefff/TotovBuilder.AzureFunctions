@@ -53,7 +53,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 {
                     AzureBlobStorageWebsiteContainerName = "$web",
                     WebsiteChangelogBlobName = "data/changelog.json",
-                    WebsiteItemCategoriesBlobName = "data/item-categories.json",
                     WebsiteItemsBlobName = "data/items.json",
                     WebsitePresetsBlobName = "data/presets.json",
                     WebsitePricesBlobName = "data/prices.json",
@@ -76,10 +75,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            itemCategoriesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.ItemCategories)
                 .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
@@ -144,10 +139,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock
                 .Setup(m => m.UpdateBlob("$web", "data/changelog.json", expectedChangelog, It.IsAny<BlobHttpHeaders>()))
-                .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            azureBlobStorageManagerMock
-                .Setup(m => m.UpdateBlob("$web", "data/item-categories.json", expectedItemCategories, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
             azureBlobStorageManagerMock
@@ -289,7 +280,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 {
                     AzureBlobStorageWebsiteContainerName = "$web",
                     WebsiteChangelogBlobName = "data/changelog.json",
-                    WebsiteItemCategoriesBlobName = "data/item-categories.json",
                     WebsiteItemsBlobName = "data/items.json",
                     WebsitePresetsBlobName = "data/presets.json",
                     WebsitePricesBlobName = "data/prices.json",
@@ -312,10 +302,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail("Error")))
-                .Verifiable();
-            itemCategoriesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns((IEnumerable<ItemCategory>?)null)
                 .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
@@ -427,7 +413,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 {
                     AzureBlobStorageWebsiteContainerName = "$web",
                     WebsiteChangelogBlobName = "data/changelog.json",
-                    WebsiteItemCategoriesBlobName = "data/item-categories.json",
                     WebsiteItemsBlobName = "data/items.json",
                     WebsitePresetsBlobName = "data/presets.json",
                     WebsitePricesBlobName = "data/prices.json",
@@ -450,10 +435,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            itemCategoriesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.ItemCategories)
                 .Verifiable();
 
             Mock<IItemsFetcher> itemsFetcherMock = new();
@@ -518,10 +499,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock
                 .Setup(m => m.UpdateBlob("$web", "data/changelog.json", expectedChangelog, It.IsAny<BlobHttpHeaders>()))
-                .Returns(Task.FromResult(Result.Fail("Error")))
-                .Verifiable();
-            azureBlobStorageManagerMock
-                .Setup(m => m.UpdateBlob("$web", "data/item-categories.json", expectedItemCategories, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
             azureBlobStorageManagerMock

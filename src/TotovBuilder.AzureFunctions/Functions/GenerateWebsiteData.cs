@@ -147,7 +147,6 @@ namespace TotovBuilder.AzureFunctions.Functions
                 websiteConfigurationFetchTask);
             Task.WaitAll(
                 Upload(ChangelogFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteChangelogBlobName),
-                Upload(TransformItemCategories(ItemCategoriesFetcher.FetchedData), ConfigurationWrapper.Values.WebsiteItemCategoriesBlobName),
                 Upload(ItemsFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteItemsBlobName),
                 Upload(PresetsFetcher.FetchedData, ConfigurationWrapper.Values.WebsitePresetsBlobName),
                 Upload(PricesFetcher.FetchedData, ConfigurationWrapper.Values.WebsitePricesBlobName),
@@ -155,16 +154,6 @@ namespace TotovBuilder.AzureFunctions.Functions
                 Upload(WebsiteConfigurationFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName));
 
             Logger.LogInformation(Properties.Resources.WebsiteDataGenerated);
-        }
-
-        /// <summary>
-        /// Transform item categories into a list of item category IDs.
-        /// </summary>
-        /// <param name="itemCategories">Item categories.</param>
-        /// <returns>Item category IDs.</returns>
-        private static IEnumerable<string>? TransformItemCategories(IEnumerable<ItemCategory>? itemCategories)
-        {
-            return itemCategories?.Select(ic => ic.Id) ?? null;
         }
 
         /// <summary>
