@@ -284,7 +284,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeArray(propertiesJson, "zones", out ArrayEnumerator headArmoredAreasJson))
                 {
-                    armorMod.ArmoredAreas = headArmoredAreasJson.Select(z => GetArmoredAreaName(z)).Distinct().ToArray();
+                    armorMod.ArmoredAreas = [.. headArmoredAreasJson.Select(z => GetArmoredAreaName(z)).Distinct()];
                 }
             }
 
@@ -332,7 +332,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 armoredAreas.AddRange(zones);
             }
 
-            item.ArmoredAreas = armoredAreas.Distinct().ToArray();
+            item.ArmoredAreas = [.. armoredAreas.Distinct()];
             item.ModSlots = [.. item.ModSlots, .. armorModSlots];
         }
 
@@ -719,7 +719,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
-                magazine.AcceptedAmmunitionIds = propertiesJson.GetProperty("allowedAmmo")!.EnumerateArray().Select(allowedAmmoJson => allowedAmmoJson.GetProperty("id").GetString()!).ToArray();
+                magazine.AcceptedAmmunitionIds = [.. propertiesJson.GetProperty("allowedAmmo")!.EnumerateArray().Select(allowedAmmoJson => allowedAmmoJson.GetProperty("id").GetString()!)];
                 magazine.Capacity = propertiesJson.GetProperty("capacity").GetDouble();
                 magazine.CheckSpeedModifierPercentage = propertiesJson.GetProperty("ammoCheckModifier").GetDouble();
                 magazine.ErgonomicsModifier = propertiesJson.GetProperty("ergonomics").GetDouble();
@@ -801,7 +801,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 {
                     ModSlot modSlot = new()
                     {
-                        CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),
+                        CompatibleItemIds = [.. modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!)],
                         Name = modSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
                     };
                     modSlots.Add(modSlot);
@@ -888,7 +888,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString()!;
                 rangedWeapon.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
-                rangedWeapon.FireModes = propertiesJson.GetProperty("fireModes").EnumerateArray().Select((JsonElement fireModeJson) => fireModeJson.GetString()!.ToPascalCase()).ToArray();
+                rangedWeapon.FireModes = [.. propertiesJson.GetProperty("fireModes").EnumerateArray().Select(fireModeJson => fireModeJson.GetString()!.ToPascalCase())];
                 rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
                 rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
                 rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
@@ -1095,10 +1095,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private static void SetArmorModsCompatibleItems(ConcurrentBag<Item> items)
         {
             IEnumerable<IArmor> armors = items.Where(i => i is IArmor a && a.ModSlots.Length != 0).Cast<IArmor>();
-            string[] backPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("BCKPLATE")).Select(i => i.Id).ToArray();
-            string[] frontPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("FRPLATE")).Select(i => i.Id).ToArray();
-            string[] leftPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("LPLATE")).Select(i => i.Id).ToArray();
-            string[] rightPlateIds = items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("RPLATE")).Select(i => i.Id).ToArray();
+            string[] backPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("BCKPLATE")).Select(i => i.Id)];
+            string[] frontPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("FRPLATE")).Select(i => i.Id)];
+            string[] leftPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("LPLATE")).Select(i => i.Id)];
+            string[] rightPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("RPLATE")).Select(i => i.Id)];
 
             foreach (IArmor armor in armors)
             {

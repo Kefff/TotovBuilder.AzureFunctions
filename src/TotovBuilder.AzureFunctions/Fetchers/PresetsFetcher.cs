@@ -206,7 +206,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return;
             }
 
-            List<InventoryItemModSlot> inventoryItemModSlots = new(inventoryItem.ModSlots);
+            List<InventoryItemModSlot> inventoryItemModSlots = [.. inventoryItem.ModSlots];
 
             foreach (ModSlot modSlot in item.ModSlots)
             {

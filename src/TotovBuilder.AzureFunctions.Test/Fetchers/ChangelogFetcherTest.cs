@@ -55,15 +55,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Changes =
                     [
-                        new ChangelogChange()
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
                     ],
                     Date = new DateTime(2022, 1, 2),
@@ -73,15 +68,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 {
                     Changes =
                     [
-                        new ChangelogChange()
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
                     ],
                     Date = new DateTime(2022, 1, 2),
@@ -89,17 +79,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes =
+                    Changes = 
                     [
-                        new ChangelogChange()
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
                     ],
                     Date = new DateTime(2022, 1, 2),
@@ -107,17 +92,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes =
+                    Changes = 
                     [
-                        new ChangelogChange()
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            {  "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
                     ],
                     Date = new DateTime(2022, 1, 2),
@@ -125,17 +105,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes =
+                    Changes = 
                     [
-                        new ChangelogChange()
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
                     ],
                     Date = new DateTime(2022, 1, 2),
@@ -169,17 +144,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ""date"": ""2022-01-02T00:00:00+01:00"",
     ""changes"": [
       {
-        ""language"": ""en"",
-        ""text"": ""Added a thing.""
-      },
-      {
-        ""language"": ""fr"",
-        ""text"": ""Ajout d'une chose.""
+        ""en"": ""Added a thing."",
+        ""fr"": ""Ajout d'une chose.""
       }
     ]
   }
-]
-")))
+]")))
                 .Verifiable();
 
             ChangelogFetcher fetcher = new(

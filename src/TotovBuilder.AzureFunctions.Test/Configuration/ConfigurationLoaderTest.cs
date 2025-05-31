@@ -36,7 +36,7 @@ namespace TotovBuilder.AzureFunctions.Test.Configuration
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            IConfigurationWrapper configurationWrapper = new ConfigurationWrapper();
+            ConfigurationWrapper configurationWrapper = new();
 
             // Act
             ConfigurationLoader configurationLoader = new(

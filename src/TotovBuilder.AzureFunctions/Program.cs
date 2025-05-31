@@ -13,7 +13,7 @@ using TotovBuilder.Shared.Extensions;
 
 IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices((HostBuilderContext hopstBuilderContext, IServiceCollection services) =>
+    .ConfigureServices((hopstBuilderContext, services) =>
     {
         services.AddHttpClient();
 
@@ -35,13 +35,12 @@ IHost host = new HostBuilder()
         services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
         services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
 
-        services.AddAzureBlobStorageManager(
-            (IServiceProvider serviceProvider) =>
-            {
-                IConfigurationWrapper configurationWrapper = serviceProvider.GetRequiredService<IConfigurationWrapper>();
+        services.AddAzureBlobStorageManager(serviceProvider =>
+        {
+            IConfigurationWrapper configurationWrapper = serviceProvider.GetRequiredService<IConfigurationWrapper>();
 
-                return new AzureBlobStorageManagerOptions(configurationWrapper.Values.AzureBlobStorageConnectionString, configurationWrapper.Values.ExecutionTimeout);
-            });
+            return new AzureBlobStorageManagerOptions(configurationWrapper.Values.AzureBlobStorageConnectionString, configurationWrapper.Values.ExecutionTimeout);
+        });
 
         services.Configure<LoggerFilterOptions>(options =>
         {
