@@ -680,11 +680,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     return DeserializeEyewear(itemJson, itemCategory.Id);
                 case "grenade":
                     return DeserializeGrenade(itemJson, itemCategory.Id);
+                case "faceCover":
                 case "headwear":
                     return DeserializeHeadwear(itemJson, itemCategory.Id);
                 case "armband":
                 case "currency":
-                case "faceCover":
                 case "headphones":
                 case "other":
                 case "special":
