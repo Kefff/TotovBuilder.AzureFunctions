@@ -131,11 +131,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             Task.WaitAll([.. deserializationTasks]);
 
-            // MISSING FROM API
-            // Since the API does not indicate on armor mod slots the compatible items,
-            // we add as compatible items all armor mods that protects the same zone as the armor mod slot
-            SetArmorModsCompatibleItems(items);
-
             return Task.FromResult(Result.Ok(items.AsEnumerable()));
         }
 
@@ -194,15 +189,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeDouble(propertiesJson, "class", out double armorClass))
                 {
-                    // The value returned by the API is the value with the default ballistic plates.
-                    // This should instead be the base armor of the item without armor plates.
+                    // For armors with a soft armor, this value will be overridden by the front soft armor armor class
                     armor.ArmorClass = armorClass;
                 }
 
                 if (TryDeserializeDouble(propertiesJson, "durability", out double durability))
                 {
-                    // The value returned by the API is the value with the default ballistic plates.
-                    // This should instead be the base durability of the item without armor plates.
+                    // For armors with a soft armor, this value will be overridden by the sum of the soft armor durability
                     armor.Durability = durability;
                 }
 
@@ -305,6 +298,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             List<string> armoredAreas = [];
             List<ModSlot> armorModSlots = [];
+            int lockedArmorSlotsDurability = 0;
 
             foreach (JsonElement modSlotJson in armorModSlotsJson)
             {
@@ -312,24 +306,35 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (armorSlotType == "ItemArmorSlotOpen")
                 {
-                    // For now, when an armor has armor plate slots, we consider its armor value is 0.
-                    // In reality, it should be the value of the front aramid insert but the API does not provide it.
-                    item.ArmorClass = 0;
-
                     ModSlot armorModSlot = new()
                     {
-                        // Compatible items are not listed in the API
-                        //CompatibleItemIds = modSlotJson.GetProperty("filters").GetProperty("allowedItems").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),  // TODO : MISSING FROM API
+                        CompatibleItemIds = modSlotJson.GetProperty("allowedPlates").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),
                         Name = modSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
                     };
                     armorModSlots.Add(armorModSlot);
+                }
+                else if (armorSlotType == "ItemArmorSlotLocked")
+                {
+                    string armorSlotName = modSlotJson.GetProperty("nameId").GetString()!;
+
+                    if (armorSlotName == "Soft_armor_front")
+                    {
+                        item.ArmorClass = modSlotJson.GetProperty("class").GetInt32();
+                    }
+                    
+                    lockedArmorSlotsDurability += modSlotJson.GetProperty("durability").GetInt32();
                 }
 
                 IEnumerable<string> zones = modSlotJson
                     .GetProperty("zones")
                     .EnumerateArray()
-                    .Select(z => GetArmoredAreaName(z));
+                    .Select(GetArmoredAreaName);
                 armoredAreas.AddRange(zones);
+            }
+
+            if (lockedArmorSlotsDurability > 0)
+            {
+                item.Durability = lockedArmorSlotsDurability;
             }
 
             item.ArmoredAreas = [.. armoredAreas.Distinct()];
@@ -525,10 +530,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
                 grenade.ExplosionDelay = propertiesJson.GetProperty("fuse").GetDouble();
+                grenade.Impact = propertiesJson.GetProperty("type").GetString() == "Impact Grenade";
                 grenade.FragmentsAmount = propertiesJson.GetProperty("fragments").GetDouble();
                 grenade.MaximumExplosionRange = propertiesJson.GetProperty("maxExplosionDistance").GetDouble();
                 grenade.MinimumExplosionRange = propertiesJson.GetProperty("minExplosionDistance").GetDouble();
-                grenade.Type = propertiesJson.GetProperty("type").GetString()!;
 
                 if (grenade.MaximumExplosionRange == 0)
                 {
@@ -1085,42 +1090,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             return TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson)
                 && propertiesJson.EnumerateObject().Any()
                 && propertiesJson.GetProperty("__typename").GetString() == "ItemPropertiesPreset";
-        }
-
-        /// <summary>
-        /// Sets the compatible item IDs or armor slots since it is missible from the API.
-        /// Add as compatible items all armor mods that protects the same zone as the armor mod slot.
-        /// </summary>
-        /// <param name="items">List of all the items.</param>
-        private static void SetArmorModsCompatibleItems(ConcurrentBag<Item> items)
-        {
-            IEnumerable<IArmor> armors = items.Where(i => i is IArmor a && a.ModSlots.Length != 0).Cast<IArmor>();
-            string[] backPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("BCKPLATE")).Select(i => i.Id)];
-            string[] frontPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("FRPLATE")).Select(i => i.Id)];
-            string[] leftPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("LPLATE")).Select(i => i.Id)];
-            string[] rightPlateIds = [.. items.Where(i => i is IArmorMod am && am.ArmoredAreas.Contains("RPLATE")).Select(i => i.Id)];
-
-            foreach (IArmor armor in armors)
-            {
-                foreach (ModSlot modSlot in armor.ModSlots)
-                {
-                    switch (modSlot.Name)
-                    {
-                        case "back_plate":
-                            modSlot.CompatibleItemIds = backPlateIds;
-                            break;
-                        case "front_plate":
-                            modSlot.CompatibleItemIds = frontPlateIds;
-                            break;
-                        case "left_side_plate":
-                            modSlot.CompatibleItemIds = leftPlateIds;
-                            break;
-                        case "right_side_plate":
-                            modSlot.CompatibleItemIds = rightPlateIds;
-                            break;
-                    }
-                }
-            }
         }
 
         /// <summary>
