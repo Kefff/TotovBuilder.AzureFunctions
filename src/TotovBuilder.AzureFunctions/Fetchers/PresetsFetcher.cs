@@ -329,41 +329,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
-            UpdateItemProperties(preset);
 
             return preset;
-        }
-
-        /// <summary>
-        /// Updates the properties of the item of a preset.
-        /// </summary>
-        /// <param name="preset">Preset.</param>
-        private void UpdateItemProperties(InventoryItem preset)
-        {
-            Item? presetItem = ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == preset.ItemId);
-
-            if (presetItem is IArmor armoredPresetItem
-                && (presetItem.CategoryId == "armor" || presetItem.CategoryId == "vest")
-                && armoredPresetItem.Name.EndsWith(" Default"))
-            {
-                // The durability returned by the API is the sum of the aramid inserts durability + default armor plates durability.
-                // We substract the default armor plates durability to find the real durability of the item.
-                double armorPlatesDurability = 0;
-                IArmor baseItem = (IArmor)ItemsFetcher.FetchedData!.First(i => i.Id == armoredPresetItem.BaseItemId);
-
-                foreach (InventoryItemModSlot inventoryItemModSlot in preset.ModSlots.Where(iims => iims.Item != null))
-                {
-                    Item modSlotItem = ItemsFetcher.FetchedData!.First(i => i.Id == inventoryItemModSlot.Item!.ItemId);
-
-                    if (modSlotItem is IArmorMod armoredModSlotItem)
-                    {
-                        armorPlatesDurability += armoredModSlotItem.Durability;
-                    }
-                }
-
-                armoredPresetItem.Durability = baseItem.Durability - armorPlatesDurability;
-                baseItem.Durability = armoredPresetItem.Durability;
-            }
         }
     }
 }
