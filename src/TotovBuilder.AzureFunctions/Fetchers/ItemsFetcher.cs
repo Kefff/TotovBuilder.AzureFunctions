@@ -529,11 +529,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (TryDeserializeObject(itemJson, "properties", out JsonElement propertiesJson) && propertiesJson.EnumerateObject().Count() > 1)
             {
+                grenade.Blinding = propertiesJson.GetProperty("type").GetString() == "Flashbang";
                 grenade.ExplosionDelay = propertiesJson.GetProperty("fuse").GetDouble();
                 grenade.Impact = propertiesJson.GetProperty("type").GetString() == "Impact Grenade";
                 grenade.FragmentsAmount = propertiesJson.GetProperty("fragments").GetDouble();
                 grenade.MaximumExplosionRange = propertiesJson.GetProperty("maxExplosionDistance").GetDouble();
                 grenade.MinimumExplosionRange = propertiesJson.GetProperty("minExplosionDistance").GetDouble();
+                grenade.Smoke = propertiesJson.GetProperty("type").GetString() == "Smoke";
 
                 if (grenade.MaximumExplosionRange == 0)
                 {
