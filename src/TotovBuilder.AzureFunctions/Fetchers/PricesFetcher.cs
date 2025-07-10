@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using FluentResults;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
@@ -81,10 +82,39 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (bartersResult!.IsSuccess)
             {
+                TranformBartersWithCurrency(BartersFetcher.FetchedData!, pricesAndBarters);
                 pricesAndBarters.AddRange(BartersFetcher.FetchedData!);
             }
 
             return Result.Ok<IEnumerable<Price>>(pricesAndBarters);
+        }
+
+        /// <summary>
+        /// Transforms barters into prices when the barter is only constituted of one currency.
+        /// </summary>
+        /// <remarks>This can be the case for items sold with GP coins.</remarks>
+        /// <param name="barters">List of barters.</param>
+        /// <param name="prices">List of prices.</param>
+        private void TranformBartersWithCurrency(IEnumerable<Price> barters, IEnumerable<Price> prices)
+        {
+            foreach (Price barter in barters.Where(b => b.BarterItems.Length == 1))
+            {
+                // When the price is considered a barter but it uses a currency (for example GP coins)
+                // we do not consider it to be a barter
+                BarterItem barterItem = barter.BarterItems[0];
+                Currency? currency = TarkovValuesFetcher.FetchedData!.Currencies.FirstOrDefault(c => c.ItemId == barterItem.ItemId);
+
+                if (currency == null)
+                {
+                    continue;
+                }
+
+                Price? currencyPrice = prices.FirstOrDefault(p => p.ItemId == currency.ItemId);
+                barter.BarterItems = [];
+                barter.CurrencyName = currency.Name;
+                barter.Value = barterItem.Quantity;
+                barter.ValueInMainCurrency = barterItem.Quantity * (currencyPrice?.ValueInMainCurrency ?? 0);
+            }
         }
 
         /// <summary>

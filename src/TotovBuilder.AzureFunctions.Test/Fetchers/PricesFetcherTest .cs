@@ -81,9 +81,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Result result = await fetcher.Fetch();
 
             // Assert
-            result.IsSuccess.Should().BeTrue();
-            fetcher.FetchedData.Should().BeEquivalentTo(new List<Price>(TestData.Prices.Concat(TestData.Barters))
-            {
+            List<Price> expected =
+            [
+                .. TestData.Prices.Concat(TestData.Barters),
                 new()
                 {
                     CurrencyName = "RUB",
@@ -93,9 +93,140 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Value = 1,
                     ValueInMainCurrency = 1
                 }
-            });
-            bartersFetcherMock.Verify();
-            tarkovValuesFetcherMock.Verify();
+            ];
+
+            result.IsSuccess.Should().BeTrue();
+            fetcher.FetchedData.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public async Task Fetch_WithBartersOnlyUsingCurrency_ShouldTransformBarterToPrice()
+        {
+            // Arrange
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    ApiPresetsQuery = "{ items(type: preset) { id } }",
+                    ApiPricesQuery = "{ items { id }",
+                    ApiUrl = "https://localhost/api",
+                    ExecutionTimeout = 5
+                })
+                .Verifiable();
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+  ""data"": {
+    ""items"": [
+      {
+        ""buyFor"": [
+          {
+            ""currency"": ""RUB"",
+            ""price"": 10000,
+            ""priceRUB"": 10000,
+            ""vendor"": {
+              ""minTraderLevel"": 1,
+              ""taskUnlock"": null,
+              ""trader"": {
+                ""normalizedName"": ""ref""
+              }
+            }
+          }
+        ],
+        ""id"": ""5d235b4d86f7742e017bc88a""
+      }
+    ]
+  }
+}") }))
+                .Verifiable();
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
+
+            Mock<IBartersFetcher> bartersFetcherMock = new();
+            bartersFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            bartersFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns([new()
+                    {
+                        BarterItems =
+                        [
+                            new BarterItem()
+                            {
+                                ItemId = "5d235b4d86f7742e017bc88a",
+                                Quantity = 6
+                            }
+                        ],
+                        CurrencyName = "barter",
+                        ItemId = "67f90180f07898267b0a4ed7",
+                        Merchant = "ref",
+                        MerchantLevel = 2
+                    }])
+                .Verifiable();
+
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            tarkovValuesFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            tarkovValuesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.TarkovValues)
+                .Verifiable();
+
+            PricesFetcher fetcher = new(
+                new Mock<ILogger<PricesFetcher>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                configurationWrapperMock.Object,
+                bartersFetcherMock.Object,
+                tarkovValuesFetcherMock.Object);
+
+            // Act
+            Result result = await fetcher.Fetch();
+
+            // Assert
+            List<Price> expected =
+            [
+                new()
+                {
+                    CurrencyName = "GPCOIN",
+                    ItemId = "67f90180f07898267b0a4ed7",
+                    Merchant = "ref",
+                    MerchantLevel = 2,
+                    Value = 6,
+                    ValueInMainCurrency = 60000
+                },
+                new()
+                {
+                    CurrencyName = "RUB",
+                    ItemId = "5d235b4d86f7742e017bc88a",
+                    Merchant = "ref",
+                    MerchantLevel = 1,
+                    Value = 10000,
+                    ValueInMainCurrency = 10000
+                },
+                new Price()
+                {
+                    CurrencyName = "RUB",
+                    ItemId = "5449016a4bdc2d6f028b456f",
+                    Merchant = "prapor",
+                    MerchantLevel = 1,
+                    Value = 1,
+                    ValueInMainCurrency = 1
+                }
+            ];
+
+            result.IsSuccess.Should().BeTrue();
+            fetcher.FetchedData.Should().BeEquivalentTo(expected);
         }
 
         [Fact]
@@ -198,8 +329,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ValueInMainCurrency = 1
                 }
             });
-            bartersFetcherMock.Verify();
-            tarkovValuesFetcherMock.Verify();
         }
 
         [Fact]
@@ -254,7 +383,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeFalse();
             result.Errors.Single().Message.Should().Be("Prices - No data fetched.");
-            tarkovValuesFetcherMock.Verify();
         }
 
         [Fact]
@@ -324,8 +452,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ValueInMainCurrency = 1
                 }
             });
-            bartersFetcherMock.Verify();
-            tarkovValuesFetcherMock.Verify();
         }
     }
 }

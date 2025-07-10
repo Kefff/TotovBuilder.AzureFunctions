@@ -33,6 +33,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// Tarkov values fetcher.
+        /// </summary>
+        private readonly ITarkovValuesFetcher TarkovValuesFetcher;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="BartersFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
@@ -41,9 +46,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         public BartersFetcher(
             ILogger<BartersFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IConfigurationWrapper configurationWrapper)
+            IConfigurationWrapper configurationWrapper,
+            ITarkovValuesFetcher tarkovValuesFetcher)
             : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
+            TarkovValuesFetcher = tarkovValuesFetcher;
         }
 
         /// <inheritdoc/>
