@@ -733,6 +733,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 magazine.LoadSpeedModifierPercentage = propertiesJson.GetProperty("loadModifier").GetDouble();
                 magazine.MalfunctionPercentage = propertiesJson.GetProperty("malfunctionChance").GetDouble();
                 magazine.ModSlots = DeserializeModSlots(propertiesJson);
+
+                if (magazine.ModSlots.Any(ms => ms.Name.StartsWith("camora_")))
+                {
+                    // Cylinder magazines have no capacity because they have mod slots where ammunition can be placed.
+                    // This prevents the "Content" tab from appearing.
+                    // We place ammunition in the mod slots instead of the content because some ammunition cannot be stacked
+                    // to the amount of the "camora_" modslots (grenades for grenade launcher cannot be stacked)
+                    magazine.AcceptedAmmunitionIds = [];
+                    magazine.Capacity = 0;
+                }
             }
 
             return magazine;
