@@ -14,9 +14,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a base class for API fetchers.
     /// </summary>
-    public abstract class ApiFetcher<T> : IApiFetcher<T>
+    public abstract partial class ApiFetcher<T> : IApiFetcher<T>
         where T : class
     {
+        /// <inheritdoc/>
+        public T? FetchedData { get; private set; } = null;
+
         /// <summary>
         /// API query.
         /// </summary>
@@ -38,10 +41,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected readonly ILogger<ApiFetcher<T>> Logger;
 
         /// <summary>
-        /// Fetched data.
-        /// Once data has been fetched and stored in this property, it is never fetched again.
+        /// Serialization options.
         /// </summary>
-        private T? FetchedData { get; set; } = null;
+        private static readonly JsonSerializerOptions SerializerOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
         /// <summary>
         /// Fetching task.
@@ -71,7 +76,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        public async Task<Result<T>> Fetch()
+        public async Task<Result> Fetch()
         {
             if (!FetchingTask.IsCompleted)
             {
@@ -103,7 +108,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
             }
 
-            return Result.Ok(FetchedData);
+            return Result.Ok();
         }
 
         /// <summary>
@@ -286,10 +291,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             try
             {
-                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
+                using HttpRequestMessage request = new(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                string content = JsonSerializer.Serialize(new { Query = ApiQuery }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                string content = JsonSerializer.Serialize(new { Query = ApiQuery }, SerializerOptions);
                 request.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
                 IHttpClientWrapper client = HttpClientWrapperFactory.Create();
@@ -346,7 +351,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     return Result.Fail(error);
                 }
 
-                Match usefulDataKeyMatch = Regex.Match(ApiQuery, "^{ ?([a-zA-Z]+)");
+                Match usefulDataKeyMatch = GetDataRegex().Match(ApiQuery);
 
                 if (!data.TryGetProperty(usefulDataKeyMatch.Groups[1].Value, out JsonElement isolatedData))
                 {
@@ -376,5 +381,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return Result.Fail(error);
             }
         }
+
+        [GeneratedRegex("^{ ?([a-zA-Z]+)")]
+        private static partial Regex GetDataRegex();
     }
 }

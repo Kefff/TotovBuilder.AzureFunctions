@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
-using TotovBuilder.Model.Items;
 using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -129,93 +128,71 @@ namespace TotovBuilder.AzureFunctions.Functions
 
             Logger.LogInformation(Properties.Resources.GeneratingWebsiteData);
 
+            Task<Result> changelogFetchTask = ChangelogFetcher.Fetch();
+            Task<Result> itemCategoriesFetchTask = ItemCategoriesFetcher.Fetch();
+            Task<Result> itemsFetchTask = ItemsFetcher.Fetch();
+            Task<Result> presetsFetchTask = PresetsFetcher.Fetch();
+            Task<Result> pricesFetchTask = PricesFetcher.Fetch();
+            Task<Result> tarkovValuesFetchTask = TarkovValuesFetcher.Fetch();
+            Task<Result> websiteConfigurationFetchTask = WebsiteConfigurationFetcher.Fetch();
+
             Task.WaitAll(
-                FetchAndUpload(ChangelogFetcher, ConfigurationWrapper.Values.WebsiteChangelogBlobName),
-                FetchAndUpload(
-                    ItemCategoriesFetcher,
-                    ConfigurationWrapper.Values.WebsiteItemCategoriesBlobName,
-                    TransformItemCategories),
-                FetchAndUpload(ItemsFetcher, ConfigurationWrapper.Values.WebsiteItemsBlobName),
-                FetchAndUpload(PresetsFetcher, ConfigurationWrapper.Values.WebsitePresetsBlobName),
-                FetchAndUpload(PricesFetcher, ConfigurationWrapper.Values.WebsitePricesBlobName),
-                FetchAndUpload(TarkovValuesFetcher, ConfigurationWrapper.Values.WebsiteTarkovValuesBlobName),
-                FetchAndUpload(WebsiteConfigurationFetcher, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName));
+                changelogFetchTask,
+                itemCategoriesFetchTask,
+                itemsFetchTask,
+                presetsFetchTask,
+                pricesFetchTask,
+                tarkovValuesFetchTask,
+                websiteConfigurationFetchTask);
+            Task.WaitAll(
+                Upload(ChangelogFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteChangelogBlobName),
+                Upload(ItemsFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteItemsBlobName),
+                Upload(PresetsFetcher.FetchedData, ConfigurationWrapper.Values.WebsitePresetsBlobName),
+                Upload(PricesFetcher.FetchedData, ConfigurationWrapper.Values.WebsitePricesBlobName),
+                Upload(TarkovValuesFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteTarkovValuesBlobName),
+                Upload(WebsiteConfigurationFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName));
 
             Logger.LogInformation(Properties.Resources.WebsiteDataGenerated);
         }
 
         /// <summary>
-        /// Fetches data for the website and uploads it to a blob storage.
+        /// Uploads data it to a blob storage.
         /// </summary>
         /// <typeparam name="TData">Type of data.</typeparam>
-        /// <param name="fetcher">Fetcher.</param>
+        /// <param name="data">Data.</param>
         /// <param name="azureBlobName">Blob name.</param>
-        private async Task FetchAndUpload<TData>(IApiFetcher<TData> fetcher, string azureBlobName)
+        private async Task Upload<TData>(TData? data, string azureBlobName)
             where TData : class
         {
-            await FetchAndUpload(fetcher, azureBlobName, (TData input) => input);
-        }
-
-        /// <summary>
-        /// Fetches data for the website, transforms and uploads it to a blob storage.
-        /// </summary>
-        /// <typeparam name="TIn">Type of data before transformation.</typeparam>
-        /// <typeparam name="TOut">Type of data after transformation.</typeparam>
-        /// <param name="fetcher">Fetcher.</param>
-        /// <param name="azureBlobName">Blob name.</param>
-        /// <param name="transformationFunction">Function for transforming data before uploading.</param>
-        private async Task FetchAndUpload<TIn, TOut>(IApiFetcher<TIn> fetcher, string azureBlobName, Func<TIn, TOut> transformationFunction)
-            where TIn : class
-            where TOut : class
-        {
-            Result<TIn> fetchResult = await fetcher.Fetch();
-
-            if (fetchResult.IsFailed)
+            if (data == null)
             {
                 return;
             }
 
-            TOut transformedData = transformationFunction(fetchResult.Value);
-
-            JsonSerializerOptions serializationOptions = new JsonSerializerOptions()
+            JsonSerializerOptions serializationOptions = new()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
             string serializedData;
 
-            if (typeof(IEnumerable).IsAssignableFrom(typeof(TOut)))
+            if (typeof(IEnumerable).IsAssignableFrom(typeof(TData)))
             {
                 serializedData = JsonSerializer.Serialize(
-                    transformedData as IEnumerable<object>, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
+                    data as IEnumerable<object>, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
                     serializationOptions);
             }
             else
             {
                 serializedData = JsonSerializer.Serialize(
-                    transformedData as object, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
+                    data as object, // Cast required otherwise properties of classes inheriting from Item are not serialized. See https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism?pivots=dotnet-7-0
                     serializationOptions);
             }
 
-            BlobHttpHeaders httpHeaders = new BlobHttpHeaders()
+            BlobHttpHeaders httpHeaders = new()
             {
                 CacheControl = ConfigurationWrapper.Values.WebsiteDataCacheControl
             };
-            Result updateResult = await AzureBlobStorageManager.UpdateBlob(ConfigurationWrapper.Values.AzureBlobStorageWebsiteContainerName, azureBlobName, serializedData, httpHeaders);
-
-            if (updateResult.IsFailed)
-            {
-                return;
-            }
-        }
-
-        /// <summary>
-        /// Transform item categories into a list of item category IDs.
-        /// </summary>
-        /// <param name="itemCategories">Item categories.</param>
-        /// <returns>Item category IDs.</returns>
-        private IEnumerable<string> TransformItemCategories(IEnumerable<ItemCategory> itemCategories)
-        {
-            return itemCategories.Select(ic => ic.Id);
+            await AzureBlobStorageManager.UpdateBlob(ConfigurationWrapper.Values.AzureBlobStorageWebsiteContainerName, azureBlobName, serializedData, httpHeaders);
         }
     }
 }

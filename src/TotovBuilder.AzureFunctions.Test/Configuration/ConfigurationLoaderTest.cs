@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
@@ -20,19 +21,25 @@ namespace TotovBuilder.AzureFunctions.Test.Configuration
         public async Task Load_ShouldLoadConfiguration()
         {
             // Arrange
-            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new Mock<IAzureFunctionsConfigurationFetcher>();
+            Mock<IAzureFunctionsConfigurationFetcher> azureFunctionsConfigurationFetcherMock = new();
             azureFunctionsConfigurationFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(async () =>
                 {
                     await Task.Delay(1000);
-                    return TestData.AzureFunctionsConfiguration;
-                });
 
-            IConfigurationWrapper configurationWrapper = new ConfigurationWrapper();
+                    return Result.Ok();
+                })
+                .Verifiable();
+            azureFunctionsConfigurationFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.AzureFunctionsConfiguration)
+                .Verifiable();
+
+            ConfigurationWrapper configurationWrapper = new();
 
             // Act
-            ConfigurationLoader configurationLoader = new ConfigurationLoader(
+            ConfigurationLoader configurationLoader = new(
                 new Mock<ILogger<ConfigurationLoader>>().Object,
                 configurationWrapper,
                 azureFunctionsConfigurationFetcherMock.Object);

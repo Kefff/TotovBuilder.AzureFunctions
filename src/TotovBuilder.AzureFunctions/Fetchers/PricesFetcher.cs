@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using FluentResults;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
@@ -43,11 +44,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
 
         /// <summary>
-        /// Tarkov values.
-        /// </summary>
-        private TarkovValues TarkovValues = new TarkovValues();
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="QuestsFetcher"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
@@ -70,16 +66,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
         {
-            Result<TarkovValues> tarkovValuesResult = await TarkovValuesFetcher.Fetch();
+            Result tarkovValuesResult = await TarkovValuesFetcher.Fetch();
 
             if (tarkovValuesResult.IsFailed)
             {
-                return tarkovValuesResult.ToResult();
+                return tarkovValuesResult;
             }
 
-            TarkovValues = tarkovValuesResult.Value;
-
-            List<Price> pricesAndBarters = new List<Price>();
+            List<Price> pricesAndBarters = [];
             Result<IEnumerable<Price>>? bartersResult = null;
 
             Task.WaitAll(
@@ -88,10 +82,39 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (bartersResult!.IsSuccess)
             {
-                pricesAndBarters.AddRange(bartersResult.Value);
+                TranformBartersWithCurrency(BartersFetcher.FetchedData!, pricesAndBarters);
+                pricesAndBarters.AddRange(BartersFetcher.FetchedData!);
             }
 
             return Result.Ok<IEnumerable<Price>>(pricesAndBarters);
+        }
+
+        /// <summary>
+        /// Transforms barters into prices when the barter is only constituted of one currency.
+        /// </summary>
+        /// <remarks>This can be the case for items sold with GP coins.</remarks>
+        /// <param name="barters">List of barters.</param>
+        /// <param name="prices">List of prices.</param>
+        private void TranformBartersWithCurrency(IEnumerable<Price> barters, IEnumerable<Price> prices)
+        {
+            foreach (Price barter in barters.Where(b => b.BarterItems.Length == 1))
+            {
+                // When the price is considered a barter but it uses a currency (for example GP coins)
+                // we do not consider it to be a barter
+                BarterItem barterItem = barter.BarterItems[0];
+                Currency? currency = TarkovValuesFetcher.FetchedData!.Currencies.FirstOrDefault(c => c.ItemId == barterItem.ItemId);
+
+                if (currency == null)
+                {
+                    continue;
+                }
+
+                Price? currencyPrice = prices.FirstOrDefault(p => p.ItemId == currency.ItemId);
+                barter.BarterItems = [];
+                barter.CurrencyName = currency.Name;
+                barter.Value = barterItem.Quantity;
+                barter.ValueInMainCurrency = barterItem.Quantity * (currencyPrice?.ValueInMainCurrency ?? 0);
+            }
         }
 
         /// <summary>
@@ -101,7 +124,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Prices.</returns>
         private IEnumerable<Price> GetPrices(string pricesResponseContent)
         {
-            List<Price> prices = new List<Price>();
+            List<Price> prices = [];
             JsonElement pricesJson = JsonDocument.Parse(pricesResponseContent).RootElement;
 
             foreach (JsonElement itemJson in pricesJson.EnumerateArray())
@@ -117,7 +140,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             continue;
                         }
 
-                        Price price = new Price()
+                        Price price = new()
                         {
                             CurrencyName = priceJson.GetProperty("currency").GetString()!,
                             ItemId = itemJson.GetProperty("id").GetString()!,
@@ -167,7 +190,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             // Adding a price to the main currency item
-            Currency? mainCurrency = TarkovValues.Currencies.FirstOrDefault(c => c.MainCurrency);
+            Currency? mainCurrency = TarkovValuesFetcher.FetchedData!.Currencies.FirstOrDefault(c => c.MainCurrency);
 
             if (mainCurrency != null)
             {

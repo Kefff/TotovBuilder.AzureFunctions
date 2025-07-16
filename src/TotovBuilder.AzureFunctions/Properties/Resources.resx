@@ -124,10 +124,6 @@
     <value>{0} - Error while fetching data from the API :
 {1}</value>
   </data>
-  <data name="ArmorPenetrationsDeserializationError" xml:space="preserve">
-    <value>Error while deserializing armor penetrations :
-{0}</value>
-  </data>
   <data name="AzureFunctionsConfigurationDeserializationError" xml:space="preserve">
     <value>Error while deserializing Azure Functions configuration :
 {0}</value>

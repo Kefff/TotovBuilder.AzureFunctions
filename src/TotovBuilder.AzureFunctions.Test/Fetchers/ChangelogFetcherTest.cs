@@ -24,114 +24,95 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturn5LastChangelogs()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawChangelogBlobName = "changelog.json"
-            });
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawChangelogBlobName = "changelog.json"
+                })
+                .Verifiable();
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)))
+                .Verifiable();
 
-            ChangelogFetcher fetcher = new ChangelogFetcher(
+            ChangelogFetcher fetcher = new(
                 new Mock<ILogger<ChangelogFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act
-            Result<IEnumerable<ChangelogEntry>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(new ChangelogEntry[]
+            fetcher.FetchedData.Should().BeEquivalentTo(new ChangelogEntry[]
             {
-                new ChangelogEntry()
+                new()
                 {
-                    Changes = new ChangelogChange[]
-                    {
-                        new ChangelogChange()
+                    Changes =
+                    [
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
-                    },
+                    ],
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.5.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
-                    Changes = new ChangelogChange[]
-                    {
-                        new ChangelogChange()
+                    Changes =
+                    [
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
-                    },
+                    ],
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.4.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
-                    Changes = new ChangelogChange[]
-                    {
-                        new ChangelogChange()
+                    Changes = 
+                    [
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
-                    },
+                    ],
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.3.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
-                    Changes = new ChangelogChange[]
-                    {
-                        new ChangelogChange()
+                    Changes = 
+                    [
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            {  "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
-                    },
+                    ],
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.2.0",
                 },
-                new ChangelogEntry()
+                new()
                 {
-                    Changes = new ChangelogChange[]
-                    {
-                        new ChangelogChange()
+                    Changes = 
+                    [
+                        new()
                         {
-                            Language = "en",
-                            Text = "Added a thing."
-                        },
-                        new ChangelogChange()
-                        {
-                            Language = "fr",
-                            Text = "Ajout d'une chose."
+                            { "en", "Added a thing." },
+                            { "fr", "Ajout d'une chose." }
                         }
-                    },
+                    ],
                     Date = new DateTime(2022, 1, 2),
                     Version = "1.1.0",
                 }
@@ -142,14 +123,19 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawChangelogBlobName = "changelog.json"
-            });
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawChangelogBlobName = "changelog.json"
+                })
+                .Verifiable();
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
   },
@@ -158,19 +144,15 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ""date"": ""2022-01-02T00:00:00+01:00"",
     ""changes"": [
       {
-        ""language"": ""en"",
-        ""text"": ""Added a thing.""
-      },
-      {
-        ""language"": ""fr"",
-        ""text"": ""Ajout d'une chose.""
+        ""en"": ""Added a thing."",
+        ""fr"": ""Ajout d'une chose.""
       }
     ]
   }
-]
-")));
+]")))
+                .Verifiable();
 
-            ChangelogFetcher fetcher = new ChangelogFetcher(
+            ChangelogFetcher fetcher = new(
                 new Mock<ILogger<ChangelogFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);

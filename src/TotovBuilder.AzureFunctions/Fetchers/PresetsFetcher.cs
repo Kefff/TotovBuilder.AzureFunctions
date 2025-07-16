@@ -36,11 +36,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// List of items.
-        /// </summary>
-        private IEnumerable<Item> Items = Array.Empty<Item>();
-
-        /// <summary>
         /// Items fetcher.
         /// </summary>
         private readonly IItemsFetcher ItemsFetcher;
@@ -63,16 +58,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <inheritdoc/>
         protected override async Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
         {
-            List<Task> deserializationTasks = new List<Task>();
-            ConcurrentBag<InventoryItem> presets = new ConcurrentBag<InventoryItem>();
-            Result<IEnumerable<Item>> itemsResult = await ItemsFetcher.Fetch();
+            List<Task> deserializationTasks = [];
+            ConcurrentBag<InventoryItem> presets = [];
+            Result itemsResult = await ItemsFetcher.Fetch();
 
             if (itemsResult.IsFailed)
             {
-                return itemsResult.ToResult();
+                return itemsResult;
             }
-
-            Items = itemsResult.Value;
 
             JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
 
@@ -87,7 +80,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Adds the first of a list of contained items as the content of an inventory item if possible.
+        /// Adds the first item of a list of contained items as the content of an inventory item if possible.
         /// </summary>
         /// <param name="inventoryItem">Inventory item.</param>
         /// <param name="item">Item.</param>
@@ -105,15 +98,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 && item is IMagazine magazine
                 && magazine.AcceptedAmmunitionIds.Contains(containedItem.Item.Id))
             {
-                InventoryItem containedInventoryItem = new InventoryItem()
+                InventoryItem containedInventoryItem = new()
                 {
                     ItemId = containedItem.Item.Id,
                     Quantity = containedItem.Quantity
                 };
-                inventoryItem.Content = new InventoryItem[]
-                {
-                    containedInventoryItem
-                };
+                inventoryItem.Content = [containedInventoryItem];
 
                 containedItems.Dequeue();
                 AddContent(containedInventoryItem, containedItem.Item, containedItems); // Continuing adding content while contained items are not moddable
@@ -195,7 +185,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
                 else
                 {
-                    if (Items.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
+                    if (ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
                     {
                         AddModSlots(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
                     }
@@ -216,7 +206,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return;
             }
 
-            List<InventoryItemModSlot> inventoryItemModSlots = new List<InventoryItemModSlot>(inventoryItem.ModSlots);
+            List<InventoryItemModSlot> inventoryItemModSlots = [.. inventoryItem.ModSlots];
 
             foreach (ModSlot modSlot in item.ModSlots)
             {
@@ -245,7 +235,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
             }
 
-            inventoryItem.ModSlots = inventoryItemModSlots.ToArray();
+            inventoryItem.ModSlots = [.. inventoryItemModSlots];
         }
 
         /// <summary>
@@ -257,7 +247,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Preset.</returns>
         private InventoryItem ConstructPreset(string presetId, IItem baseItem, Queue<PresetContainedItem> containedItems)
         {
-            InventoryItem inventoryItem = new InventoryItem()
+            InventoryItem inventoryItem = new()
             {
                 ItemId = presetId
             };
@@ -310,7 +300,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private InventoryItem? DeserializePresetData(JsonElement presetJson)
         {
             string presetId = presetJson.GetProperty("id").GetString()!;
-            IItem? item = Items.FirstOrDefault(i => i.Id == presetId);
+            IItem? item = ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == presetId);
 
             if (item is not IModdable presetItem)
             {
@@ -318,8 +308,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return null;
             }
 
-            IModdable baseItem = (IModdable)Items.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
-            Queue<PresetContainedItem> containedItems = new Queue<PresetContainedItem>();
+            IModdable baseItem = (IModdable)ItemsFetcher.FetchedData!.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
+            Queue<PresetContainedItem> containedItems = new();
 
             foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
             {
@@ -331,10 +321,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     continue;
                 }
 
-                Item containedItem = Items.First(i => i.Id == containedItemId);
+                Item containedItem = ItemsFetcher.FetchedData!.First(i => i.Id == containedItemId);
                 int quantity = containedItemJson.GetProperty("quantity").GetInt32();
 
-                PresetContainedItem presetContainedItem = new PresetContainedItem(containedItem, quantity);
+                PresetContainedItem presetContainedItem = new(containedItem, quantity);
                 containedItems.Enqueue(presetContainedItem);
             }
 

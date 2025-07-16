@@ -23,40 +23,50 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldReturnItemMissingProperties()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawItemMissingPropertiesBlobName = "item-missing-properties.json"
-            });
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawItemMissingPropertiesBlobName = "item-missing-properties.json"
+                })
+                .Verifiable();
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ItemMissingPropertiesJson)));
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(TestData.ItemMissingPropertiesJson)))
+                .Verifiable();
 
-            ItemMissingPropertiesFetcher fetcher = new ItemMissingPropertiesFetcher(
+            ItemMissingPropertiesFetcher fetcher = new(
                 new Mock<ILogger<ItemMissingPropertiesFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act
-            Result<IEnumerable<ItemMissingProperties>> result = await fetcher.Fetch();
+            Result result = await fetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(TestData.ItemMissingProperties);
         }
 
         [Fact]
         public async Task Fetch_WithInvalidData_ShouldFail()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawItemMissingPropertiesBlobName = "item-missing-properties.json"
-            });
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawItemMissingPropertiesBlobName = "item-missing-properties.json"
+                })
+                .Verifiable();
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(@"[
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(@"[
   {
     invalid
   },
@@ -74,9 +84,10 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     ""id"": ""5a16b7e1fcdbcb00165aa6c9"",
     ""maxStackableAmount"": 1,
     ""modSlots"": []
-  }")));
+  }")))
+                .Verifiable();
 
-            ItemMissingPropertiesFetcher fetcher = new ItemMissingPropertiesFetcher(
+            ItemMissingPropertiesFetcher fetcher = new(
                 new Mock<ILogger<ItemMissingPropertiesFetcher>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);

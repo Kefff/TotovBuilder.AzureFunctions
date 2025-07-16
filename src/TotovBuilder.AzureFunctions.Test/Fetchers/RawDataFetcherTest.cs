@@ -24,23 +24,26 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_ShouldFetchedData()
         {
             // Arrange
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
 
-            Mock<IConfigurationWrapper> mockConfigurationWrapperMock = new Mock<IConfigurationWrapper>();
-            mockConfigurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration());
+            Mock<IConfigurationWrapper> mockConfigurationWrapperMock = new();
+            mockConfigurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration())
+                .Verifiable();
 
-            RawDataFetcherImplementation rawDataFetcher = new RawDataFetcherImplementation(
+            RawDataFetcherImplementation rawDataFetcher = new(
                 new Mock<ILogger<RawDataFetcherImplementation>>().Object,
                 azureBlobStorageManagerMock.Object,
                 mockConfigurationWrapperMock.Object);
 
             // Act
-            Result<IEnumerable<ChangelogEntry>> result = await rawDataFetcher.Fetch();
+            Result result = await rawDataFetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(TestData.Changelog);
+            rawDataFetcher.FetchedData.Should().BeEquivalentTo(TestData.Changelog);
             azureBlobStorageManagerMock.Verify(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
@@ -48,33 +51,37 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithPreviousFetchingTask_ShouldWaitForItToEndAndReturnFetchedData()
         {
             // Arrange
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawChangelogBlobName = "changelog.json"
-            });
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawChangelogBlobName = "changelog.json"
+                })
+                .Verifiable();
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             azureBlobStorageManagerMock
                 .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(async () =>
                 {
                     await Task.Delay(1000);
                     return Result.Ok(TestData.ChangelogJson);
-                });
+                })
+                .Verifiable();
 
-            RawDataFetcherImplementation rawDataFetcher = new RawDataFetcherImplementation(
+            RawDataFetcherImplementation rawDataFetcher = new(
                 new Mock<ILogger<RawDataFetcherImplementation>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act
             _ = rawDataFetcher.Fetch();
-            Result<IEnumerable<ChangelogEntry>> result = await rawDataFetcher.Fetch();
+            Result result = await rawDataFetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(TestData.Changelog);
+            rawDataFetcher.FetchedData.Should().BeEquivalentTo(TestData.Changelog);
             azureBlobStorageManagerMock.Verify(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
@@ -82,40 +89,52 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         public async Task Fetch_WithAlreadyFetchedData_ShouldReturnFetchedData()
         {
             // Arrange
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)));
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Ok(TestData.ChangelogJson)))
+                .Verifiable();
 
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration());
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration())
+                .Verifiable();
 
-            RawDataFetcherImplementation rawDataFetcher = new RawDataFetcherImplementation(
+            RawDataFetcherImplementation rawDataFetcher = new(
                 new Mock<ILogger<RawDataFetcherImplementation>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
 
             // Act
             await rawDataFetcher.Fetch();
-            Result<IEnumerable<ChangelogEntry>> result = await rawDataFetcher.Fetch();
+            Result result = await rawDataFetcher.Fetch();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(TestData.Changelog);
+            rawDataFetcher.FetchedData.Should().BeEquivalentTo(TestData.Changelog);
             azureBlobStorageManagerMock.Verify(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
         public async Task Fetch_WithError_ShouldFail()
         {
-            Mock<IConfigurationWrapper> configurationWrapperMock = new Mock<IConfigurationWrapper>();
-            configurationWrapperMock.SetupGet(m => m.Values).Returns(new AzureFunctionsConfiguration()
-            {
-                RawChangelogBlobName = "changelog.json"
-            });
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(new AzureFunctionsConfiguration()
+                {
+                    RawChangelogBlobName = "changelog.json"
+                })
+                .Verifiable();
 
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new Mock<IAzureBlobStorageManager>();
-            azureBlobStorageManagerMock.Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(Result.Fail<string>(string.Empty)));
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
+            azureBlobStorageManagerMock
+                .Setup(m => m.FetchBlob(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(Result.Fail<string>(string.Empty)))
+                .Verifiable();
 
-            RawDataFetcherImplementation rawDataFetcher = new RawDataFetcherImplementation(
+            RawDataFetcherImplementation rawDataFetcher = new(
                 new Mock<ILogger<RawDataFetcherImplementation>>().Object,
                 azureBlobStorageManagerMock.Object,
                 configurationWrapperMock.Object);
