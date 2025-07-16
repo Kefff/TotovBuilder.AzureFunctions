@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
-using TotovBuilder.Model.Items;
 using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Functions

@@ -740,7 +740,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     // This prevents the "Content" tab from appearing.
                     // We place ammunition in the mod slots instead of the content because some ammunition cannot be stacked
                     // to the amount of the "camora_" modslots (grenades for grenade launcher cannot be stacked)
-                    magazine.AcceptedAmmunitionIds = [];
                     magazine.Capacity = 0;
                 }
             }
