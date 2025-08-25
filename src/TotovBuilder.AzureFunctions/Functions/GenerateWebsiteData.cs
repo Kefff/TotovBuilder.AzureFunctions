@@ -7,6 +7,9 @@ using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
+using TotovBuilder.AzureFunctions.Fetchers;
+using TotovBuilder.Model.Configuration;
+using TotovBuilder.Model.Utils;
 using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Functions
@@ -42,9 +45,14 @@ namespace TotovBuilder.AzureFunctions.Functions
         private readonly IItemCategoriesFetcher ItemCategoriesFetcher;
 
         /// <summary>
-        /// Items fetcher.
+        /// Game mode localized items fetcher.
         /// </summary>
-        private readonly IItemsFetcher ItemsFetcher;
+        private readonly IGameModeLocalizedItemsFetcher GameModeLocalizedItemsFetcher;
+
+        /// <summary>
+        /// Game mode localized prices fetcher.
+        /// </summary>
+        private readonly IGameModeLocalizedPricesFetcher GameModeLocalizedPricesFetcher;
 
         /// <summary>
         /// Logger.
@@ -55,11 +63,6 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// Presets fetcher.
         /// </summary>
         private readonly IPresetsFetcher PresetsFetcher;
-
-        /// <summary>
-        /// Prices fetcher.
-        /// </summary>
-        private readonly IPricesFetcher PricesFetcher;
 
         /// <summary>
         /// Tarkov values fetcher.
@@ -74,15 +77,15 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateWebsiteData"/> class.
         /// </summary>
+        /// <param name="logger">Logger.</param>
         /// <param name="configurationLoader">Configuration loader.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="azureBlobStorageManager">Azure blob storage manager.</param>
         /// <param name="changelogFetcher">Changelog fetcher.</param>.
+        /// <param name="gameModeLocalizedItemsFetcher">Game mode localized items fetcher.</param>
+        /// <param name="gameModeLocalizedPricesFetcher">Game mode localized prices fetcher.</param>
         /// <param name="itemCategoriesFetcher">Item categories fetcher.</param>
-        /// <param name="itemsFetcher">Item fetcher.</param>
-        /// <param name="logger">Logger.</param>
         /// <param name="presetsFetcher">Presets fetcher.</param>
-        /// <param name="pricesFetcher">Prices fetcher.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         /// <param name="websiteConfigurationFetcher">Website configuration fetcher.</param>
         public GenerateWebsiteData(
@@ -91,10 +94,10 @@ namespace TotovBuilder.AzureFunctions.Functions
             IConfigurationWrapper configurationWrapper,
             IAzureBlobStorageManager azureBlobStorageManager,
             IChangelogFetcher changelogFetcher,
+            IGameModeLocalizedItemsFetcher gameModeLocalizedItemsFetcher,
+            IGameModeLocalizedPricesFetcher gameModeLocalizedPricesFetcher,
             IItemCategoriesFetcher itemCategoriesFetcher,
-            IItemsFetcher itemsFetcher,
             IPresetsFetcher presetsFetcher,
-            IPricesFetcher pricesFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher,
             IWebsiteConfigurationFetcher websiteConfigurationFetcher)
         {
@@ -103,10 +106,10 @@ namespace TotovBuilder.AzureFunctions.Functions
             AzureBlobStorageManager = azureBlobStorageManager;
             ChangelogFetcher = changelogFetcher;
             ItemCategoriesFetcher = itemCategoriesFetcher;
-            ItemsFetcher = itemsFetcher;
+            GameModeLocalizedItemsFetcher = gameModeLocalizedItemsFetcher;
+            GameModeLocalizedPricesFetcher = gameModeLocalizedPricesFetcher;
             Logger = logger;
             PresetsFetcher = presetsFetcher;
-            PricesFetcher = pricesFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
             WebsiteConfigurationFetcher = websiteConfigurationFetcher;
         }
@@ -130,27 +133,42 @@ namespace TotovBuilder.AzureFunctions.Functions
 
             Task<Result> changelogFetchTask = ChangelogFetcher.Fetch();
             Task<Result> itemCategoriesFetchTask = ItemCategoriesFetcher.Fetch();
-            Task<Result> itemsFetchTask = ItemsFetcher.Fetch();
+            Task<Result> gameModeLocalizedItemsFetchTask = GameModeLocalizedItemsFetcher.Fetch();
+            Task<Result> gameModeLocalizedPricesFetchTask = GameModeLocalizedPricesFetcher.Fetch();
             Task<Result> presetsFetchTask = PresetsFetcher.Fetch();
-            Task<Result> pricesFetchTask = PricesFetcher.Fetch();
             Task<Result> tarkovValuesFetchTask = TarkovValuesFetcher.Fetch();
             Task<Result> websiteConfigurationFetchTask = WebsiteConfigurationFetcher.Fetch();
 
             Task.WaitAll(
                 changelogFetchTask,
                 itemCategoriesFetchTask,
-                itemsFetchTask,
+                gameModeLocalizedItemsFetchTask,
+                gameModeLocalizedPricesFetchTask,
                 presetsFetchTask,
-                pricesFetchTask,
                 tarkovValuesFetchTask,
                 websiteConfigurationFetchTask);
-            Task.WaitAll(
+
+            List<Task> uploadTasks =
+            [
                 Upload(ChangelogFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteChangelogBlobName),
-                Upload(ItemsFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteItemsBlobName),
                 Upload(PresetsFetcher.FetchedData, ConfigurationWrapper.Values.WebsitePresetsBlobName),
-                Upload(PricesFetcher.FetchedData, ConfigurationWrapper.Values.WebsitePricesBlobName),
                 Upload(TarkovValuesFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteTarkovValuesBlobName),
-                Upload(WebsiteConfigurationFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName));
+                Upload(WebsiteConfigurationFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName)
+            ];
+
+            foreach (string language in ConfigurationWrapper.Values.Languages) {
+                GameModeLocalizedItems gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData!.First(fd => fd.Language == language);
+                uploadTasks.Add(Upload(gameModeLocalizedItems.Items, string.Format(ConfigurationWrapper.Values.WebsiteItemsBlobName, $"_{language}")));
+                
+                foreach (KeyValuePair<string, string> gameMode in ConfigurationWrapper.Values.GameModes) {
+                
+                    GameModeLocalizedPrices gameModeLocalizedPrices = GameModeLocalizedPricesFetcher.FetchedData!.First(fd => fd.GameMode == gameMode.Key && fd.Language == language);
+                    uploadTasks.Add(Upload(gameModeLocalizedPrices.Prices, string.Format(ConfigurationWrapper.Values.WebsitePricesBlobName, $"_{gameMode.Key}", $"_{language}")));
+                }
+            }
+            
+
+            Task.WaitAll([.. uploadTasks]);
 
             Logger.LogInformation(Properties.Resources.WebsiteDataGenerated);
         }

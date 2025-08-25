@@ -7,6 +7,7 @@ using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Builds;
+using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Utils;
 
@@ -38,21 +39,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Items fetcher.
         /// </summary>
-        private readonly IItemsFetcher ItemsFetcher;
+        private readonly IGameModeLocalizedItemsFetcher GameModeLocalizedItemsFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PresetsFetcher"/> class.
         /// </summary>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="gameModeLocalizedItemsFetcher">Game mode localized items fetcher.</param>
         public PresetsFetcher(
             ILogger<PresetsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
-            IItemsFetcher itemsFetcher
+            IGameModeLocalizedItemsFetcher gameModeLocalizedItemsFetcher
         ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
-            ItemsFetcher = itemsFetcher;
+            GameModeLocalizedItemsFetcher = gameModeLocalizedItemsFetcher;
         }
 
         /// <inheritdoc/>
@@ -60,7 +63,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             List<Task> deserializationTasks = [];
             ConcurrentBag<InventoryItem> presets = [];
-            Result itemsResult = await ItemsFetcher.Fetch();
+            Result itemsResult = await GameModeLocalizedItemsFetcher.Fetch();
 
             if (itemsResult.IsFailed)
             {
@@ -185,7 +188,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
                 else
                 {
-                    if (ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
+                    IItem[] items = GetItems();
+
+                    if (items.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
                     {
                         AddModSlots(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
                     }
@@ -300,7 +305,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private InventoryItem? DeserializePresetData(JsonElement presetJson)
         {
             string presetId = presetJson.GetProperty("id").GetString()!;
-            IItem? item = ItemsFetcher.FetchedData!.FirstOrDefault(i => i.Id == presetId);
+            IItem[] items = GetItems();
+            IItem? item = items.FirstOrDefault(i => i.Id == presetId);
 
             if (item is not IModdable presetItem)
             {
@@ -308,7 +314,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return null;
             }
 
-            IModdable baseItem = (IModdable)ItemsFetcher.FetchedData!.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
+            IModdable baseItem = (IModdable)items.First(i => i.Id == presetItem.BaseItemId); // If the preset exists, this means that the base item also exists otherwise the preset is not added to the items list
             Queue<PresetContainedItem> containedItems = new();
 
             foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
@@ -321,7 +327,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     continue;
                 }
 
-                Item containedItem = ItemsFetcher.FetchedData!.First(i => i.Id == containedItemId);
+                IItem containedItem = items.First(i => i.Id == containedItemId);
                 int quantity = containedItemJson.GetProperty("quantity").GetInt32();
 
                 PresetContainedItem presetContainedItem = new(containedItem, quantity);
@@ -331,6 +337,18 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
 
             return preset;
+        }
+
+        /// <summary>
+        /// Gets items.
+        /// </summary>
+        /// <returns>Items.</returns>
+        private IItem[] GetItems()
+        {
+            string language = ConfigurationWrapper.Values.Languages.First();
+            GameModeLocalizedItems gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData!.First(gmli => gmli.Language == language);
+
+            return gameModeLocalizedItems.Items;
         }
     }
 }

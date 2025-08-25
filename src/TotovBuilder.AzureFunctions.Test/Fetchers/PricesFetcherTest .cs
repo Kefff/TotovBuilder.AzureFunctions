@@ -29,13 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiPresetsQuery = "{ items(type: preset) { id } }",
-                    ApiPricesQuery = "{ items { id }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -71,6 +65,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
@@ -106,13 +102,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiPresetsQuery = "{ items(type: preset) { id } }",
-                    ApiPricesQuery = "{ items { id }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -184,6 +174,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
@@ -236,12 +228,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiPricesQuery = "{ items { id }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -298,6 +285,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
@@ -338,12 +327,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiPricesQuery = "{ items { id }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -371,6 +355,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
@@ -392,12 +378,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiPricesQuery = "{ items { id name buyFor { vendor { ... on TraderOffer { trader { normalizedName } minTraderLevel taskUnlock { id } } ... on FleaMarket { normalizedName } } price currency priceRUB } } }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -429,6 +410,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,

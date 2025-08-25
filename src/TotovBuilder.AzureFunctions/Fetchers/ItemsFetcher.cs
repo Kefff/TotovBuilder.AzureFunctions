@@ -22,9 +22,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             get
             {
-                return ConfigurationWrapper.Values.ApiItemsQuery;
+                if (string.IsNullOrWhiteSpace(_apiQuery))
+                {
+                    _apiQuery = ConfigurationWrapper.Values.ApiItemsQuery.Replace("{0}", Language);
+                }
+
+                return _apiQuery;
             }
         }
+        private string? _apiQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType
@@ -34,6 +40,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return DataType.Items;
             }
         }
+
+        /// <summary>
+        /// Language for the API request.
+        /// </summary>
+        public string Language { get; init; }
 
         /// <summary>
         /// List of item categories.
@@ -68,6 +79,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemsFetcher"/> class.
         /// </summary>
+        /// <param name="language">Language mode for the API request.param>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
@@ -75,6 +87,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="itemMissingPropertiesFetcher">Item missing properties fetcher.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         public ItemsFetcher(
+            string language,
             ILogger<ItemsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
@@ -83,6 +96,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ITarkovValuesFetcher tarkovValuesFetcher
         ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
+            Language = language;
             ItemCategoriesFetcher = itemCategoriesFetcher;
             ItemMissingPropertiesFetcher = itemMissingPropertiesFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
@@ -252,8 +266,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             presetItem.MovementSpeedModifierPercentage = baseItem.MovementSpeedModifierPercentage;
             presetItem.TurningSpeedModifierPercentage = baseItem.TurningSpeedModifierPercentage;
 
-            if (presetItem.Name.EndsWith(" Default"))
+            if (presetItem.MarketLink.EndsWith("-default"))
             {
+                // We should not have to do this but armors do not have a default preset ID
+                // so we try to find the default one based on the link
                 baseItem.DefaultPresetId = presetItem.Id; // MISSING FROM API
             }
 
@@ -277,7 +293,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                 if (TryDeserializeArray(propertiesJson, "zones", out ArrayEnumerator headArmoredAreasJson))
                 {
-                    armorMod.ArmoredAreas = [.. headArmoredAreasJson.Select(z => GetArmoredAreaName(z)).Distinct()];
+                    armorMod.ArmoredAreas = [.. headArmoredAreasJson.Select(headArmoredArea => headArmoredArea.GetString()!).Distinct()];
                 }
             }
 
@@ -300,35 +316,32 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             List<ModSlot> armorModSlots = [];
             int lockedArmorSlotsDurability = 0;
 
-            foreach (JsonElement modSlotJson in armorModSlotsJson)
+            foreach (JsonElement armorModSlotJson in armorModSlotsJson)
             {
-                string armorSlotType = modSlotJson.GetProperty("__typename").GetString()!;
+                string armorSlotType = armorModSlotJson.GetProperty("__typename").GetString()!;
 
                 if (armorSlotType == "ItemArmorSlotOpen")
                 {
                     ModSlot armorModSlot = new()
                     {
-                        CompatibleItemIds = modSlotJson.GetProperty("allowedPlates").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!).ToArray(),
-                        Name = modSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
+                        CompatibleItemIds = [.. armorModSlotJson.GetProperty("allowedPlates").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!)],
+                        Name = armorModSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
                     };
                     armorModSlots.Add(armorModSlot);
                 }
                 else if (armorSlotType == "ItemArmorSlotLocked")
                 {
-                    string armorSlotName = modSlotJson.GetProperty("nameId").GetString()!;
+                    string armorSlotName = armorModSlotJson.GetProperty("nameId").GetString()!;
 
                     if (armorSlotName == "Soft_armor_front")
                     {
-                        item.ArmorClass = modSlotJson.GetProperty("class").GetInt32();
+                        item.ArmorClass = armorModSlotJson.GetProperty("class").GetInt32();
                     }
                     
-                    lockedArmorSlotsDurability += modSlotJson.GetProperty("durability").GetInt32();
+                    lockedArmorSlotsDurability += armorModSlotJson.GetProperty("durability").GetInt32();
                 }
 
-                IEnumerable<string> zones = modSlotJson
-                    .GetProperty("zones")
-                    .EnumerateArray()
-                    .Select(GetArmoredAreaName);
+                IEnumerable<string> zones = armorModSlotJson.GetProperty("zones").EnumerateArray().Select(zoneJson => zoneJson.GetString()!);
                 armoredAreas.AddRange(zones);
             }
 
@@ -904,7 +917,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 rangedWeapon.Caliber = propertiesJson.GetProperty("caliber").GetString()!;
                 rangedWeapon.Ergonomics = propertiesJson.GetProperty("ergonomics").GetDouble();
-                rangedWeapon.FireModes = [.. propertiesJson.GetProperty("fireModes").EnumerateArray().Select(fireModeJson => fireModeJson.GetString()!.ToPascalCase())];
+                rangedWeapon.FireModes = [.. propertiesJson.GetProperty("fireModes").EnumerateArray().Select(fireModeJson => fireModeJson.GetString()!)];
                 rangedWeapon.FireRate = propertiesJson.GetProperty("fireRate").GetDouble();
                 rangedWeapon.HorizontalRecoil = propertiesJson.GetProperty("recoilHorizontal").GetDouble();
                 rangedWeapon.VerticalRecoil = propertiesJson.GetProperty("recoilVertical").GetDouble();
@@ -1023,22 +1036,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             presetItem.Capacity = baseItem.Capacity;
 
             return presetItem;
-        }
-
-        /// <summary>
-        /// Gets the name of an armored area from a JSON property.
-        /// </summary>
-        /// <param name="armoredAreaJson">Armored area from a JSON property</param>
-        /// <returns>Armored area name.</returns>
-        private static string GetArmoredAreaName(JsonElement armoredAreaJson)
-        {
-            string armoredArea = armoredAreaJson.GetString()!
-                .Replace("F. PLATE", "FR. PLATE") // Some items have "F. PLATE" instead of "FR. PLATE"
-                .ToPascalCase()
-                .Replace(",", string.Empty)
-                .Replace(".", string.Empty);
-
-            return armoredArea;
         }
 
         /// <summary>

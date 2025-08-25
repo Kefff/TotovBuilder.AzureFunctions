@@ -1,18 +1,18 @@
 ﻿using FluentResults;
+using TotovBuilder.Model.Utils;
 
 namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
 {
     /// <summary>
-    /// Provides the functionalities of a base class for API fetchers.
+    /// Provides the functionnalities of a fetcher that fetches localized prices for a game mode.
     /// </summary>
-    public interface IApiFetcher<T>
-        where T : class
+    public interface IGameModeLocalizedPricesFetcher
     {
         /// <summary>
         /// Fetched data.
         /// Once data has been fetched and stored in this property, it is never fetched again.
         /// </summary>
-        T? FetchedData { get; }
+        IEnumerable<GameModeLocalizedPrices>? FetchedData { get; }
 
         /// <summary>
         /// Fetches data from the API.

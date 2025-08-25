@@ -25,10 +25,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
@@ -57,10 +54,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    AzureFunctionsConfigurationBlobName = "azure-functions-configuration.json"
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();

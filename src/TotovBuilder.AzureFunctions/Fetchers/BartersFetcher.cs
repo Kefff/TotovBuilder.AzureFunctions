@@ -19,9 +19,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         {
             get
             {
-                return ConfigurationWrapper.Values.ApiBartersQuery;
+                if (string.IsNullOrWhiteSpace(_apiQuery))
+                {
+                    _apiQuery = ConfigurationWrapper.Values.ApiBartersQuery.Replace("{0}", GameMode).Replace("{1}", Language);
+                }
+
+                return _apiQuery;
             }
         }
+        private string? _apiQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType
@@ -33,24 +39,33 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Tarkov values fetcher.
+        /// Game mode for the API request.
         /// </summary>
-        private readonly ITarkovValuesFetcher TarkovValuesFetcher;
+        public string GameMode { get; init; }
+
+        /// <summary>
+        /// Language for the API request.
+        /// </summary>
+        public string Language { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BartersFetcher"/> class.
         /// </summary>
+        /// <param name="gameMode">Game mode for the API request.</param>
+        /// <param name="language">Language mode for the API request.param>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         public BartersFetcher(
+            string gameMode,
+            string language,
             ILogger<BartersFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
-            IConfigurationWrapper configurationWrapper,
-            ITarkovValuesFetcher tarkovValuesFetcher)
+            IConfigurationWrapper configurationWrapper)
             : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
-            TarkovValuesFetcher = tarkovValuesFetcher;
+            GameMode = gameMode;
+            Language = language;
         }
 
         /// <inheritdoc/>

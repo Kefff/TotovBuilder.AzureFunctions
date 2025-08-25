@@ -27,12 +27,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiBartersQuery = "{ barters { level } }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -47,17 +42,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.TarkovValues)
-                .Verifiable();
-
             BartersFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object,
-                tarkovValuesFetcherMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -125,12 +115,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiBartersQuery = "{ barters { level } }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -145,17 +130,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.TarkovValues)
-                .Verifiable();
-
             BartersFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object,
-                tarkovValuesFetcherMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -190,12 +170,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    ApiBartersQuery = "{ barters { level } }",
-                    ApiUrl = "https://localhost/api",
-                    ExecutionTimeout = 5
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IHttpClientWrapper> httpClientWrapperMock = new();
@@ -251,17 +226,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
-            tarkovValuesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.TarkovValues)
-                .Verifiable();
-
             BartersFetcher fetcher = new(
+                "regular",
+                "en",
                 new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object,
-                tarkovValuesFetcherMock.Object);
+                configurationWrapperMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
