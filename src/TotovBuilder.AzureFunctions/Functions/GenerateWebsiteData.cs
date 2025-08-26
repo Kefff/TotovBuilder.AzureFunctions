@@ -45,7 +45,7 @@ namespace TotovBuilder.AzureFunctions.Functions
         /// <summary>
         /// Game mode localized items fetcher.
         /// </summary>
-        private readonly IGameModeLocalizedItemsFetcher GameModeLocalizedItemsFetcher;
+        private readonly ILocalizedItemsFetcher GameModeLocalizedItemsFetcher;
 
         /// <summary>
         /// Game mode localized prices fetcher.
@@ -92,7 +92,7 @@ namespace TotovBuilder.AzureFunctions.Functions
             IConfigurationWrapper configurationWrapper,
             IAzureBlobStorageManager azureBlobStorageManager,
             IChangelogFetcher changelogFetcher,
-            IGameModeLocalizedItemsFetcher gameModeLocalizedItemsFetcher,
+            ILocalizedItemsFetcher gameModeLocalizedItemsFetcher,
             IGameModeLocalizedPricesFetcher gameModeLocalizedPricesFetcher,
             IItemCategoriesFetcher itemCategoriesFetcher,
             IPresetsFetcher presetsFetcher,

@@ -5,9 +5,9 @@ using TotovBuilder.Model.Utils;
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
-    /// Represents a fetcher that fetches localized items for a game mode.
+    /// Represents a fetcher that fetches localized items.
     /// </summary>
-    public class GameModeLocalizedItemsFetcher : IGameModeLocalizedItemsFetcher
+    public class LocalizedItemsFetcher : ILocalizedItemsFetcher
     {
         /// <inheritdoc/>
         public IEnumerable<LocalizedItems>? FetchedData

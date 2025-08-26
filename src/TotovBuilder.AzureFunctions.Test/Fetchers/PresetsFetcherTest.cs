@@ -49,12 +49,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            gameModeLocalizedItemsFetcherMock
+            localizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
@@ -70,7 +70,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -139,12 +139,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            gameModeLocalizedItemsFetcherMock
+            localizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
@@ -160,7 +160,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -218,12 +218,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            gameModeLocalizedItemsFetcherMock.SetupGet(m => m.FetchedData)
+            localizedItemsFetcherMock.SetupGet(m => m.FetchedData)
                 .Returns(
                     [
                         new LocalizedItems()
@@ -332,7 +332,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -390,12 +390,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            gameModeLocalizedItemsFetcherMock
+            localizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
@@ -471,7 +471,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -529,12 +529,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            gameModeLocalizedItemsFetcherMock
+            localizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
@@ -550,7 +550,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -635,12 +635,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            gameModeLocalizedItemsFetcherMock
+            localizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
@@ -656,7 +656,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -720,8 +720,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
@@ -730,7 +730,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result result = await fetcher.Fetch();
@@ -738,7 +738,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             // Assert
             result.IsSuccess.Should().BeFalse();
             result.Errors.Single().Message.Should().Be("Presets - No data fetched.");
-            gameModeLocalizedItemsFetcherMock.Verify();
+
+            localizedItemsFetcherMock.Verify();
         }
     }
 }

@@ -84,12 +84,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 itemMissingPropertiesFetcher.Object,
                 tarkovValuesFetcherMock.Object);
 
-            Mock<IGameModeLocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
-            gameModeLocalizedItemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            gameModeLocalizedItemsFetcherMock
+            localizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(() => [
                     new LocalizedItems()
@@ -103,7 +103,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 new Mock<ILogger<PresetsFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                gameModeLocalizedItemsFetcherMock.Object);
+                localizedItemsFetcherMock.Object);
 
             // Act
             Result itemsFetchResult = await itemsFetcher.Fetch();
@@ -121,7 +121,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             presetsFetchResult.IsSuccess.Should().BeTrue();
             presetsFetcher.FetchedData.Should().NotBeNull();
 
-            IEnumerable<IItem> orderedResult = gameModeLocalizedItemsFetcherMock.Object.FetchedData!
+            IEnumerable<IItem> orderedResult = localizedItemsFetcherMock.Object.FetchedData!
                 .Single(fd => fd.Language == "en")
                 .Items
                     .OrderBy(i => $"{i.CategoryId} - {i.Name}");

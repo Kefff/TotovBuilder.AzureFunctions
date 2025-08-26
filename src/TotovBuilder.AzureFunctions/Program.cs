@@ -26,10 +26,10 @@ IHost host = new HostBuilder()
 
         services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
         services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
+        services.AddSingleton<IGameModeLocalizedPricesFetcher, GameModeLocalizedPricesFetcher>();
         services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
         services.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
-        services.AddSingleton<IGameModeLocalizedItemsFetcher, GameModeLocalizedItemsFetcher>();
-        services.AddSingleton<IGameModeLocalizedPricesFetcher, GameModeLocalizedPricesFetcher>();
+        services.AddSingleton<ILocalizedItemsFetcher, LocalizedItemsFetcher>();
         services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
         services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
         services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();

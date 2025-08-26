@@ -38,7 +38,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Items fetcher.
         /// </summary>
-        private readonly IGameModeLocalizedItemsFetcher GameModeLocalizedItemsFetcher;
+        private readonly ILocalizedItemsFetcher GameModeLocalizedItemsFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PresetsFetcher"/> class.
@@ -51,7 +51,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ILogger<PresetsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
-            IGameModeLocalizedItemsFetcher gameModeLocalizedItemsFetcher
+            ILocalizedItemsFetcher gameModeLocalizedItemsFetcher
         ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
             GameModeLocalizedItemsFetcher = gameModeLocalizedItemsFetcher;
