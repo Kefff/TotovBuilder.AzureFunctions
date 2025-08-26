@@ -337,7 +337,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     {
                         item.ArmorClass = armorModSlotJson.GetProperty("class").GetInt32();
                     }
-                    
+
                     lockedArmorSlotsDurability += armorModSlotJson.GetProperty("durability").GetInt32();
                 }
 

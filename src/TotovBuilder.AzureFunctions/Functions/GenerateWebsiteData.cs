@@ -7,8 +7,6 @@ using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
-using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Utils;
 using TotovBuilder.Shared.Abstractions.Azure;
 
@@ -156,17 +154,17 @@ namespace TotovBuilder.AzureFunctions.Functions
                 Upload(WebsiteConfigurationFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName)
             ];
 
-            foreach (string language in ConfigurationWrapper.Values.Languages) {
-                GameModeLocalizedItems gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData!.First(fd => fd.Language == language);
-                uploadTasks.Add(Upload(gameModeLocalizedItems.Items, string.Format(ConfigurationWrapper.Values.WebsiteItemsBlobName, $"_{language}")));
-                
-                foreach (KeyValuePair<string, string> gameMode in ConfigurationWrapper.Values.GameModes) {
-                
-                    GameModeLocalizedPrices gameModeLocalizedPrices = GameModeLocalizedPricesFetcher.FetchedData!.First(fd => fd.GameMode == gameMode.Key && fd.Language == language);
-                    uploadTasks.Add(Upload(gameModeLocalizedPrices.Prices, string.Format(ConfigurationWrapper.Values.WebsitePricesBlobName, $"_{gameMode.Key}", $"_{language}")));
+            foreach (string language in ConfigurationWrapper.Values.Languages)
+            {
+                LocalizedItems? gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData?.FirstOrDefault(fd => fd.Language == language);
+                uploadTasks.Add(Upload(gameModeLocalizedItems?.Items, string.Format(ConfigurationWrapper.Values.WebsiteItemsBlobName, language)));
+
+                foreach (GameMode gameMode in ConfigurationWrapper.Values.GameModes)
+                {
+                    GameModeLocalizedPrices? gameModeLocalizedPrices = GameModeLocalizedPricesFetcher.FetchedData?.FirstOrDefault(fd => fd.GameMode.Name == gameMode.Name && fd.Language == language);
+                    uploadTasks.Add(Upload(gameModeLocalizedPrices?.Prices, string.Format(ConfigurationWrapper.Values.WebsitePricesBlobName, gameMode.Name, language)));
                 }
             }
-            
 
             Task.WaitAll([.. uploadTasks]);
 

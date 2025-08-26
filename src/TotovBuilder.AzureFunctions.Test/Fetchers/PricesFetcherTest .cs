@@ -10,9 +10,9 @@ using Moq;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Fetchers;
-using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Test;
+using TotovBuilder.Model.Utils;
 using Xunit;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
@@ -65,7 +65,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
-                "regular",
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
@@ -174,7 +178,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
-                "regular",
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
@@ -285,7 +293,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
-                "regular",
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
@@ -355,7 +367,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
-                "regular",
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
@@ -410,7 +426,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Verifiable();
 
             PricesFetcher fetcher = new(
-                "regular",
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,

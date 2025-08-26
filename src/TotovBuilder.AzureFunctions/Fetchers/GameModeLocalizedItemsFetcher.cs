@@ -10,14 +10,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class GameModeLocalizedItemsFetcher : IGameModeLocalizedItemsFetcher
     {
         /// <inheritdoc/>
-        public IEnumerable<GameModeLocalizedItems>? FetchedData
+        public IEnumerable<LocalizedItems>? FetchedData
         {
             get
             {
                 throw new NotImplementedException();
             }
         }
-        
+
         /// <inheritdoc/>
         public Task<Result> Fetch()
         {

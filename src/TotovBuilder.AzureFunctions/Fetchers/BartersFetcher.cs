@@ -6,6 +6,7 @@ using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
+using TotovBuilder.Model.Utils;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -21,7 +22,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 if (string.IsNullOrWhiteSpace(_apiQuery))
                 {
-                    _apiQuery = ConfigurationWrapper.Values.ApiBartersQuery.Replace("{0}", GameMode).Replace("{1}", Language);
+                    _apiQuery = ConfigurationWrapper.Values.ApiBartersQuery.Replace("{0}", GameMode.ApiQueryValue).Replace("{1}", Language);
                 }
 
                 return _apiQuery;
@@ -41,7 +42,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Game mode for the API request.
         /// </summary>
-        public string GameMode { get; init; }
+        public GameMode GameMode { get; init; }
 
         /// <summary>
         /// Language for the API request.
@@ -57,7 +58,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         public BartersFetcher(
-            string gameMode,
+            GameMode gameMode,
             string language,
             ILogger<BartersFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,

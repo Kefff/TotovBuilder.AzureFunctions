@@ -7,7 +7,6 @@ using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Abstractions.Items;
 using TotovBuilder.Model.Builds;
-using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Utils;
 
@@ -346,7 +345,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private IItem[] GetItems()
         {
             string language = ConfigurationWrapper.Values.Languages.First();
-            GameModeLocalizedItems gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData!.First(gmli => gmli.Language == language);
+            LocalizedItems gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData!.First(gmli => gmli.Language == language);
 
             return gameModeLocalizedItems.Items;
         }

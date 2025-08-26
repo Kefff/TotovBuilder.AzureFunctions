@@ -12,7 +12,7 @@ namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
         /// Fetched data.
         /// Once data has been fetched and stored in this property, it is never fetched again.
         /// </summary>
-        IEnumerable<GameModeLocalizedItems>? FetchedData { get; }
+        IEnumerable<LocalizedItems>? FetchedData { get; }
 
         /// <summary>
         /// Fetches data from the API.

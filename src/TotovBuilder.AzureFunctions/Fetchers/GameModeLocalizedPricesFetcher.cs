@@ -17,7 +17,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 throw new NotImplementedException();
             }
         }
-        
+
         /// <inheritdoc/>
         public Task<Result> Fetch()
         {

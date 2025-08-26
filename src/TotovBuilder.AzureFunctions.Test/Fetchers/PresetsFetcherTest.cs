@@ -11,7 +11,6 @@ using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Builds;
-using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Test;
 using TotovBuilder.Model.Utils;
@@ -59,7 +58,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
-                        new GameModeLocalizedItems()
+                        new LocalizedItems()
                         {
                             Items = TestData.Items,
                             Language = "en",
@@ -149,7 +148,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
-                        new GameModeLocalizedItems()
+                        new LocalizedItems()
                         {
                             Items = TestData.Items,
                             Language = "en",
@@ -227,7 +226,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             gameModeLocalizedItemsFetcherMock.SetupGet(m => m.FetchedData)
                 .Returns(
                     [
-                        new GameModeLocalizedItems()
+                        new LocalizedItems()
                         {
                             Items = new Item[]
                             {
@@ -400,7 +399,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
-                        new GameModeLocalizedItems()
+                        new LocalizedItems()
                         {
                             Items = new Item[]
                             {
@@ -539,7 +538,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
-                        new GameModeLocalizedItems()
+                        new LocalizedItems()
                         {
                             Items = TestData.Items,
                             Language = "en"
@@ -645,7 +644,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .SetupGet(m => m.FetchedData)
                 .Returns(
                     [
-                        new GameModeLocalizedItems()
+                        new LocalizedItems()
                         {
                             Items = TestData.Items,
                             Language = "en"

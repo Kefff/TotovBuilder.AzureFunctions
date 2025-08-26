@@ -76,7 +76,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes = 
+                    Changes =
                     [
                         new()
                         {
@@ -89,7 +89,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes = 
+                    Changes =
                     [
                         new()
                         {
@@ -102,7 +102,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes = 
+                    Changes =
                     [
                         new()
                         {

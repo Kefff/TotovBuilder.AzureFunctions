@@ -11,12 +11,10 @@ using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Abstractions.Items;
-using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Test;
 using TotovBuilder.Model.Utils;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace TotovBuilder.AzureFunctions.Test.Fetchers
 {
@@ -94,7 +92,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             gameModeLocalizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(() => [
-                    new GameModeLocalizedItems()
+                    new LocalizedItems()
                     {
                         Items = [.. itemsFetcher.FetchedData!],
                         Language = "en"
