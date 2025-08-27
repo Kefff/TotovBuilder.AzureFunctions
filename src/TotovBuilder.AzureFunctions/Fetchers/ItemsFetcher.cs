@@ -15,7 +15,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents an items fetcher.
     /// </summary>
-    public class ItemsFetcher : ApiFetcher<IEnumerable<Item>>, IItemsFetcher
+    public class ItemsFetcher : ApiFetcher<IEnumerable<Item>>
     {
         /// <inheritdoc/>
         protected override string ApiQuery
@@ -42,7 +42,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Language for the API request.
+        ///  Language in which items are fetched from the API.
         /// </summary>
         public string Language { get; init; }
 

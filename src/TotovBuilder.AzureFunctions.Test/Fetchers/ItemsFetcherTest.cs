@@ -55,12 +55,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.ItemCategories)
                 .Verifiable();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcherMock = new();
+            itemMissingPropertiesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemMissingPropertiesFetcher
+            itemMissingPropertiesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
@@ -81,7 +81,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
+                itemMissingPropertiesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
@@ -190,12 +190,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.ItemCategories)
                 .Verifiable();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcherMock = new();
+            itemMissingPropertiesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemMissingPropertiesFetcher
+            itemMissingPropertiesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns([])
                 .Verifiable();
@@ -216,7 +216,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
+                itemMissingPropertiesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -305,12 +305,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.ItemCategories)
                 .Verifiable();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcherMock = new();
+            itemMissingPropertiesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemMissingPropertiesFetcher
+            itemMissingPropertiesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
@@ -331,7 +331,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
+                itemMissingPropertiesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -426,12 +426,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 })
                 .Verifiable();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcherMock = new();
+            itemMissingPropertiesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemMissingPropertiesFetcher
+            itemMissingPropertiesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
@@ -452,7 +452,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
+                itemMissingPropertiesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -515,12 +515,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcherMock = new();
+            itemMissingPropertiesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemMissingPropertiesFetcher
+            itemMissingPropertiesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
@@ -541,7 +541,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
+                itemMissingPropertiesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -641,12 +641,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.ItemCategories)
                 .Verifiable();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcherMock = new();
+            itemMissingPropertiesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemMissingPropertiesFetcher
+            itemMissingPropertiesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
@@ -667,7 +667,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
+                itemMissingPropertiesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -776,12 +776,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.ItemCategories)
                 .Verifiable();
 
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
+            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcherMock = new();
+            itemMissingPropertiesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemMissingPropertiesFetcher
+            itemMissingPropertiesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
@@ -802,7 +802,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
+                itemMissingPropertiesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act

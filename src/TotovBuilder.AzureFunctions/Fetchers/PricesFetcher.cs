@@ -13,7 +13,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a prices fetcher.
     /// </summary>
-    public class PricesFetcher : ApiFetcher<IEnumerable<Price>>, IPricesFetcher
+    public class PricesFetcher : ApiFetcher<IEnumerable<Price>>
     {
         /// <inheritdoc/>
         protected override string ApiQuery
@@ -40,12 +40,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Game mode for the API request.
+        ///  Game mode for which prices are fetched from the API.
         /// </summary>
         public GameMode GameMode { get; init; }
 
         /// <summary>
-        /// Language for the API request.
+        ///  Language in which items are fetched from the API.
         /// </summary>
         public string Language { get; init; }
 
