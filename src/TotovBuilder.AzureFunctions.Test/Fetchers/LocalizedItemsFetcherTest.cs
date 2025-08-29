@@ -22,7 +22,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
     public class LocalizedItemsFetcherTest
     {
         [Fact]
-        public async Task Fetch_ShouldFetchItemsInDifferentLanguages()
+        public async Task Fetch_ShouldFetchItemsInAllLanguages()
         {
             // Arrange
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
@@ -100,6 +100,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             localizedItemsFetcher.FetchedData!.ElementAt(0).Items.Should().BeEquivalentTo(ItemsEN);
             localizedItemsFetcher.FetchedData!.ElementAt(1).Language.Should().Be("fr");
             localizedItemsFetcher.FetchedData!.ElementAt(1).Items.Should().BeEquivalentTo(ItemsFR);
+
+            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(2));
         }
 
         [Fact]
