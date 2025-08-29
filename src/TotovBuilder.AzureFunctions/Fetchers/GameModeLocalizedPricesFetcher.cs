@@ -12,26 +12,26 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// </summary>
     public class GameModeLocalizedPricesFetcher : IGameModeLocalizedPricesFetcher
     {
-        private readonly ILogger<PricesFetcher> Logger;
-        private readonly IHttpClientWrapperFactory HttpClientWrapperFactory;
+        private readonly ILogger<BartersFetcher> BartersFetcherLogger;
         private readonly IConfigurationWrapper ConfigurationWrapper;
-        private readonly IBartersFetcher BartersFetcher;
+        private readonly IHttpClientWrapperFactory HttpClientWrapperFactory;
+        private readonly ILogger<PricesFetcher> PricesFetcherLogger;
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
 
         /// <inheritdoc/>
         public IEnumerable<GameModeLocalizedPrices>? FetchedData { get; private set; } = null;
 
         public GameModeLocalizedPricesFetcher(
-            ILogger<PricesFetcher> logger,
+            ILogger<PricesFetcher> pricesFetcherLogger,
+            ILogger<BartersFetcher> bartersFetcherLogger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
-            IBartersFetcher bartersFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher)
         {
-            Logger = logger;
-            HttpClientWrapperFactory = httpClientWrapperFactory;
+            BartersFetcherLogger = bartersFetcherLogger;
             ConfigurationWrapper = configurationWrapper;
-            BartersFetcher = bartersFetcher;
+            HttpClientWrapperFactory = httpClientWrapperFactory;
+            PricesFetcherLogger = pricesFetcherLogger;
             TarkovValuesFetcher = tarkovValuesFetcher;
         }
 
@@ -50,13 +50,19 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 foreach (string language in ConfigurationWrapper.Values.Languages)
                 {
+                    BartersFetcher bartersFetcher = new(
+                        gameMode,
+                        language,
+                        BartersFetcherLogger,
+                        HttpClientWrapperFactory,
+                        ConfigurationWrapper);
                     PricesFetcher itemsFetcher = new(
                         gameMode,
                         language,
-                        Logger,
+                        PricesFetcherLogger,
                         HttpClientWrapperFactory,
                         ConfigurationWrapper,
-                        BartersFetcher,
+                        bartersFetcher,
                         TarkovValuesFetcher);
                     priceFetchers.Add(itemsFetcher);
                     fetchTasks.Add(itemsFetcher.Fetch());

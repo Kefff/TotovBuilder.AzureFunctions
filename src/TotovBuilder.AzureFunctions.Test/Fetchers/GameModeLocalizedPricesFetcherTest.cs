@@ -39,13 +39,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     string requestContent = await hrm.Content!.ReadAsStringAsync();
                     string responseContent;
 
-                    if (requestContent.Contains("gameMode: regular"))
+                    if (requestContent.Contains("items("))
                     {
-                        responseContent = requestContent.Contains("lang: en") ? PricesJsonPvpEN : PricesJsonPvpFR;
+                        if (requestContent.Contains("gameMode: regular"))
+                        {
+                            responseContent = requestContent.Contains("lang: en") ? PricesJsonPvpEN : PricesJsonPvpFR;
+                        }
+                        else
+                        {
+                            responseContent = requestContent.Contains("lang: en") ? PricesJsonPveEN : PricesJsonPveFR;
+                        }
                     }
                     else
                     {
-                        responseContent = requestContent.Contains("lang: en") ? PricesJsonPveEN : PricesJsonPveFR;
+                        responseContent = @"{
+  ""data"": {
+    ""barters"": []
+  }
+}";
                     }
 
                     HttpResponseMessage response = new(HttpStatusCode.OK)
@@ -63,16 +74,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     .Returns(httpClientWrapperMock.Object)
                     .Verifiable();
 
-            Mock<IBartersFetcher> barterFetcherMock = new();
-            barterFetcherMock
-                .Setup(m => m.Fetch())
-                    .Returns(Task.FromResult(Result.Ok()))
-                    .Verifiable();
-            barterFetcherMock
-                .SetupGet(m => m.FetchedData)
-                    .Returns([])
-                    .Verifiable();
-
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
@@ -85,9 +86,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             GameModeLocalizedPricesFetcher gameModeLocalizedPricesFetcher = new(
                 new Mock<ILogger<PricesFetcher>>().Object,
+                new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                barterFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -108,7 +109,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             gameModeLocalizedPricesFetcher.FetchedData!.ElementAt(3).Language.Should().Be("fr");
             gameModeLocalizedPricesFetcher.FetchedData!.ElementAt(3).Prices.Should().BeEquivalentTo(PricesPveFR);
 
-            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(4));
+            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(8));
         }
 
         [Fact]
@@ -129,13 +130,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     string requestContent = await hrm.Content!.ReadAsStringAsync();
                     string responseContent;
 
-                    if (requestContent.Contains("gameMode: regular"))
+                    if (requestContent.Contains("items("))
                     {
-                        responseContent = requestContent.Contains("lang: en") ? PricesJsonPvpEN : PricesJsonPvpFR;
+                        if (requestContent.Contains("gameMode: regular"))
+                        {
+                            responseContent = requestContent.Contains("lang: en") ? PricesJsonPvpEN : PricesJsonPvpFR;
+                        }
+                        else
+                        {
+                            responseContent = requestContent.Contains("lang: en") ? PricesJsonPveEN : PricesJsonPveFR;
+                        }
                     }
                     else
                     {
-                        responseContent = requestContent.Contains("lang: en") ? PricesJsonPveEN : PricesJsonPveFR;
+                        responseContent = @"{
+  ""data"": {
+    ""barters"": []
+  }
+}";
                     }
 
                     HttpResponseMessage response = new(HttpStatusCode.OK)
@@ -153,16 +165,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IBartersFetcher> barterFetcherMock = new();
-            barterFetcherMock
-                .Setup(m => m.Fetch())
-                    .Returns(Task.FromResult(Result.Ok()))
-                    .Verifiable();
-            barterFetcherMock
-                .SetupGet(m => m.FetchedData)
-                    .Returns([])
-                    .Verifiable();
-
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
@@ -175,9 +177,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             GameModeLocalizedPricesFetcher gameModeLocalizedPricesFetcher = new(
                 new Mock<ILogger<PricesFetcher>>().Object,
+                new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                barterFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -199,7 +201,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             gameModeLocalizedPricesFetcher.FetchedData!.ElementAt(3).Language.Should().Be("fr");
             gameModeLocalizedPricesFetcher.FetchedData!.ElementAt(3).Prices.Should().BeEquivalentTo(PricesPveFR);
 
-            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(4));
+            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(8));
         }
 
         [Fact]
@@ -231,16 +233,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(httpClientWrapperMock.Object)
                 .Verifiable();
 
-            Mock<IBartersFetcher> barterFetcherMock = new();
-            barterFetcherMock
-                .Setup(m => m.Fetch())
-                    .Returns(Task.FromResult(Result.Ok()))
-                    .Verifiable();
-            barterFetcherMock
-                .SetupGet(m => m.FetchedData)
-                    .Returns([])
-                    .Verifiable();
-
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
                 .Setup(m => m.Fetch())
@@ -253,9 +245,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             GameModeLocalizedPricesFetcher gameModeLocalizedPricesFetcher = new(
                 new Mock<ILogger<PricesFetcher>>().Object,
+                new Mock<ILogger<BartersFetcher>>().Object,
                 httpClientWrapperFactoryMock.Object,
                 configurationWrapperMock.Object,
-                barterFetcherMock.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
