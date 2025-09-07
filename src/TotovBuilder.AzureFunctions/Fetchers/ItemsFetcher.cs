@@ -325,7 +325,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     ModSlot armorModSlot = new()
                     {
                         CompatibleItemIds = [.. armorModSlotJson.GetProperty("allowedPlates").EnumerateArray().Select(ai => ai.GetProperty("id").GetString()!)],
-                        Name = armorModSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()
+                        //Name = armorModSlotJson.GetProperty("name").GetString()! // MISSING FROM API
+                        Name = $"modSlot_{armorModSlotJson.GetProperty("nameId").GetString()!.ToLowerInvariant()}"
                     };
                     armorModSlots.Add(armorModSlot);
                 }
