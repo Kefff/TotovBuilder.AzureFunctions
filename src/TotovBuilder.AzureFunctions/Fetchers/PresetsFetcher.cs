@@ -344,7 +344,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Items.</returns>
         private IItem[] GetItems()
         {
-            string language = ConfigurationWrapper.Values.Languages.First();
+            string language = ConfigurationWrapper.Values.ItemsLanguages.First();
             LocalizedItems gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData!.First(gmli => gmli.Language == language);
 
             return gameModeLocalizedItems.Items;

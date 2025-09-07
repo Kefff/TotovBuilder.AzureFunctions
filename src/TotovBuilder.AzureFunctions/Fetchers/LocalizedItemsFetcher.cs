@@ -49,7 +49,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             List<ItemsFetcher> itemFetchers = [];
             List<Task<Result>> fetchTasks = [];
 
-            foreach (string language in ConfigurationWrapper.Values.Languages)
+            foreach (string language in ConfigurationWrapper.Values.ItemsLanguages)
             {
                 ItemsFetcher itemsFetcher = new(
                     language,

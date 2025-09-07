@@ -48,7 +48,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             foreach (GameMode gameMode in ConfigurationWrapper.Values.GameModes)
             {
-                foreach (string language in ConfigurationWrapper.Values.Languages)
+                foreach (string language in ConfigurationWrapper.Values.ItemsLanguages)
                 {
                     BartersFetcher bartersFetcher = new(
                         gameMode,

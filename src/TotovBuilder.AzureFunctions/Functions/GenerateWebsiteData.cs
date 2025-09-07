@@ -154,7 +154,7 @@ namespace TotovBuilder.AzureFunctions.Functions
                 Upload(WebsiteConfigurationFetcher.FetchedData, ConfigurationWrapper.Values.WebsiteWebsiteConfigurationBlobName)
             ];
 
-            foreach (string language in ConfigurationWrapper.Values.Languages)
+            foreach (string language in ConfigurationWrapper.Values.ItemsLanguages)
             {
                 LocalizedItems? gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData?.FirstOrDefault(fd => fd.Language == language);
                 uploadTasks.Add(Upload(gameModeLocalizedItems?.Items, string.Format(ConfigurationWrapper.Values.WebsiteItemsBlobName, language)));
