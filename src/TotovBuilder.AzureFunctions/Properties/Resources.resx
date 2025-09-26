@@ -184,6 +184,9 @@ Cannot find a slot for items "{1}".</value>
     <value>Error while deserializing preset :
 {0}</value>
   </data>
+  <data name="PresetsEmpty" xml:space="preserve">
+    <value>No preset could be constructed.</value>
+  </data>
   <data name="PreviousFetchingFinished" xml:space="preserve">
     <value>{0} - Waiting for previous fetching to finish.</value>
   </data>

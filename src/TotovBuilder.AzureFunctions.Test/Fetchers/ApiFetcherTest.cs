@@ -478,7 +478,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 return TryDeserializeString(jsonElement, propertyName, out value);
             }
 
-            protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
+            protected override Task<Result<IEnumerable<Price>>> DeserializeDataAsync(string responseContent)
             {
                 return Task.FromResult(Result.Ok(TestData.Prices.AsEnumerable()));
             }

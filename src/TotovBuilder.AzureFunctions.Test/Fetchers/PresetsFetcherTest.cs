@@ -176,6 +176,80 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 });
         }
 
+
+        [Fact]
+        public async Task Fetch_WithoutValidData_ShouldFail()
+        {
+            // Arrange
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(TestData.AzureFunctionsConfiguration)
+                .Verifiable();
+
+            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
+            httpClientWrapperMock
+                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
+                .Returns(async () =>
+                {
+                    await Task.Delay(1000);
+                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+  ""data"": {
+    ""items"": [
+      {
+        ""containsItems"": [
+            {
+            ""item"": {
+                ""id"": ""5a16b7e1fcdbcb00165aa6c9""
+            },
+            ""quantity"": 1
+            }
+        ],
+        ""id"": ""test-preset-not-existing""
+      }
+    ]
+  }
+}") };
+                })
+                .Verifiable();
+
+            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
+            httpClientWrapperFactoryMock
+                .Setup(m => m.Create())
+                .Returns(httpClientWrapperMock.Object)
+                .Verifiable();
+
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            localizedItemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(
+                    [
+                        new LocalizedItems()
+                        {
+                            Items = TestData.Items,
+                            Language = "en",
+                        }
+                    ])
+                .Verifiable();
+
+            PresetsFetcher fetcher = new(
+                new Mock<ILogger<PresetsFetcher>>().Object,
+                httpClientWrapperFactoryMock.Object,
+                configurationWrapperMock.Object,
+                localizedItemsFetcherMock.Object);
+
+            // Act
+            Result result = await fetcher.Fetch();
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors[0].Message.Should().Be("Presets - No data fetched.");
+        }
+
         [Fact]
         public async Task Fetch_WithIncompatibleAmmunitionInMagazine_ShouldTryFindingASlotUntilMaximumTriesAndReturnNothing()
         {

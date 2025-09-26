@@ -70,7 +70,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Price>>> DeserializeDataAsync(string responseContent)
         {
             List<Price> barters = [];
 

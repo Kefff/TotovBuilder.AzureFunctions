@@ -86,7 +86,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
+        protected override async Task<Result<IEnumerable<Price>>> DeserializeDataAsync(string responseContent)
         {
             Result tarkovValuesResult = await TarkovValuesFetcher.Fetch();
 

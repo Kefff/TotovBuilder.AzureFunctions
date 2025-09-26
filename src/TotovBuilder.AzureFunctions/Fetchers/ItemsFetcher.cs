@@ -103,7 +103,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Item>>> DeserializeData(string responseContent)
+        protected override Task<Result<IEnumerable<Item>>> DeserializeDataAsync(string responseContent)
         {
             Result? itemCategoriesResult = null;
             Result? itemMissingPropertiesResult = null;

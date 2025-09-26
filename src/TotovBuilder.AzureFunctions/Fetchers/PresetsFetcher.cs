@@ -38,7 +38,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Items fetcher.
         /// </summary>
-        private readonly ILocalizedItemsFetcher GameModeLocalizedItemsFetcher;
+        private readonly ILocalizedItemsFetcher LocalizedItemsFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PresetsFetcher"/> class.
@@ -46,23 +46,23 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="logger">Logger.</param>
-        /// <param name="gameModeLocalizedItemsFetcher">Game mode localized items fetcher.</param>
+        /// <param name="localizedItemsFetcher">Localized items fetcher.</param>
         public PresetsFetcher(
             ILogger<PresetsFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
-            ILocalizedItemsFetcher gameModeLocalizedItemsFetcher
+            ILocalizedItemsFetcher localizedItemsFetcher
         ) : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
-            GameModeLocalizedItemsFetcher = gameModeLocalizedItemsFetcher;
+            LocalizedItemsFetcher = localizedItemsFetcher;
         }
 
         /// <inheritdoc/>
-        protected override async Task<Result<IEnumerable<InventoryItem>>> DeserializeData(string responseContent)
+        protected override async Task<Result<IEnumerable<InventoryItem>>> DeserializeDataAsync(string responseContent)
         {
             List<Task> deserializationTasks = [];
             ConcurrentBag<InventoryItem> presets = [];
-            Result itemsResult = await GameModeLocalizedItemsFetcher.Fetch();
+            Result itemsResult = await LocalizedItemsFetcher.Fetch();
 
             if (itemsResult.IsFailed)
             {
@@ -77,6 +77,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             }
 
             await Task.WhenAll(deserializationTasks);
+
+            if (presets.IsEmpty)
+            {
+                string error = Properties.Resources.PresetsEmpty;
+                Logger.LogError(error);
+
+                return Result.Fail(error);
+            }
 
             return Result.Ok(presets.AsEnumerable());
         }
@@ -129,7 +137,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="inventoryItem">Inventory item.</param>
         /// <param name="item">Item corresponding to the inventory item.</param>
         /// <param name="containedItems">Contained items.</param>
-        private void AddItem(InventoryItem inventoryItem, IItem item, Queue<PresetContainedItem> containedItems)
+        private async Task AddItemAsync(InventoryItem inventoryItem, IItem item, Queue<PresetContainedItem> containedItems)
         {
             if (containedItems.Count == 0)
             {
@@ -140,7 +148,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (containedItem.Item is IModdable && item is IModdable moddable)
             {
-                AddModSlots(inventoryItem, moddable, containedItems);
+                await AddModSlotsAsync(inventoryItem, moddable, containedItems);
             }
             else
             {
@@ -154,7 +162,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="inventoryItemModSlot">Inventory item modslot.</param>
         /// <param name="modSlot">Mod slot.</param>
         /// <param name="containedItems">Contained items.</param>
-        private void AddModSlotItem(InventoryItemModSlot inventoryItemModSlot, ModSlot modSlot, Queue<PresetContainedItem> containedItems)
+        private async Task AddModSlotItemAsync(InventoryItemModSlot inventoryItemModSlot, ModSlot modSlot, Queue<PresetContainedItem> containedItems)
         {
             PresetContainedItem containedItem = containedItems.Peek();
 
@@ -183,15 +191,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
                     // Trying to add the following items as mods or content (content should always be the following item of its container)
                     // If not possible, we restart trying to add the following items as a mod from the topmost item
-                    AddItem(inventoryItemModSlot.Item, containedModdable, containedItems);
+                    await AddItemAsync(inventoryItemModSlot.Item, containedModdable, containedItems);
                 }
                 else
                 {
-                    IItem[] items = GetItems();
+                    IItem[] items = await GetItemsAsync();
 
                     if (items.FirstOrDefault(i => i.Id == inventoryItemModSlot.Item.ItemId) is IModdable alreadyPresentItem)
                     {
-                        AddModSlots(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
+                        await AddModSlotsAsync(inventoryItemModSlot.Item, alreadyPresentItem, containedItems);
                     }
                 }
             }
@@ -203,7 +211,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="inventoryItem">Inventory item.</param>
         /// <param name="item">Item corresponding to the inventory item.</param>
         /// <param name="containedItems">Contained items.</param>
-        private void AddModSlots(InventoryItem inventoryItem, IModdable item, Queue<PresetContainedItem> containedItems)
+        private async Task AddModSlotsAsync(InventoryItem inventoryItem, IModdable item, Queue<PresetContainedItem> containedItems)
         {
             if (item.ModSlots.Length == 0 || containedItems.Count == 0)
             {
@@ -230,7 +238,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     };
                 }
 
-                AddModSlotItem(inventoryItemModSlot!, modSlot, containedItems);
+                await AddModSlotItemAsync(inventoryItemModSlot!, modSlot, containedItems);
 
                 if (!hasItem && inventoryItemModSlot!.Item != null)
                 {
@@ -249,7 +257,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <param name="baseItem">Base item.</param>
         /// <param name="containedItems">Contained items.</param>
         /// <returns>Preset.</returns>
-        private InventoryItem ConstructPreset(string presetId, IItem baseItem, Queue<PresetContainedItem> containedItems)
+        private async Task<InventoryItem> ConstructPresetAsync(string presetId, IItem baseItem, Queue<PresetContainedItem> containedItems)
         {
             InventoryItem inventoryItem = new()
             {
@@ -266,7 +274,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                     break;
                 }
 
-                AddItem(inventoryItem, baseItem, containedItems);
+                await AddItemAsync(inventoryItem, baseItem, containedItems);
                 tries++;
             }
 
@@ -278,11 +286,11 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="presetsJson">Json element representing the preset to deserialize.</param>
         /// <param name="presets">List of presets the deserialized preset will be stored into.</param>
-        private void DeserializeData(JsonElement presetsJson, ConcurrentBag<InventoryItem> presets)
+        private async Task DeserializeData(JsonElement presetsJson, ConcurrentBag<InventoryItem> presets)
         {
             try
             {
-                InventoryItem? preset = DeserializePresetData(presetsJson);
+                InventoryItem? preset = await DeserializePresetDataAsync(presetsJson);
 
                 if (preset != null)
                 {
@@ -301,10 +309,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="presetJson">Json element representing the preset to deserialize.</param>
         /// <returns>Deserialized preset.</returns>
-        private InventoryItem? DeserializePresetData(JsonElement presetJson)
+        private async Task<InventoryItem?> DeserializePresetDataAsync(JsonElement presetJson)
         {
             string presetId = presetJson.GetProperty("id").GetString()!;
-            IItem[] items = GetItems();
+            IItem[] items = await GetItemsAsync();
             IItem? item = items.FirstOrDefault(i => i.Id == presetId);
 
             if (item is not IModdable presetItem)
@@ -333,7 +341,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 containedItems.Enqueue(presetContainedItem);
             }
 
-            InventoryItem preset = ConstructPreset(presetId, baseItem, containedItems);
+            InventoryItem preset = await ConstructPresetAsync(presetId, baseItem, containedItems);
 
             return preset;
         }
@@ -342,12 +350,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// Gets items.
         /// </summary>
         /// <returns>Items.</returns>
-        private IItem[] GetItems()
+        private async Task<IItem[]> GetItemsAsync()
         {
-            string language = ConfigurationWrapper.Values.ItemsLanguages.First();
-            LocalizedItems gameModeLocalizedItems = GameModeLocalizedItemsFetcher.FetchedData!.First(gmli => gmli.Language == language);
+            await LocalizedItemsFetcher.Fetch(); // Making sure items have been fetched
+            LocalizedItems? localizedItems = LocalizedItemsFetcher.FetchedData?.FirstOrDefault();
 
-            return gameModeLocalizedItems.Items;
+            return localizedItems?.Items ?? [];
         }
     }
 }
