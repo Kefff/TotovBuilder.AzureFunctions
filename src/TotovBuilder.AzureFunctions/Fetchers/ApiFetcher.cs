@@ -116,7 +116,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// </summary>
         /// <param name="responseContent">Content of a fetch response.</param>
         /// <returns>Deserialized data.</returns>
-        protected abstract Task<Result<T>> DeserializeData(string responseContent);
+        protected abstract Task<Result<T>> DeserializeDataAsync(string responseContent);
 
         /// <summary>
         /// Tries to deserialize an array.
@@ -325,7 +325,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return isolatedDataResult.ToResult<T>();
             }
 
-            Result<T> deserializedDataResult = await DeserializeData(isolatedDataResult.Value);
+            Result<T> deserializedDataResult = await DeserializeDataAsync(isolatedDataResult.Value);
 
             Logger.LogInformation(Properties.Resources.ApiDataFetched, DataType.ToString());
 

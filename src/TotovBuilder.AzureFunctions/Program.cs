@@ -25,13 +25,12 @@ IHost host = new HostBuilder()
         services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
 
         services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
-        services.AddSingleton<IBartersFetcher, BartersFetcher>();
         services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
+        services.AddSingleton<IGameModeLocalizedPricesFetcher, GameModeLocalizedPricesFetcher>();
         services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
         services.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
-        services.AddSingleton<IItemsFetcher, ItemsFetcher>();
+        services.AddSingleton<ILocalizedItemsFetcher, LocalizedItemsFetcher>();
         services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
-        services.AddSingleton<IPricesFetcher, PricesFetcher>();
         services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
         services.AddSingleton<IWebsiteConfigurationFetcher, WebsiteConfigurationFetcher>();
 
@@ -56,5 +55,4 @@ IHost host = new HostBuilder()
         });
     })
     .Build();
-
 host.Run();

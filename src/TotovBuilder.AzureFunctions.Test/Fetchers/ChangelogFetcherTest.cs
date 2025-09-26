@@ -27,10 +27,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    RawChangelogBlobName = "changelog.json"
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
@@ -79,7 +76,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes = 
+                    Changes =
                     [
                         new()
                         {
@@ -92,7 +89,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes = 
+                    Changes =
                     [
                         new()
                         {
@@ -105,7 +102,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 new()
                 {
-                    Changes = 
+                    Changes =
                     [
                         new()
                         {
@@ -126,10 +123,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    RawChangelogBlobName = "changelog.json"
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();

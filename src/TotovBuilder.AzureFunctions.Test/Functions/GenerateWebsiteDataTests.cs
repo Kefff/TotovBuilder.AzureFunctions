@@ -13,8 +13,8 @@ using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Functions;
 using TotovBuilder.Model.Builds;
 using TotovBuilder.Model.Configuration;
-using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Test;
+using TotovBuilder.Model.Utils;
 using TotovBuilder.Shared.Abstractions.Azure;
 using Xunit;
 
@@ -49,16 +49,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    AzureBlobStorageWebsiteContainerName = "$web",
-                    WebsiteChangelogBlobName = "data/changelog.json",
-                    WebsiteItemsBlobName = "data/items.json",
-                    WebsitePresetsBlobName = "data/presets.json",
-                    WebsitePricesBlobName = "data/prices.json",
-                    WebsiteTarkovValuesBlobName = "data/tarkov-values.json",
-                    WebsiteWebsiteConfigurationBlobName = "data/website-configuration.json"
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IChangelogFetcher> changelogFetcherMock = new();
@@ -71,20 +62,83 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(TestData.Changelog)
                 .Verifiable();
 
+            Mock<IGameModeLocalizedPricesFetcher> gameModeLocalizedPricesFetcherMock = new();
+            gameModeLocalizedPricesFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            gameModeLocalizedPricesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns([
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "regular",
+                                Name = "pvp"
+                            },
+                            Language = "en",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "regular",
+                                Name = "pvp"
+                            },
+                            Language = "fr",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "pve",
+                                Name = "pve"
+                            },
+                            Language = "en",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "pve",
+                                Name = "pve"
+                            },
+                            Language = "fr",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        }
+                    ])
+                .Verifiable();
+
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
 
-            Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
-            itemsFetcherMock
+            localizedItemsFetcherMock
                 .SetupGet(m => m.FetchedData)
-                .Returns(TestData.Items)
+                .Returns(
+                    [
+                        new LocalizedItems()
+                        {
+                            Items = TestData.Items,
+                            Language = "en"
+                        },
+                        new LocalizedItems()
+                        {
+                            Items = TestData.Items,
+                            Language = "fr"
+                        }
+                    ])
                 .Verifiable();
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
@@ -95,16 +149,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             presetsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.Presets)
-                .Verifiable();
-
-            Mock<IPricesFetcher> pricesFetcherMock = new();
-            pricesFetcherMock
-                .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            pricesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.Prices.Concat(TestData.Barters))
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
@@ -142,7 +186,11 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
             azureBlobStorageManagerMock
-                .Setup(m => m.UpdateBlob("$web", "data/items.json", expectedItems, It.IsAny<BlobHttpHeaders>()))
+                .Setup(m => m.UpdateBlob("$web", "data/items_en.json", expectedItems, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/items_fr.json", expectedItems, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
             azureBlobStorageManagerMock
@@ -150,7 +198,19 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
             azureBlobStorageManagerMock
-                .Setup(m => m.UpdateBlob("$web", "data/prices.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pvp_en.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pvp_fr.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pve_en.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pve_fr.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
             azureBlobStorageManagerMock
@@ -168,10 +228,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,
                 changelogFetcherMock.Object,
+                localizedItemsFetcherMock.Object,
+                gameModeLocalizedPricesFetcherMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemsFetcherMock.Object,
                 presetsFetcherMock.Object,
-                pricesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object,
                 websiteConfigurationFetcherMock.Object);
 
@@ -184,9 +244,9 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             configurationLoaderMock.Verify();
             configurationWrapperMock.Verify();
             itemCategoriesFetcherMock.Verify();
-            itemsFetcherMock.Verify();
+            localizedItemsFetcherMock.Verify();
+            gameModeLocalizedPricesFetcherMock.Verify();
             presetsFetcherMock.Verify();
-            pricesFetcherMock.Verify();
             tarkovValuesFetcherMock.Verify();
             websiteConfigurationFetcherMock.Verify();
         }
@@ -212,15 +272,15 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
 
+            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             Mock<IChangelogFetcher> changelogFetcherMock = new();
+            Mock<IGameModeLocalizedPricesFetcher> gameModeLocalizedPricesFetcherMock = new();
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
-            Mock<IItemsFetcher> itemsFetcherMock = new();
+            Mock<ILocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
             Mock<IPresetsFetcher> presetsFetcherMock = new();
-            Mock<IPricesFetcher> pricesFetcherMock = new();
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             Mock<IWebsiteConfigurationFetcher> websiteConfigurationFetcherMock = new();
-            Mock<IAzureBlobStorageManager> azureBlobStorageManagerMock = new();
 
             GenerateWebsiteData function = new(
                 new Mock<ILogger<GenerateWebsiteData>>().Object,
@@ -228,10 +288,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,
                 changelogFetcherMock.Object,
+                gameModeLocalizedItemsFetcherMock.Object,
+                gameModeLocalizedPricesFetcherMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemsFetcherMock.Object,
                 presetsFetcherMock.Object,
-                pricesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object,
                 websiteConfigurationFetcherMock.Object);
 
@@ -244,9 +304,9 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             configurationWrapperMock.Verify(m => m.Values, Times.Never);
             changelogFetcherMock.Verify(m => m.Fetch(), Times.Never);
             itemCategoriesFetcherMock.Verify(m => m.Fetch(), Times.Never);
-            itemsFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            gameModeLocalizedItemsFetcherMock.Verify(m => m.Fetch(), Times.Never);
             presetsFetcherMock.Verify(m => m.Fetch(), Times.Never);
-            pricesFetcherMock.Verify(m => m.Fetch(), Times.Never);
+            gameModeLocalizedPricesFetcherMock.Verify(m => m.Fetch(), Times.Never);
             tarkovValuesFetcherMock.Verify(m => m.Fetch(), Times.Never);
             websiteConfigurationFetcherMock.Verify(m => m.Fetch(), Times.Never);
 
@@ -276,16 +336,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    AzureBlobStorageWebsiteContainerName = "$web",
-                    WebsiteChangelogBlobName = "data/changelog.json",
-                    WebsiteItemsBlobName = "data/items.json",
-                    WebsitePresetsBlobName = "data/presets.json",
-                    WebsitePricesBlobName = "data/prices.json",
-                    WebsiteTarkovValuesBlobName = "data/tarkov-values.json",
-                    WebsiteWebsiteConfigurationBlobName = "data/website-configuration.json"
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IChangelogFetcher> changelogFetcherMock = new();
@@ -298,20 +349,30 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns((IEnumerable<ChangelogEntry>?)null)
                 .Verifiable();
 
+            Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
+            localizedItemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            localizedItemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((IEnumerable<LocalizedItems>?)null)
+                .Verifiable();
+
+            Mock<IGameModeLocalizedPricesFetcher> gameModeLocalizedPricesFetcherMock = new();
+            gameModeLocalizedPricesFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            gameModeLocalizedPricesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns((IEnumerable<GameModeLocalizedPrices>?)null)
+                .Verifiable();
+
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Fail("Error")))
-                .Verifiable();
-
-            Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock
-                .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail("Error")))
-                .Verifiable();
-            itemsFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns((IEnumerable<Item>?)null)
                 .Verifiable();
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
@@ -322,16 +383,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             presetsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns((IEnumerable<InventoryItem>?)null)
-                .Verifiable();
-
-            Mock<IPricesFetcher> pricesFetcherMock = new();
-            pricesFetcherMock
-                .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Fail("Error")))
-                .Verifiable();
-            pricesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns((IEnumerable<Price>?)null)
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
@@ -362,10 +413,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,
                 changelogFetcherMock.Object,
+                localizedItemsFetcherMock.Object,
+                gameModeLocalizedPricesFetcherMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemsFetcherMock.Object,
                 presetsFetcherMock.Object,
-                pricesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object,
                 websiteConfigurationFetcherMock.Object);
 
@@ -378,9 +429,9 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             configurationLoaderMock.Verify();
             configurationWrapperMock.Verify();
             itemCategoriesFetcherMock.Verify();
-            itemsFetcherMock.Verify();
+            localizedItemsFetcherMock.Verify();
+            gameModeLocalizedPricesFetcherMock.Verify();
             presetsFetcherMock.Verify();
-            pricesFetcherMock.Verify();
             tarkovValuesFetcherMock.Verify();
             websiteConfigurationFetcherMock.Verify();
         }
@@ -409,16 +460,7 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
             configurationWrapperMock
                 .SetupGet(m => m.Values)
-                .Returns(new AzureFunctionsConfiguration()
-                {
-                    AzureBlobStorageWebsiteContainerName = "$web",
-                    WebsiteChangelogBlobName = "data/changelog.json",
-                    WebsiteItemsBlobName = "data/items.json",
-                    WebsitePresetsBlobName = "data/presets.json",
-                    WebsitePricesBlobName = "data/prices.json",
-                    WebsiteTarkovValuesBlobName = "data/tarkov-values.json",
-                    WebsiteWebsiteConfigurationBlobName = "data/website-configuration.json"
-                })
+                .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
             Mock<IChangelogFetcher> changelogFetcherMock = new();
@@ -431,20 +473,83 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(TestData.Changelog)
                 .Verifiable();
 
+            Mock<ILocalizedItemsFetcher> gameModeLocalizedItemsFetcherMock = new();
+            gameModeLocalizedItemsFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            gameModeLocalizedItemsFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(
+                    [
+                        new LocalizedItems()
+                        {
+                            Items = TestData.Items,
+                            Language = "en"
+                        },
+                        new LocalizedItems()
+                        {
+                            Items = TestData.Items,
+                            Language = "fr"
+                        }
+                    ])
+                .Verifiable();
+
+            Mock<IGameModeLocalizedPricesFetcher> gameModeLocalizedPricesFetcherMock = new();
+            gameModeLocalizedPricesFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            gameModeLocalizedPricesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns([
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "regular",
+                                Name = "pvp"
+                            },
+                            Language = "en",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "regular",
+                                Name = "pvp"
+                            },
+                            Language = "fr",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "pve",
+                                Name = "pve"
+                            },
+                            Language = "en",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "pve",
+                                Name = "pve"
+                            },
+                            Language = "fr",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        }
+                    ])
+                .Verifiable();
+
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
                 .Setup(m => m.Fetch())
                 .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-
-            Mock<IItemsFetcher> itemsFetcherMock = new();
-            itemsFetcherMock
-                .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            itemsFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.Items)
                 .Verifiable();
 
             Mock<IPresetsFetcher> presetsFetcherMock = new();
@@ -455,16 +560,6 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             presetsFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.Presets)
-                .Verifiable();
-
-            Mock<IPricesFetcher> pricesFetcherMock = new();
-            pricesFetcherMock
-                .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            pricesFetcherMock
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.Prices.Concat(TestData.Barters))
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
@@ -502,7 +597,11 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
             azureBlobStorageManagerMock
-                .Setup(m => m.UpdateBlob("$web", "data/items.json", expectedItems, It.IsAny<BlobHttpHeaders>()))
+                .Setup(m => m.UpdateBlob("$web", "data/items_en.json", expectedItems, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/items_fr.json", expectedItems, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
             azureBlobStorageManagerMock
@@ -510,7 +609,19 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
             azureBlobStorageManagerMock
-                .Setup(m => m.UpdateBlob("$web", "data/prices.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pvp_en.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pvp_fr.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pve_en.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Fail("Error")))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pve_fr.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Fail("Error")))
                 .Verifiable();
             azureBlobStorageManagerMock
@@ -528,10 +639,10 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 configurationWrapperMock.Object,
                 azureBlobStorageManagerMock.Object,
                 changelogFetcherMock.Object,
+                gameModeLocalizedItemsFetcherMock.Object,
+                gameModeLocalizedPricesFetcherMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemsFetcherMock.Object,
                 presetsFetcherMock.Object,
-                pricesFetcherMock.Object,
                 tarkovValuesFetcherMock.Object,
                 websiteConfigurationFetcherMock.Object);
 
@@ -544,9 +655,9 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
             configurationLoaderMock.Verify();
             configurationWrapperMock.Verify();
             itemCategoriesFetcherMock.Verify();
-            itemsFetcherMock.Verify();
+            gameModeLocalizedItemsFetcherMock.Verify();
+            gameModeLocalizedPricesFetcherMock.Verify();
             presetsFetcherMock.Verify();
-            pricesFetcherMock.Verify();
             tarkovValuesFetcherMock.Verify();
             websiteConfigurationFetcherMock.Verify();
         }

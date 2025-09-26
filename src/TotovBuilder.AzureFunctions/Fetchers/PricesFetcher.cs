@@ -1,28 +1,34 @@
 ﻿using System.Text.Json;
 using FluentResults;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
+using TotovBuilder.Model.Utils;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
     /// Represents a prices fetcher.
     /// </summary>
-    public class PricesFetcher : ApiFetcher<IEnumerable<Price>>, IPricesFetcher
+    public class PricesFetcher : ApiFetcher<IEnumerable<Price>>
     {
         /// <inheritdoc/>
         protected override string ApiQuery
         {
             get
             {
-                return ConfigurationWrapper.Values.ApiPricesQuery;
+                if (string.IsNullOrEmpty(_apiQuery))
+                {
+                    _apiQuery = ConfigurationWrapper.Values.ApiPricesQuery.Replace("{0}", GameMode.ApiQueryValue).Replace("{1}", Language);
+                }
+
+                return _apiQuery;
             }
         }
+        private string? _apiQuery;
 
         /// <inheritdoc/>
         protected override DataType DataType
@@ -32,6 +38,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 return DataType.Prices;
             }
         }
+
+        /// <summary>
+        ///  Game mode for which prices are fetched from the API.
+        /// </summary>
+        public GameMode GameMode { get; init; }
+
+        /// <summary>
+        ///  Language in which items are fetched from the API.
+        /// </summary>
+        public string Language { get; init; }
 
         /// <summary>
         /// Barters fetcher.
@@ -46,12 +62,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Initializes a new instance of the <see cref="QuestsFetcher"/> class.
         /// </summary>
+        /// <param name="gameMode">Game mode for the API request.</param>
+        /// <param name="language">Language mode for the API request.param>
         /// <param name="logger">Logger.</param>
         /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="bartersFetcher">Barters fetcher.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
         public PricesFetcher(
+            GameMode gameMode,
+            string language,
             ILogger<PricesFetcher> logger,
             IHttpClientWrapperFactory httpClientWrapperFactory,
             IConfigurationWrapper configurationWrapper,
@@ -59,12 +79,14 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ITarkovValuesFetcher tarkovValuesFetcher)
             : base(logger, httpClientWrapperFactory, configurationWrapper)
         {
+            GameMode = gameMode;
+            Language = language;
             BartersFetcher = bartersFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
         }
 
         /// <inheritdoc/>
-        protected override async Task<Result<IEnumerable<Price>>> DeserializeData(string responseContent)
+        protected override async Task<Result<IEnumerable<Price>>> DeserializeDataAsync(string responseContent)
         {
             Result tarkovValuesResult = await TarkovValuesFetcher.Fetch();
 

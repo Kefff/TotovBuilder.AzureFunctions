@@ -242,6 +242,15 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No preset could be constructed..
+        /// </summary>
+        internal static string PresetsEmpty {
+            get {
+                return ResourceManager.GetString("PresetsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} - Waiting for previous fetching to finish..
         /// </summary>
         internal static string PreviousFetchingFinished {
