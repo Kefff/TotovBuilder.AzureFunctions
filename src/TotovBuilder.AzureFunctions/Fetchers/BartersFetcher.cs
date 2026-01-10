@@ -101,13 +101,13 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                         barterItems.Add(new BarterItem()
                         {
                             ItemId = baterItemJson.GetProperty("item").GetProperty("id").GetString()!,
-                            Quantity = baterItemJson.GetProperty("quantity").GetInt32()
+                            Quantity = baterItemJson.GetProperty("quantity").GetDouble()
                         });
                     }
 
                     foreach (JsonElement itemJson in barterJson.GetProperty("rewardItems").EnumerateArray())
                     {
-                        int quantity = itemJson.GetProperty("quantity").GetInt32();
+                        double quantity = itemJson.GetProperty("quantity").GetDouble();
                         Price barter = new()
                         {
                             BarterItems = [.. barterItems],
@@ -118,7 +118,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                             Quest = quest
                         };
 
-                        if (quantity > 1)
+                        if (quantity != 1)
                         {
                             foreach (BarterItem barterItem in barter.BarterItems)
                             {
