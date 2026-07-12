@@ -190,6 +190,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                                 price.MerchantLevel = minTraderLevel;
                             }
                         }
+                        else if (vendorJson.TryGetProperty("minPlayerLevel", out JsonElement minPlayerLevelJson))
+                        {
+                            int minPlayerLevel = minPlayerLevelJson.GetInt32();
+
+                            if (minPlayerLevel > 0)
+                            {
+                                price.MerchantLevel = minPlayerLevel;
+                            }
+                        }
 
                         if (TryDeserializeObject(vendorJson, "taskUnlock", out JsonElement taskUnlockJson))
                         {
