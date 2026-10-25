@@ -101,7 +101,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     .OrderBy(i => $"{i.CategoryId} - {i.Name}");
             IEnumerable<Item> expected = TestData.Items.OrderBy(i => $"{i.CategoryId} - {i.Name}");
 
-            orderedResult.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
+            orderedResult.Should().BeEquivalentTo(expected, options => options.PreferringRuntimeMemberTypes());
         }
 
         [Fact]
@@ -189,7 +189,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 }
             ];
 
-            fetcher.FetchedData.Should().BeEquivalentTo(expected, options => options.RespectingRuntimeTypes());
+            fetcher.FetchedData.Should().BeEquivalentTo(expected, options => options.PreferringRuntimeMemberTypes ());
         }
 
         [Fact]
@@ -275,7 +275,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Weight = 0.01,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
                 }
-            }, options => options.RespectingRuntimeTypes());
+            }, options => options.PreferringRuntimeMemberTypes ());
         }
 
         [Fact]
@@ -366,7 +366,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Weight = 0.5,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/Test_barrel"
                 }
-            }, options => options.RespectingRuntimeTypes());
+            }, options => options.PreferringRuntimeMemberTypes ());
         }
 
         [Fact]
@@ -865,7 +865,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Weight = 0.01,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/TerraGroup_Labs_keycard_(Blue)"
                 }
-            }, options => options.RespectingRuntimeTypes());
+            }, options => options.PreferringRuntimeMemberTypes ());
         }
 
         [Fact]
@@ -982,7 +982,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     Weight = 0.01,
                     WikiLink = "https://escapefromtarkov.fandom.com/wiki/preset-with-non-moddable-base-item"
                 }
-            }, options => options.RespectingRuntimeTypes());
+            }, options => options.PreferringRuntimeMemberTypes ());
         }
     }
 }
