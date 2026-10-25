@@ -7,6 +7,7 @@ using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Utils;
+using static TotovBuilder.AzureFunctions.Utils.JsonDeserializer;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -15,20 +16,15 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// </summary>
     public class PricesFetcher : ApiFetcher<IEnumerable<Price>>
     {
-        /// <inheritdoc/>
-        protected override string ApiQuery
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_apiQuery))
-                {
-                    _apiQuery = ConfigurationWrapper.Values.ApiPricesQuery.Replace("{0}", GameMode.ApiQueryValue).Replace("{1}", Language);
-                }
+        /// <summary>
+        ///  Game mode for which prices are fetched from the API.
+        /// </summary>
+        public GameMode GameMode { get; init; }
 
-                return _apiQuery;
-            }
-        }
-        private string? _apiQuery;
+        /// <summary>
+        ///  Language in which quests are fetched from the API.
+        /// </summary>
+        public string Language { get; init; }
 
         /// <inheritdoc/>
         protected override DataType DataType
@@ -40,14 +36,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        ///  Game mode for which prices are fetched from the API.
+        /// API requester.
         /// </summary>
-        public GameMode GameMode { get; init; }
-
-        /// <summary>
-        ///  Language in which items are fetched from the API.
-        /// </summary>
-        public string Language { get; init; }
+        private readonly IApiRequester ApiRequester;
 
         /// <summary>
         /// Barters fetcher.
@@ -55,60 +46,234 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private readonly IBartersFetcher BartersFetcher;
 
         /// <summary>
+        /// Configuration wrapper.
+        /// </summary>
+        private readonly IConfigurationWrapper ConfigurationWrapper;
+
+        /// <summary>
+        /// Quests fetcher.
+        /// </summary>
+        private readonly IQuestsFetcher QuestsFetcher;
+
+        /// <summary>
         /// Tarkov values fetcher.
         /// </summary>
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="QuestsFetcher"/> class.
+        /// Traders fetcher.
         /// </summary>
-        /// <param name="gameMode">Game mode for the API request.</param>
-        /// <param name="language">Language mode for the API request.param>
+        private readonly ITradersFetcher TradersFetcher;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PricesFetcher"/> class.
+        /// </summary>
+        /// <param name="gameMode">Game mode for which prices are fetched.</param>
+        /// <param name="language">Language in which quests are fetched.</param>
         /// <param name="logger">Logger.</param>
-        /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
+        /// <param name="apiRequester">API requester.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="bartersFetcher">Barters fetcher.</param>
+        /// <param name="questsFetcher">Quests fetcher.</param>
         /// <param name="tarkovValuesFetcher">Tarkov values fetcher.</param>
+        /// <param name="tradersFetcher">Traders fetcher.</param>
         public PricesFetcher(
             GameMode gameMode,
             string language,
             ILogger<PricesFetcher> logger,
-            IHttpClientWrapperFactory httpClientWrapperFactory,
+            IApiRequester apiRequester,
             IConfigurationWrapper configurationWrapper,
             IBartersFetcher bartersFetcher,
-            ITarkovValuesFetcher tarkovValuesFetcher)
-            : base(logger, httpClientWrapperFactory, configurationWrapper)
+            IQuestsFetcher questsFetcher,
+            ITarkovValuesFetcher tarkovValuesFetcher,
+            ITradersFetcher tradersFetcher)
+            : base(logger)
         {
+            ApiRequester = apiRequester;
+            BartersFetcher = bartersFetcher;
+            ConfigurationWrapper = configurationWrapper;
             GameMode = gameMode;
             Language = language;
-            BartersFetcher = bartersFetcher;
+            QuestsFetcher = questsFetcher;
             TarkovValuesFetcher = tarkovValuesFetcher;
+            TradersFetcher = tradersFetcher;
         }
 
         /// <inheritdoc/>
-        protected override async Task<Result<IEnumerable<Price>>> DeserializeDataAsync(string responseContent)
+        protected override async Task<Result<IEnumerable<Price>>> ExecuteFetch()
         {
-            Result tarkovValuesResult = await TarkovValuesFetcher.Fetch();
+            string itemsPath = BuildApiPath(ConfigurationWrapper.Values.ApiItemsPath, GameMode.ApiQueryValue);
+            Task<Result<JsonElement>> itemsDataTask = ApiRequester.RequestData(itemsPath);
+            Task<Result> questsTask = QuestsFetcher.Fetch();
+            Task<Result> tarkovValuesTask = TarkovValuesFetcher.Fetch();
+            Task<Result> tradersTask = TradersFetcher.Fetch();
+            Task<Result> bartersTask = BartersFetcher.Fetch();
 
-            if (tarkovValuesResult.IsFailed)
+            await Task.WhenAll(itemsDataTask, questsTask, tarkovValuesTask, tradersTask, bartersTask);
+
+            Result allTasksResult = Result.Merge(
+                itemsDataTask.Result.ToResult(),
+                questsTask.Result,
+                tarkovValuesTask.Result,
+                tradersTask.Result);
+
+            if (allTasksResult.IsFailed)
             {
-                return tarkovValuesResult;
+                return allTasksResult;
             }
 
-            List<Price> pricesAndBarters = [];
-            Result<IEnumerable<Price>>? bartersResult = null;
+            JsonElement itemsDataJson = itemsDataTask.Result.Value;
 
-            Task.WaitAll(
-                Task.Run(() => pricesAndBarters.AddRange(GetPrices(responseContent))),
-                BartersFetcher.Fetch().ContinueWith(r => bartersResult = r.Result));
+            Result<JsonElement> itemsResult = ItemsData.GetItems(itemsDataJson, itemsPath, Logger);
 
-            if (bartersResult!.IsSuccess)
+            if (itemsResult.IsFailed)
+            {
+                return itemsResult.ToResult();
+            }
+
+            JsonElement itemsJson = itemsResult.Value;
+
+            List<Price> pricesAndBarters = [.. GetPrices(itemsDataJson, itemsJson)];
+
+            if (bartersTask.Result.IsSuccess)
             {
                 TranformBartersWithCurrency(BartersFetcher.FetchedData!, pricesAndBarters);
                 pricesAndBarters.AddRange(BartersFetcher.FetchedData!);
             }
 
             return Result.Ok<IEnumerable<Price>>(pricesAndBarters);
+        }
+
+        /// <summary>
+        /// Gets the flea market price of an item.
+        /// </summary>
+        /// <param name="itemJson">Json element representing the item.</param>
+        /// <param name="itemId">ID of the item.</param>
+        /// <param name="fleaMarketName">Name of the flea market merchant.</param>
+        /// <param name="mainCurrency">Main currency.</param>
+        /// <returns>Flea market price, or <c>null</c> when the item cannot be bought on the flea market.</returns>
+        private static Price? GetFleaMarketPrice(JsonElement itemJson, string itemId, string fleaMarketName, Currency mainCurrency)
+        {
+            if (TryDeserializeArray(itemJson, "types", out JsonElement.ArrayEnumerator typesJson)
+                && typesJson.Any(t => t.ValueKind == JsonValueKind.String && t.GetString() == "noFlea"))
+            {
+                return null;
+            }
+
+            if (!TryDeserializeDouble(itemJson, "avg24hPrice", out double averagePrice)
+                || averagePrice <= 0)
+            {
+                return null;
+            }
+
+            Price price = new()
+            {
+                CurrencyName = mainCurrency.Name,
+                ItemId = itemId,
+                Merchant = fleaMarketName,
+                Value = averagePrice,
+                ValueInMainCurrency = averagePrice
+            };
+
+            if (TryDeserializeDouble(itemJson, "minLevelForFlea", out double minPlayerLevel)
+                && minPlayerLevel > 0)
+            {
+                price.MerchantLevel = (int)minPlayerLevel;
+            }
+
+            return price;
+        }
+
+        /// <summary>
+        /// Gets prices.
+        /// </summary>
+        /// <param name="itemsDataJson">Json element representing the items data.</param>
+        /// <param name="itemsJson">Json element representing the items.</param>
+        /// <returns>Prices.</returns>
+        private IEnumerable<Price> GetPrices(JsonElement itemsDataJson, JsonElement itemsJson)
+        {
+            List<Price> prices = [];
+            Currency? mainCurrency = TarkovValuesFetcher.FetchedData!.Currencies.FirstOrDefault(c => c.MainCurrency);
+            string? fleaMarketName = null;
+
+            if (TryDeserializeObject(itemsDataJson, "fleaMarket", out JsonElement fleaMarketJson)
+                && TryDeserializeBoolean(fleaMarketJson, "enabled", out bool isFleaMarketEnabled)
+                && isFleaMarketEnabled
+                && TryDeserializeString(fleaMarketJson, "normalizedName", out string normalizedName))
+            {
+                fleaMarketName = normalizedName;
+            }
+
+            foreach (JsonProperty itemJson in itemsJson.EnumerateObject())
+            {
+                try
+                {
+                    string itemId = itemJson.Value.GetProperty("id").GetString()!;
+
+                    foreach (JsonElement offerJson in itemJson.Value.GetProperty("buyFromTrader").EnumerateArray())
+                    {
+                        int value = offerJson.GetProperty("price").GetInt32();
+
+                        if (value == 0)
+                        {
+                            continue;
+                        }
+
+                        Price price = new()
+                        {
+                            CurrencyName = offerJson.GetProperty("currency").GetString()!,
+                            ItemId = itemId,
+                            Merchant = TradersFetcher.GetMerchantName(offerJson.GetProperty("trader").GetString()!),
+                            Value = value,
+                            ValueInMainCurrency = offerJson.GetProperty("priceRUB").GetInt32()
+                        };
+
+                        if (TryDeserializeDouble(offerJson, "minTraderLevel", out double minTraderLevel)
+                            && minTraderLevel > 0)
+                        {
+                            price.MerchantLevel = (int)minTraderLevel;
+                        }
+
+                        if (TryDeserializeString(offerJson, "taskUnlock", out string taskId))
+                        {
+                            price.Quest = QuestsFetcher.GetQuest(taskId);
+                        }
+
+                        prices.Add(price);
+                    }
+
+                    if (fleaMarketName != null && mainCurrency != null)
+                    {
+                        Price? fleaMarketPrice = GetFleaMarketPrice(itemJson.Value, itemId, fleaMarketName, mainCurrency);
+
+                        if (fleaMarketPrice != null)
+                        {
+                            prices.Add(fleaMarketPrice);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    string error = string.Format(Properties.Resources.PriceDeserializationError, e);
+                    Logger.LogError(error);
+                }
+            }
+
+            // Adding a price to the main currency item
+            if (mainCurrency != null)
+            {
+                prices.Add(new Price()
+                {
+                    CurrencyName = mainCurrency.Name,
+                    ItemId = mainCurrency.ItemId!,
+                    Merchant = "prapor",
+                    MerchantLevel = 1,
+                    Value = 1,
+                    ValueInMainCurrency = 1
+                });
+            }
+
+            return prices;
         }
 
         /// <summary>
@@ -137,106 +302,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 barter.Value = barterItem.Quantity;
                 barter.ValueInMainCurrency = barterItem.Quantity * (currencyPrice?.ValueInMainCurrency ?? 0);
             }
-        }
-
-        /// <summary>
-        /// Gets prices.
-        /// </summary>
-        /// <param name="pricesResponseContent">Content of the price fetch response.</param>
-        /// <returns>Prices.</returns>
-        private IEnumerable<Price> GetPrices(string pricesResponseContent)
-        {
-            List<Price> prices = [];
-            JsonElement pricesJson = JsonDocument.Parse(pricesResponseContent).RootElement;
-
-            foreach (JsonElement itemJson in pricesJson.EnumerateArray())
-            {
-                try
-                {
-                    foreach (JsonElement priceJson in itemJson.GetProperty("buyFor").EnumerateArray())
-                    {
-                        int value = priceJson.GetProperty("price").GetInt32();
-
-                        if (value == 0)
-                        {
-                            continue;
-                        }
-
-                        Price price = new()
-                        {
-                            CurrencyName = priceJson.GetProperty("currency").GetString()!,
-                            ItemId = itemJson.GetProperty("id").GetString()!,
-                            Value = value,
-                            ValueInMainCurrency = priceJson.GetProperty("priceRUB").GetInt32()
-                        };
-
-                        JsonElement vendorJson = priceJson.GetProperty("vendor");
-
-                        if (vendorJson.TryGetProperty("trader", out JsonElement traderJson))
-                        {
-                            price.Merchant = traderJson.GetProperty("normalizedName").GetString()!;
-                        }
-                        else
-                        {
-                            price.Merchant = priceJson.GetProperty("vendor").GetProperty("normalizedName").GetString()!;
-                        }
-
-                        if (vendorJson.TryGetProperty("minTraderLevel", out JsonElement minTraderLevelJson))
-                        {
-                            int minTraderLevel = minTraderLevelJson.GetInt32();
-
-                            if (minTraderLevel > 0)
-                            {
-                                price.MerchantLevel = minTraderLevel;
-                            }
-                        }
-                        else if (vendorJson.TryGetProperty("minPlayerLevel", out JsonElement minPlayerLevelJson))
-                        {
-                            int minPlayerLevel = minPlayerLevelJson.GetInt32();
-
-                            if (minPlayerLevel > 0)
-                            {
-                                price.MerchantLevel = minPlayerLevel;
-                            }
-                        }
-
-                        if (TryDeserializeObject(vendorJson, "taskUnlock", out JsonElement taskUnlockJson))
-                        {
-                            price.Quest = new Quest()
-                            {
-                                Id = taskUnlockJson.GetProperty("id").GetString()!,
-                                Name = taskUnlockJson.GetProperty("name").GetString()!,
-                                WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()!
-                            };
-                        }
-
-                        prices.Add(price);
-                    }
-                }
-                catch (Exception e)
-                {
-                    string error = string.Format(Properties.Resources.PriceDeserializationError, e);
-                    Logger.LogError(error);
-                }
-            }
-
-            // Adding a price to the main currency item
-            Currency? mainCurrency = TarkovValuesFetcher.FetchedData!.Currencies.FirstOrDefault(c => c.MainCurrency);
-
-            if (mainCurrency != null)
-            {
-                prices.Add(new Price()
-                {
-                    CurrencyName = mainCurrency.Name,
-                    ItemId = mainCurrency.ItemId!,
-                    Merchant = "prapor",
-                    MerchantLevel = 1,
-                    Value = 1,
-                    ValueInMainCurrency = 1
-                });
-            }
-
-            return prices.AsEnumerable();
         }
     }
 }

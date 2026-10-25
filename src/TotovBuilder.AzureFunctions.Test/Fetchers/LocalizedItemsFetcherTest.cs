@@ -1,6 +1,5 @@
-﻿using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -31,27 +30,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async (HttpRequestMessage hrm) =>
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(
+                new Dictionary<string, string>()
                 {
-                    string requestContent = await hrm.Content!.ReadAsStringAsync();
-                    string responseContent = requestContent.Contains("lang: en") ? ItemsJsonEN : ItemsJsonFR;
-                    HttpResponseMessage response = new(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent(responseContent)
-                    };
-
-                    return response;
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                    .Returns(httpClientWrapperMock.Object)
-                    .Verifiable();
+                    { "/regular/items", ItemsJson }
+                },
+                new Dictionary<string, string>()
+                {
+                    { "/regular/items_en", ItemsTranslationsJsonEN },
+                    { "/regular/items_fr", ItemsTranslationsJsonFR }
+                });
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
@@ -61,16 +49,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             itemCategoriesFetcherMock
                 .SetupGet(m => m.FetchedData)
                     .Returns(TestData.ItemCategories)
-                    .Verifiable();
-
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
-                .Setup(m => m.Fetch())
-                    .Returns(Task.FromResult(Result.Ok()))
-                    .Verifiable();
-            itemMissingPropertiesFetcher
-                .SetupGet(m => m.FetchedData)
-                    .Returns(TestData.ItemMissingProperties)
                     .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
@@ -85,10 +63,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             LocalizedItemsFetcher localizedItemsFetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -101,7 +78,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             localizedItemsFetcher.FetchedData!.ElementAt(1).Language.Should().Be("fr");
             localizedItemsFetcher.FetchedData!.ElementAt(1).Items.Should().BeEquivalentTo(ItemsFR);
 
-            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(2));
+            apiRequesterMock.Verify(m => m.RequestTranslations("/regular/items_en"), Times.Once);
+            apiRequesterMock.Verify(m => m.RequestTranslations("/regular/items_fr"), Times.Once);
         }
 
         [Fact]
@@ -114,27 +92,16 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async (HttpRequestMessage hrm) =>
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(
+                new Dictionary<string, string>()
                 {
-                    string requestContent = await hrm.Content!.ReadAsStringAsync();
-                    string responseContent = requestContent.Contains("lang: en") ? ItemsJsonEN : ItemsJsonFR;
-                    HttpResponseMessage response = new(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent(responseContent)
-                    };
-
-                    return response;
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+                    { "/regular/items", ItemsJson }
+                },
+                new Dictionary<string, string>()
+                {
+                    { "/regular/items_en", ItemsTranslationsJsonEN },
+                    { "/regular/items_fr", ItemsTranslationsJsonFR }
+                });
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
@@ -144,16 +111,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             itemCategoriesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemCategories)
-                .Verifiable();
-
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
-                .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            itemMissingPropertiesFetcher
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
@@ -168,10 +125,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             LocalizedItemsFetcher localizedItemsFetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -185,7 +141,8 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             localizedItemsFetcher.FetchedData!.ElementAt(1).Language.Should().Be("fr");
             localizedItemsFetcher.FetchedData!.ElementAt(1).Items.Should().BeEquivalentTo(ItemsFR);
 
-            httpClientWrapperMock.Verify(m => m.SendAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(2));
+            apiRequesterMock.Verify(m => m.RequestTranslations("/regular/items_en"), Times.Once);
+            apiRequesterMock.Verify(m => m.RequestTranslations("/regular/items_fr"), Times.Once);
         }
 
         [Fact]
@@ -198,24 +155,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(@$"{{
-  ""data"": {{
-    ""items"": []
-  }}
-}}")
-                }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(@"{
+  ""data"": {
+    ""items"": {}
+  }
+}");
 
             Mock<IItemCategoriesFetcher> itemCategoriesFetcherMock = new();
             itemCategoriesFetcherMock
@@ -225,16 +169,6 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             itemCategoriesFetcherMock
                 .SetupGet(m => m.FetchedData)
                 .Returns(TestData.ItemCategories)
-                .Verifiable();
-
-            Mock<IItemMissingPropertiesFetcher> itemMissingPropertiesFetcher = new();
-            itemMissingPropertiesFetcher
-                .Setup(m => m.Fetch())
-                .Returns(Task.FromResult(Result.Ok()))
-                .Verifiable();
-            itemMissingPropertiesFetcher
-                .SetupGet(m => m.FetchedData)
-                .Returns(TestData.ItemMissingProperties)
                 .Verifiable();
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
@@ -249,10 +183,9 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             LocalizedItemsFetcher localizedItemsFetcher = new(
                 new Mock<ILogger<ItemsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 itemCategoriesFetcherMock.Object,
-                itemMissingPropertiesFetcher.Object,
                 tarkovValuesFetcherMock.Object);
 
             // Act
@@ -279,41 +212,38 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             }
         ];
 
-        private const string ItemsJsonEN = @$"{{
-  ""data"": {{
-    ""items"": [
-      {{
+        private const string ItemsJson = @"{
+  ""data"": {
+    ""items"": {
+      ""5e54f76986f7740366043752"": {
         ""categories"": [
-          {{
-            ""id"": ""5a341c4686f77469e155819e""
-          }},
-          {{
-            ""id"": ""57bef4c42459772e8d35a53b""
-          }},
-          {{
-            ""id"": ""543be5f84bdc2dd4348b456a""
-          }},
-          {{
-            ""id"": ""566162e44bdc2d3f298b4573""
-          }},
-          {{
-            ""id"": ""54009119af1c881c07000029""
-          }}
+          ""5a341c4686f77469e155819e"",
+          ""57bef4c42459772e8d35a53b"",
+          ""543be5f84bdc2dd4348b456a"",
+          ""566162e44bdc2d3f298b4573"",
+          ""54009119af1c881c07000029""
         ],
         ""conflictingItems"": [],
         ""iconLink"": ""https://assets.tarkov.dev/5e54f76986f7740366043752-icon.webp"",
         ""id"": ""5e54f76986f7740366043752"",
         ""inspectImageLink"": ""https://assets.tarkov.dev/5e54f76986f7740366043752-image.webp"",
         ""link"": ""https://tarkov.dev/item/shroud-half-mask"",
-        ""name"": ""Shroud half-mask"",
+        ""name"": ""5e54f76986f7740366043752 Name"",
         ""properties"": null,
-        ""shortName"": ""Shroud"",
+        ""shortName"": ""5e54f76986f7740366043752 ShortName"",
         ""weight"": 0.1,
         ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Shroud_half-mask""
-      }}
-    ]
-  }}
-}}";
+      }
+    }
+  }
+}";
+
+        private const string ItemsTranslationsJsonEN = @"{
+  ""data"": {
+    ""5e54f76986f7740366043752 Name"": ""Shroud half-mask"",
+    ""5e54f76986f7740366043752 ShortName"": ""Shroud""
+  }
+}";
 
         private static readonly IItem[] ItemsFR = [
             new Item()
@@ -330,40 +260,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             }
         ];
 
-        private const string ItemsJsonFR = @$"{{
-  ""data"": {{
-    ""items"": [
-      {{
-        ""categories"": [
-          {{
-            ""id"": ""5a341c4686f77469e155819e""
-          }},
-          {{
-            ""id"": ""57bef4c42459772e8d35a53b""
-          }},
-          {{
-            ""id"": ""543be5f84bdc2dd4348b456a""
-          }},
-          {{
-            ""id"": ""566162e44bdc2d3f298b4573""
-          }},
-          {{
-            ""id"": ""54009119af1c881c07000029""
-          }}
-        ],
-        ""conflictingItems"": [],
-        ""iconLink"": ""https://assets.tarkov.dev/5e54f76986f7740366043752-icon.webp"",
-        ""id"": ""5e54f76986f7740366043752"",
-        ""inspectImageLink"": ""https://assets.tarkov.dev/5e54f76986f7740366043752-image.webp"",
-        ""link"": ""https://tarkov.dev/item/shroud-half-mask"",
-        ""name"": ""Demi-masque Shroud"",
-        ""properties"": null,
-        ""shortName"": ""Shroud"",
-        ""weight"": 0.1,
-        ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Shroud_half-mask""
-      }}
-    ]
-  }}
-}}";
+        private const string ItemsTranslationsJsonFR = @"{
+  ""data"": {
+    ""5e54f76986f7740366043752 Name"": ""Demi-masque Shroud"",
+    ""5e54f76986f7740366043752 ShortName"": ""Shroud""
+  }
+}";
     }
 }

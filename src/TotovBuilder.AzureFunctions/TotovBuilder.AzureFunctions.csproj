@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
 	<OutputType>Exe</OutputType>
 	<ImplicitUsings>enable</ImplicitUsings>
@@ -11,17 +11,17 @@
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Files.Shares" Version="12.20.1" />
-    <PackageReference Include="Azure.Storage.Queues" Version="12.20.1" />
-    <PackageReference Include="FluentResults" Version="3.16.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.23.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.4.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
+    <PackageReference Include="Azure.Storage.Files.Shares" Version="12.28.0" />
+    <PackageReference Include="Azure.Storage.Queues" Version="12.28.1" />
+    <PackageReference Include="FluentResults" Version="4.0.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.52.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.51.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.3.1" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.18.1" />
-    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.6" />
-    <PackageReference Include="MimeMapping" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.1" />
+    <PackageReference Include="MimeMapping" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">

@@ -61,21 +61,21 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Data fetched from the API..
+        ///   Looks up a localized string similar to {0} - Error while requesting the API :
+        ///{1}.
         /// </summary>
-        internal static string ApiDataFetched {
+        internal static string ApiRequestError {
             get {
-                return ResourceManager.GetString("ApiDataFetched", resourceCulture);
+                return ResourceManager.GetString("ApiRequestError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Error while fetching data from the API :
-        ///{1}.
+        ///   Looks up a localized string similar to {0} - API response received..
         /// </summary>
-        internal static string ApiFetchError {
+        internal static string ApiResponseReceived {
             get {
-                return ResourceManager.GetString("ApiFetchError", resourceCulture);
+                return ResourceManager.GetString("ApiResponseReceived", resourceCulture);
             }
         }
         
@@ -119,11 +119,11 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} - Fetching data from the API..
+        ///   Looks up a localized string similar to {0} - Prices not available, the prices of the &quot;{1}&quot; game mode are used instead..
         /// </summary>
-        internal static string FetchingApiData {
+        internal static string GameModeFallbackUsed {
             get {
-                return ResourceManager.GetString("FetchingApiData", resourceCulture);
+                return ResourceManager.GetString("GameModeFallbackUsed", resourceCulture);
             }
         }
         
@@ -194,16 +194,6 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error while deserializing item missing properties :
-        ///{0}.
-        /// </summary>
-        internal static string ItemMissingPropertiesDeserializationError {
-            get {
-                return ResourceManager.GetString("ItemMissingPropertiesDeserializationError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Item &quot;{0}&quot; not found..
         /// </summary>
         internal static string ItemNotFound {
@@ -270,12 +260,39 @@ namespace TotovBuilder.AzureFunctions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Quest &quot;{0}&quot; not found..
+        /// </summary>
+        internal static string QuestNotFound {
+            get {
+                return ResourceManager.GetString("QuestNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} - Requesting the API..
+        /// </summary>
+        internal static string RequestingApi {
+            get {
+                return ResourceManager.GetString("RequestingApi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error while deserializing Tarkov values :
         ///{0}.
         /// </summary>
         internal static string TarkovValuesDeserializationError {
             get {
                 return ResourceManager.GetString("TarkovValuesDeserializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trader &quot;{0}&quot; not found..
+        /// </summary>
+        internal static string TraderNotFound {
+            get {
+                return ResourceManager.GetString("TraderNotFound", resourceCulture);
             }
         }
         

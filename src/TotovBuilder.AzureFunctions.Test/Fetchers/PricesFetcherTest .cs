@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -32,17 +30,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(TestData.PricesJson);
 
             Mock<IBartersFetcher> bartersFetcherMock = new();
             bartersFetcherMock
@@ -72,10 +60,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 bartersFetcherMock.Object,
-                tarkovValuesFetcherMock.Object);
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                tarkovValuesFetcherMock.Object,
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -109,39 +99,32 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(@"{
   ""data"": {
-    ""items"": [
-      {
-        ""buyFor"": [
+    ""items"": {
+      ""5d235b4d86f7742e017bc88a"": {
+        ""id"": ""5d235b4d86f7742e017bc88a"",
+        ""buyFromTrader"": [
           {
-            ""currency"": ""RUB"",
+            ""trader"": ""6617beeaa9cfa777ca915b7c"",
             ""price"": 10000,
             ""priceRUB"": 10000,
-            ""vendor"": {
-              ""minTraderLevel"": 1,
-              ""taskUnlock"": null,
-              ""trader"": {
-                ""normalizedName"": ""ref""
-              }
-            }
+            ""currency"": ""RUB"",
+            ""minTraderLevel"": 1,
+            ""taskUnlock"": null
           }
         ],
-        ""id"": ""5d235b4d86f7742e017bc88a""
+        ""types"": [
+          ""noFlea""
+        ]
       }
-    ]
+    },
+    ""fleaMarket"": {
+      ""enabled"": true,
+      ""normalizedName"": ""flea-market""
+    }
   }
-}") }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+}");
 
             Mock<IBartersFetcher> bartersFetcherMock = new();
             bartersFetcherMock
@@ -185,10 +168,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 bartersFetcherMock.Object,
-                tarkovValuesFetcherMock.Object);
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                tarkovValuesFetcherMock.Object,
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -239,38 +224,25 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(@"{
   ""data"": {
-    ""items"": [
-      {
+    ""items"": {
+      ""invalid-item"": {
         ""invalid"": {}
       },
-      {
-        ""buyFor"": [
-          {
-            ""currency"": ""RUB"",
-            ""price"": 18111,
-            ""priceRUB"": 18111,
-            ""vendor"": {
-              ""normalizedName"": ""flea-market""
-            }
-          }
-        ],
-        ""id"": ""5783c43d2459774bbe137486""
+      ""5783c43d2459774bbe137486"": {
+        ""id"": ""5783c43d2459774bbe137486"",
+        ""buyFromTrader"": [],
+        ""types"": [],
+        ""avg24hPrice"": 18111
       }
-    ]
+    },
+    ""fleaMarket"": {
+      ""enabled"": true,
+      ""normalizedName"": ""flea-market""
+    }
   }
-}") }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+}");
 
             Mock<IBartersFetcher> bartersFetcherMock = new();
             bartersFetcherMock
@@ -300,10 +272,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 bartersFetcherMock.Object,
-                tarkovValuesFetcherMock.Object);
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                tarkovValuesFetcherMock.Object,
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -332,6 +306,138 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
             });
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Fetch_ShouldOnlyReturnFleaMarketPricesOfItemsSoldOnTheFleaMarket(bool isFleaMarketEnabled)
+        {
+            // Arrange
+            Mock<IConfigurationWrapper> configurationWrapperMock = new();
+            configurationWrapperMock
+                .SetupGet(m => m.Values)
+                .Returns(TestData.AzureFunctionsConfiguration)
+                .Verifiable();
+
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(@"{
+  ""data"": {
+    ""fleaMarket"": {
+      ""enabled"": " + isFleaMarketEnabled.ToString().ToLowerInvariant() + @",
+      ""normalizedName"": ""flea-market""
+    },
+    ""items"": {
+      ""item-sold-on-flea-market"": {
+        ""avg24hPrice"": 15000,
+        ""buyFromTrader"": [],
+        ""id"": ""item-sold-on-flea-market"",
+        ""minLevelForFlea"": 20,
+        ""types"": []
+      },
+      ""item-not-sold-on-flea-market"": {
+        ""avg24hPrice"": 15000,
+        ""buyFromTrader"": [],
+        ""id"": ""item-not-sold-on-flea-market"",
+        ""minLevelForFlea"": 20,
+        ""types"": [
+          ""noFlea""
+        ]
+      },
+      ""item-without-average-price"": {
+        ""avg24hPrice"": 0,
+        ""buyFromTrader"": [],
+        ""id"": ""item-without-average-price"",
+        ""minLevelForFlea"": 20,
+        ""types"": []
+      },
+      ""item-sold-by-unknown-trader"": {
+        ""avg24hPrice"": 15000,
+        ""buyFromTrader"": [
+          {
+            ""currency"": ""RUB"",
+            ""minTraderLevel"": 1,
+            ""price"": 10000,
+            ""priceRUB"": 10000,
+            ""taskUnlock"": null,
+            ""trader"": ""unknown-trader""
+          }
+        ],
+        ""id"": ""item-sold-by-unknown-trader"",
+        ""minLevelForFlea"": 20,
+        ""types"": []
+      }
+    }
+  }
+}");
+
+            Mock<IBartersFetcher> bartersFetcherMock = new();
+            bartersFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            bartersFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns([])
+                .Verifiable();
+
+            Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
+            tarkovValuesFetcherMock
+                .Setup(m => m.Fetch())
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            tarkovValuesFetcherMock
+                .SetupGet(m => m.FetchedData)
+                .Returns(TestData.TarkovValues)
+                .Verifiable();
+
+            PricesFetcher fetcher = new(
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
+                "en",
+                new Mock<ILogger<PricesFetcher>>().Object,
+                apiRequesterMock.Object,
+                configurationWrapperMock.Object,
+                bartersFetcherMock.Object,
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                tarkovValuesFetcherMock.Object,
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
+
+            // Act
+            Result result = await fetcher.Fetch();
+
+            // Assert
+            List<Price> expected =
+            [
+                new()
+                {
+                    CurrencyName = "RUB",
+                    ItemId = "5449016a4bdc2d6f028b456f",
+                    Merchant = "prapor",
+                    MerchantLevel = 1,
+                    Value = 1,
+                    ValueInMainCurrency = 1
+                }
+            ];
+
+            if (isFleaMarketEnabled)
+            {
+                expected.Add(new Price()
+                {
+                    CurrencyName = "RUB",
+                    ItemId = "item-sold-on-flea-market",
+                    Merchant = "flea-market",
+                    MerchantLevel = 20,
+                    Value = 15000,
+                    ValueInMainCurrency = 15000
+                });
+            }
+
+            // The item sold by an unknown trader is ignored
+            result.IsSuccess.Should().BeTrue();
+            fetcher.FetchedData.Should().BeEquivalentTo(expected);
+        }
+
         [Fact]
         public async Task Fetch_WithFailedTarkovValuesFetch_ShouldFail()
         {
@@ -342,17 +448,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(TestData.PricesJson);
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
@@ -374,10 +470,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 bartersFetcherMock.Object,
-                tarkovValuesFetcherMock.Object);
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                tarkovValuesFetcherMock.Object,
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -397,17 +495,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PricesJson) }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(TestData.PricesJson);
 
             Mock<ITarkovValuesFetcher> tarkovValuesFetcherMock = new();
             tarkovValuesFetcherMock
@@ -433,10 +521,12 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 },
                 "en",
                 new Mock<ILogger<PricesFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 bartersFetcherMock.Object,
-                tarkovValuesFetcherMock.Object);
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                tarkovValuesFetcherMock.Object,
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -455,6 +545,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ValueInMainCurrency = 1
                 }
             });
+        }
+
+        private static QuestsFetcher CreateQuestsFetcher(IApiRequester apiRequester, IConfigurationWrapper configurationWrapper)
+        {
+            return new QuestsFetcher(
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
+                "en",
+                new Mock<ILogger<QuestsFetcher>>().Object,
+                apiRequester,
+                configurationWrapper);
+        }
+
+        private static TradersFetcher CreateTradersFetcher(IApiRequester apiRequester, IConfigurationWrapper configurationWrapper)
+        {
+            return new TradersFetcher(
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
+                new Mock<ILogger<TradersFetcher>>().Object,
+                apiRequester,
+                configurationWrapper);
         }
     }
 }

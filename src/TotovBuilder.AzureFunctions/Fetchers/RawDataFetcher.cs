@@ -1,9 +1,7 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
-using TotovBuilder.AzureFunctions.Utils;
 using TotovBuilder.Shared.Abstractions.Azure;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
@@ -11,12 +9,9 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a static data fetcher.
     /// </summary>
-    public abstract class RawDataFetcher<T> : IApiFetcher<T>
+    public abstract class RawDataFetcher<T> : ApiFetcher<T>
         where T : class
     {
-        /// <inheritdoc/>
-        public T? FetchedData { get; private set; }
-
         /// <summary>
         /// Serialization options.
         /// </summary>
@@ -36,28 +31,12 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         protected abstract string AzureBlobName { get; }
 
         /// <summary>
-        /// Type of data handled.
-        /// </summary>
-        protected abstract DataType DataType { get; }
-
-        /// <summary>
-        /// Logger.
-        /// </summary>
-        protected readonly ILogger<RawDataFetcher<T>> Logger;
-
-        /// <summary>
         /// Azure blob storage manager.
         /// </summary>
         private readonly IAzureBlobStorageManager AzureBlobStorageManager;
 
         /// <summary>
-        /// Fetching task.
-        /// Used to avoid launching multiple fetch operations at the same time.
-        /// </summary>
-        private Task FetchingTask = Task.CompletedTask;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StaticDataFetcher"/> class.
+        /// Initializes a new instance of the <see cref="RawDataFetcher{T}"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="azureBlobStorageManager">Azure blob storage manager.</param>
@@ -66,46 +45,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             ILogger<RawDataFetcher<T>> logger,
             IAzureBlobStorageManager azureBlobStorageManager,
             IConfigurationWrapper configurationWrapper)
+            : base(logger)
         {
             AzureBlobStorageManager = azureBlobStorageManager;
             ConfigurationWrapper = configurationWrapper;
-            Logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public async Task<Result> Fetch()
-        {
-            if (!FetchingTask.IsCompleted)
-            {
-                Logger.LogInformation(Properties.Resources.WaitingForPreviousFetching, DataType.ToString());
-                await FetchingTask;
-                Logger.LogInformation(Properties.Resources.PreviousFetchingFinished, DataType.ToString());
-            }
-            else
-            {
-                FetchingTask = Task.Run(async () =>
-                {
-                    if (FetchedData != null)
-                    {
-                        return;
-                    }
-
-                    Result<T> fetchResult = await ExecuteFetch();
-
-                    if (fetchResult.IsSuccess)
-                    {
-                        FetchedData = fetchResult.Value;
-                    }
-                });
-                await FetchingTask;
-            }
-
-            if (FetchedData == null)
-            {
-                return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
-            }
-
-            return Result.Ok();
         }
 
         /// <summary>
@@ -115,11 +58,8 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <returns>Deserialized data.</returns>
         protected abstract Task<Result<T>> DeserializeData(string responseContent);
 
-        /// <summary>
-        /// Executes the fetch operation.
-        /// </summary>
-        /// <returns>Fetched data.</returns>
-        private async Task<Result<T>> ExecuteFetch()
+        /// <inheritdoc/>
+        protected override async Task<Result<T>> ExecuteFetch()
         {
             Result<string> blobFetchResult = await AzureBlobStorageManager.FetchBlob(ConfigurationWrapper.Values.AzureBlobStorageRawDataContainerName, AzureBlobName);
 

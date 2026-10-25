@@ -26,11 +26,6 @@
         ItemCategories,
 
         /// <summary>
-        /// Item missing properties.
-        /// </summary>
-        ItemMissingProperties,
-
-        /// <summary>
         /// Items.
         /// </summary>
         Items,
@@ -54,6 +49,11 @@
         /// Values related to Tarkov gameplay.
         /// </summary>
         TarkovValues,
+
+        /// <summary>
+        /// Traders.
+        /// </summary>
+        Traders,
 
         /// <summary>
         /// Totov Builder website configuration.

@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
-using TotovBuilder.Model.Configuration;
 using TotovBuilder.Model.Items;
 using TotovBuilder.Model.Utils;
+using static TotovBuilder.AzureFunctions.Utils.JsonDeserializer;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
@@ -15,20 +15,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// </summary>
     public class BartersFetcher : ApiFetcher<IEnumerable<Price>>, IBartersFetcher
     {
-        /// <inheritdoc/>
-        protected override string ApiQuery
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(_apiQuery))
-                {
-                    _apiQuery = ConfigurationWrapper.Values.ApiBartersQuery.Replace("{0}", GameMode.ApiQueryValue).Replace("{1}", Language);
-                }
-
-                return _apiQuery;
-            }
-        }
-        private string? _apiQuery;
+        /// <summary>
+        ///  Game mode for which barters are fetched from the API.
+        /// </summary>
+        public GameMode GameMode { get; init; }
 
         /// <inheritdoc/>
         protected override DataType DataType
@@ -40,95 +30,84 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Game mode for the API request.
+        /// API requester.
         /// </summary>
-        public GameMode GameMode { get; init; }
+        private readonly IApiRequester ApiRequester;
 
         /// <summary>
-        /// Language for the API request.
+        /// Configuration wrapper.
         /// </summary>
-        public string Language { get; init; }
+        private readonly IConfigurationWrapper ConfigurationWrapper;
+
+        /// <summary>
+        /// Quests fetcher.
+        /// </summary>
+        private readonly IQuestsFetcher QuestsFetcher;
+
+        /// <summary>
+        /// Traders fetcher.
+        /// </summary>
+        private readonly ITradersFetcher TradersFetcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BartersFetcher"/> class.
         /// </summary>
-        /// <param name="gameMode">Game mode for the API request.</param>
-        /// <param name="language">Language mode for the API request.param>
+        /// <param name="gameMode">Game mode for which barters are fetched.</param>
         /// <param name="logger">Logger.</param>
-        /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
+        /// <param name="apiRequester">API requester.</param>
         /// <param name="configurationWrapper">Configuration wrapper.</param>
+        /// <param name="questsFetcher">Quests fetcher.</param>
+        /// <param name="tradersFetcher">Traders fetcher.</param>
         public BartersFetcher(
             GameMode gameMode,
-            string language,
             ILogger<BartersFetcher> logger,
-            IHttpClientWrapperFactory httpClientWrapperFactory,
-            IConfigurationWrapper configurationWrapper)
-            : base(logger, httpClientWrapperFactory, configurationWrapper)
+            IApiRequester apiRequester,
+            IConfigurationWrapper configurationWrapper,
+            IQuestsFetcher questsFetcher,
+            ITradersFetcher tradersFetcher)
+            : base(logger)
         {
+            ApiRequester = apiRequester;
+            ConfigurationWrapper = configurationWrapper;
             GameMode = gameMode;
-            Language = language;
+            QuestsFetcher = questsFetcher;
+            TradersFetcher = tradersFetcher;
         }
 
         /// <inheritdoc/>
-        protected override Task<Result<IEnumerable<Price>>> DeserializeDataAsync(string responseContent)
+        protected override async Task<Result<IEnumerable<Price>>> ExecuteFetch()
         {
-            List<Price> barters = [];
+            string bartersPath = BuildApiPath(ConfigurationWrapper.Values.ApiBartersPath, GameMode.ApiQueryValue);
+            Task<Result<JsonElement>> bartersDataTask = ApiRequester.RequestData(bartersPath);
+            Task<Result> questsTask = QuestsFetcher.Fetch();
+            Task<Result> tradersTask = TradersFetcher.Fetch();
 
-            JsonElement bartersJson = JsonDocument.Parse(responseContent).RootElement;
+            await Task.WhenAll(bartersDataTask, questsTask, tradersTask);
+
+            Result allTasksResult = Result.Merge(bartersDataTask.Result.ToResult(), questsTask.Result, tradersTask.Result);
+
+            if (allTasksResult.IsFailed)
+            {
+                return allTasksResult;
+            }
+
+            JsonElement bartersJson = bartersDataTask.Result.Value;
+
+            if (bartersJson.ValueKind != JsonValueKind.Array)
+            {
+                string error = string.Format(Properties.Resources.InvalidApiResponseData, bartersPath, bartersJson.GetRawText());
+                Logger.LogError(error);
+
+                return Result.Fail(error);
+            }
+
+            List<Price> barters = [];
 
             foreach (JsonElement barterJson in bartersJson.EnumerateArray())
             {
                 try
                 {
-                    List<BarterItem> barterItems = [];
-                    string merchant = barterJson.GetProperty("trader").GetProperty("normalizedName").GetString()!;
-                    int merchantLevel = barterJson.GetProperty("level").GetInt32();
-
-                    Quest? quest = null;
-
-                    if (TryDeserializeObject(barterJson, "taskUnlock", out JsonElement taskUnlockJson))
-                    {
-                        quest = new Quest()
-                        {
-                            Id = taskUnlockJson.GetProperty("id").GetString()!,
-                            Name = taskUnlockJson.GetProperty("name").GetString()!,
-                            WikiLink = taskUnlockJson.GetProperty("wikiLink").GetString()!
-                        };
-                    }
-
-                    foreach (JsonElement baterItemJson in barterJson.GetProperty("requiredItems").EnumerateArray())
-                    {
-                        barterItems.Add(new BarterItem()
-                        {
-                            ItemId = baterItemJson.GetProperty("item").GetProperty("id").GetString()!,
-                            Quantity = baterItemJson.GetProperty("quantity").GetDouble()
-                        });
-                    }
-
-                    foreach (JsonElement itemJson in barterJson.GetProperty("rewardItems").EnumerateArray())
-                    {
-                        double quantity = itemJson.GetProperty("quantity").GetDouble();
-                        Price barter = new()
-                        {
-                            BarterItems = [.. barterItems],
-                            CurrencyName = "barter",
-                            ItemId = itemJson.GetProperty("item").GetProperty("id").GetString()!,
-                            Merchant = merchant,
-                            MerchantLevel = merchantLevel,
-                            Quest = quest
-                        };
-
-                        if (quantity != 1)
-                        {
-                            foreach (BarterItem barterItem in barter.BarterItems)
-                            {
-                                // Dividing the required number of items by the amount of received items
-                                barterItem.Quantity /= quantity;
-                            }
-                        }
-
-                        barters.Add(barter);
-                    }
+                    barters.Add(DeserializeBarter(barterJson));
                 }
                 catch (Exception e)
                 {
@@ -140,7 +119,54 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             // Ignoring barters that require the same item as the one obtained to avoid price calculation infinite loops
             barters.RemoveAll(b => b.BarterItems.Any(bi => bi.ItemId == b.ItemId));
 
-            return Task.FromResult(Result.Ok(barters.AsEnumerable()));
+            return Result.Ok(barters.AsEnumerable());
+        }
+
+        /// <summary>
+        /// Deserializes a barter.
+        /// </summary>
+        /// <param name="barterJson">Json element representing the barter.</param>
+        /// <returns>Barter.</returns>
+        private Price DeserializeBarter(JsonElement barterJson)
+        {
+            List<BarterItem> barterItems = [];
+
+            foreach (JsonElement barterItemJson in barterJson.GetProperty("requiredItems").EnumerateArray())
+            {
+                barterItems.Add(new BarterItem()
+                {
+                    ItemId = barterItemJson.GetProperty("item").GetString()!,
+                    Quantity = barterItemJson.GetProperty("count").GetDouble()
+                });
+            }
+
+            JsonElement offeredItemJson = barterJson.GetProperty("offeredItem");
+            double quantity = offeredItemJson.GetProperty("count").GetDouble();
+
+            if (quantity != 1)
+            {
+                foreach (BarterItem barterItem in barterItems)
+                {
+                    // Dividing the required number of items by the amount of received items
+                    barterItem.Quantity /= quantity;
+                }
+            }
+
+            Price barter = new()
+            {
+                BarterItems = [.. barterItems],
+                CurrencyName = "barter",
+                ItemId = offeredItemJson.GetProperty("item").GetString()!,
+                Merchant = TradersFetcher.GetMerchantName(barterJson.GetProperty("trader").GetString()!),
+                MerchantLevel = barterJson.GetProperty("minTraderLevel").GetInt32()
+            };
+
+            if (TryDeserializeString(barterJson, "taskUnlock", out string taskId))
+            {
+                barter.Quest = QuestsFetcher.GetQuest(taskId);
+            }
+
+            return barter;
         }
     }
 }

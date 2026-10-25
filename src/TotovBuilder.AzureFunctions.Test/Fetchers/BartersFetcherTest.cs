@@ -1,10 +1,9 @@
-﻿using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Moq;
+using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Fetchers;
 using TotovBuilder.Model.Configuration;
@@ -30,17 +29,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.BartersJson) }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(bartersJson: TestData.BartersJson);
 
             BartersFetcher fetcher = new(
                 new GameMode()
@@ -48,10 +37,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ApiQueryValue = "regular",
                     Name = "pvp"
                 },
-                "en",
                 new Mock<ILogger<BartersFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object);
+                apiRequesterMock.Object,
+                configurationWrapperMock.Object,
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -66,54 +56,40 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
         {
             // Arrange
             string bartersJson = @"{
-  ""data"": {
-    ""barters"": [
-      {
-        ""level"": 3,
-        ""requiredItems"": [
-          {
-            ""item"": {
-              ""id"": ""545cdb794bdc2d3a198b456a""
-            },
-            ""quantity"": 2
-          }
-        ],
-        ""rewardItems"": [
-          {
-            ""item"": {
-              ""id"": ""545cdb794bdc2d3a198b456a""
-            },
-            ""quantity"": 1
-          }
-        ],
-        ""trader"": {
-          ""normalizedName"": ""mechanic""
+  ""data"": [
+    {
+      ""id"": ""test-barter-1"",
+      ""trader"": ""5a7c2eca46aef81a7ca2145d"",
+      ""taskUnlock"": null,
+      ""minTraderLevel"": 3,
+      ""requiredItems"": [
+        {
+          ""item"": ""545cdb794bdc2d3a198b456a"",
+          ""count"": 2
         }
-      },
-      {
-        ""level"": 2,
-        ""requiredItems"": [
-          {
-            ""item"": {
-              ""id"": ""5448be9a4bdc2dfd2f8b456a""
-            },
-            ""quantity"": 1
-          }
-        ],
-        ""rewardItems"": [
-          {
-            ""item"": {
-              ""id"": ""545cdb794bdc2d3a198b456a""
-            },
-            ""quantity"": 1
-          }
-        ],
-        ""trader"": {
-          ""normalizedName"": ""mechanic""
-        }
+      ],
+      ""offeredItem"": {
+        ""item"": ""545cdb794bdc2d3a198b456a"",
+        ""count"": 1
       }
-    ]
-  }
+    },
+    {
+      ""id"": ""test-barter-2"",
+      ""trader"": ""5a7c2eca46aef81a7ca2145d"",
+      ""taskUnlock"": null,
+      ""minTraderLevel"": 2,
+      ""requiredItems"": [
+        {
+          ""item"": ""5448be9a4bdc2dfd2f8b456a"",
+          ""count"": 1
+        }
+      ],
+      ""offeredItem"": {
+        ""item"": ""545cdb794bdc2d3a198b456a"",
+        ""count"": 1
+      }
+    }
+  ]
 }";
 
             Mock<IConfigurationWrapper> configurationWrapperMock = new();
@@ -122,17 +98,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(bartersJson) }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(bartersJson: bartersJson);
 
             BartersFetcher fetcher = new(
                 new GameMode()
@@ -140,10 +106,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ApiQueryValue = "regular",
                     Name = "pvp"
                 },
-                "en",
                 new Mock<ILogger<BartersFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object);
+                apiRequesterMock.Object,
+                configurationWrapperMock.Object,
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -181,58 +148,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
-  ""data"": {
-    ""barters"": [
-      {
-        ""invalid"": { }
-      },
-      {
-        ""level"": 1,
-        ""requiredItems"": [
-          {
-            ""item"": {
-              ""id"": ""5e32f56fcb6d5863cc5e5ee4""
-            },
-            ""quantity"": 2
-          },
-          {
-            ""item"": {
-              ""id"": ""5b432be65acfc433000ed01f""
-            },
-            ""quantity"": 1
-          }
-        ],
-        ""rewardItems"": [
-          {
-            ""item"": {
-              ""id"": ""545cdb794bdc2d3a198b456a""
-            },
-            ""quantity"": 1
-          }
-        ],
-        ""trader"": {
-          ""normalizedName"": ""prapor""
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.CreateForPricesAndBarters(bartersJson: @"{
+  ""data"": [
+    {
+      ""invalid"": {}
+    },
+    {
+      ""id"": ""test-barter-1"",
+      ""trader"": ""54cb50c76803fa8b248b4571"",
+      ""taskUnlock"": ""59675d6c86f7740a842fc482"",
+      ""minTraderLevel"": 1,
+      ""requiredItems"": [
+        {
+          ""item"": ""5e32f56fcb6d5863cc5e5ee4"",
+          ""count"": 2
         },
-        ""taskUnlock"": {
-          ""id"": ""59675d6c86f7740a842fc482"",
-          ""name"": ""Ice Cream Cones"",
-          ""wikiLink"": ""https://escapefromtarkov.fandom.com/wiki/Ice_Cream_Cones""
+        {
+          ""item"": ""5b432be65acfc433000ed01f"",
+          ""count"": 1
         }
+      ],
+      ""offeredItem"": {
+        ""item"": ""545cdb794bdc2d3a198b456a"",
+        ""count"": 1
       }
-    ]
-  }
-}") }))
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+    }
+  ]
+}");
 
             BartersFetcher fetcher = new(
                 new GameMode()
@@ -240,10 +182,11 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     ApiQueryValue = "regular",
                     Name = "pvp"
                 },
-                "en",
                 new Mock<ILogger<BartersFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
-                configurationWrapperMock.Object);
+                apiRequesterMock.Object,
+                configurationWrapperMock.Object,
+                CreateQuestsFetcher(apiRequesterMock.Object, configurationWrapperMock.Object),
+                CreateTradersFetcher(apiRequesterMock.Object, configurationWrapperMock.Object));
 
             // Act
             Result result = await fetcher.Fetch();
@@ -279,6 +222,33 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                     }
                 }
             });
+        }
+
+        private static QuestsFetcher CreateQuestsFetcher(IApiRequester apiRequester, IConfigurationWrapper configurationWrapper)
+        {
+            return new QuestsFetcher(
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
+                "en",
+                new Mock<ILogger<QuestsFetcher>>().Object,
+                apiRequester,
+                configurationWrapper);
+        }
+
+        private static TradersFetcher CreateTradersFetcher(IApiRequester apiRequester, IConfigurationWrapper configurationWrapper)
+        {
+            return new TradersFetcher(
+                new GameMode()
+                {
+                    ApiQueryValue = "regular",
+                    Name = "pvp"
+                },
+                new Mock<ILogger<TradersFetcher>>().Object,
+                apiRequester,
+                configurationWrapper);
         }
     }
 }

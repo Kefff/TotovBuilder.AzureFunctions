@@ -117,12 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ApiDataFetched" xml:space="preserve">
-    <value>{0} - Data fetched from the API.</value>
-  </data>
-  <data name="ApiFetchError" xml:space="preserve">
-    <value>{0} - Error while fetching data from the API :
+  <data name="ApiRequestError" xml:space="preserve">
+    <value>{0} - Error while requesting the API :
 {1}</value>
+  </data>
+  <data name="ApiResponseReceived" xml:space="preserve">
+    <value>{0} - API response received.</value>
   </data>
   <data name="AzureFunctionsConfigurationDeserializationError" xml:space="preserve">
     <value>Error while deserializing Azure Functions configuration :
@@ -139,8 +139,8 @@
   <data name="ExecutionDelayExceeded" xml:space="preserve">
     <value>{0} - Execution delay exceeded.</value>
   </data>
-  <data name="FetchingApiData" xml:space="preserve">
-    <value>{0} - Fetching data from the API.</value>
+  <data name="GameModeFallbackUsed" xml:space="preserve">
+    <value>{0} - Prices not available, the prices of the "{1}" game mode are used instead.</value>
   </data>
   <data name="GeneratingWebsiteData" xml:space="preserve">
     <value>Generating website data.</value>
@@ -164,10 +164,6 @@
   </data>
   <data name="ItemDeserializationError" xml:space="preserve">
     <value>Error while deserializing item :
-{0}</value>
-  </data>
-  <data name="ItemMissingPropertiesDeserializationError" xml:space="preserve">
-    <value>Error while deserializing item missing properties :
 {0}</value>
   </data>
   <data name="ItemNotFound" xml:space="preserve">
@@ -194,9 +190,18 @@ Cannot find a slot for items "{1}".</value>
     <value>Error while deserializing price :
 {0}</value>
   </data>
+  <data name="QuestNotFound" xml:space="preserve">
+    <value>Quest "{0}" not found.</value>
+  </data>
+  <data name="RequestingApi" xml:space="preserve">
+    <value>{0} - Requesting the API.</value>
+  </data>
   <data name="TarkovValuesDeserializationError" xml:space="preserve">
     <value>Error while deserializing Tarkov values :
 {0}</value>
+  </data>
+  <data name="TraderNotFound" xml:space="preserve">
+    <value>Trader "{0}" not found.</value>
   </data>
   <data name="WaitingForPreviousFetching" xml:space="preserve">
     <value>{0} - Waiting for previous fetching to finish.</value>

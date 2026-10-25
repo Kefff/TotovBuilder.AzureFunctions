@@ -1,34 +1,19 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using FluentResults;
+﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
-using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
 using TotovBuilder.AzureFunctions.Utils;
-using static System.Text.Json.JsonElement;
 
 namespace TotovBuilder.AzureFunctions.Fetchers
 {
     /// <summary>
-    /// Represents a base class for API fetchers.
+    /// Represents a base class for fetchers.
     /// </summary>
-    public abstract partial class ApiFetcher<T> : IApiFetcher<T>
+    /// <typeparam name="T">Type of fetched data.</typeparam>
+    public abstract class ApiFetcher<T> : IApiFetcher<T>
         where T : class
     {
         /// <inheritdoc/>
-        public T? FetchedData { get; private set; } = null;
-
-        /// <summary>
-        /// API query.
-        /// </summary>
-        protected abstract string ApiQuery { get; }
-
-        /// <summary>
-        /// Configuration wrapper;
-        /// </summary>
-        protected readonly IConfigurationWrapper ConfigurationWrapper;
+        public T? FetchedData { get; private set; }
 
         /// <summary>
         /// Type of data handled.
@@ -38,15 +23,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Logger.
         /// </summary>
-        protected readonly ILogger<ApiFetcher<T>> Logger;
-
-        /// <summary>
-        /// Serialization options.
-        /// </summary>
-        private static readonly JsonSerializerOptions SerializerOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        protected readonly ILogger Logger;
 
         /// <summary>
         /// Fetching task.
@@ -55,52 +32,46 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         private Task FetchingTask = Task.CompletedTask;
 
         /// <summary>
-        /// HTTP client wrapper factory.
+        /// Lock used to start only one fetching task at a time.
         /// </summary>
-        private readonly IHttpClientWrapperFactory HttpClientWrapperFactory;
+        private readonly object FetchingTaskLock = new();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ApiFetcher"/> class.
+        /// Initializes a new instance of the <see cref="ApiFetcher{T}"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
-        /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="configurationWrapper">Configuration wrapper.</param>
-        protected ApiFetcher(
-            ILogger<ApiFetcher<T>> logger,
-            IHttpClientWrapperFactory httpClientWrapperFactory,
-            IConfigurationWrapper configurationWrapper)
+        protected ApiFetcher(ILogger logger)
         {
-            ConfigurationWrapper = configurationWrapper;
-            HttpClientWrapperFactory = httpClientWrapperFactory;
             Logger = logger;
         }
 
         /// <inheritdoc/>
         public async Task<Result> Fetch()
         {
-            if (!FetchingTask.IsCompleted)
+            Task fetchingTask;
+            bool isWaitingForPreviousFetching;
+
+            lock (FetchingTaskLock)
+            {
+                isWaitingForPreviousFetching = !FetchingTask.IsCompleted;
+
+                if (!isWaitingForPreviousFetching && FetchedData == null)
+                {
+                    FetchingTask = ExecuteFetchAndStoreData();
+                }
+
+                fetchingTask = FetchingTask;
+            }
+
+            if (isWaitingForPreviousFetching)
             {
                 Logger.LogInformation(Properties.Resources.WaitingForPreviousFetching, DataType.ToString());
-                await FetchingTask;
+                await fetchingTask;
                 Logger.LogInformation(Properties.Resources.PreviousFetchingFinished, DataType.ToString());
             }
             else
             {
-                FetchingTask = Task.Run(async () =>
-                {
-                    if (FetchedData != null)
-                    {
-                        return;
-                    }
-
-                    Result<T> fetchResult = await ExecuteFetch();
-
-                    if (fetchResult.IsSuccess)
-                    {
-                        FetchedData = fetchResult.Value;
-                    }
-                });
-                await FetchingTask;
+                await fetchingTask;
             }
 
             if (FetchedData == null)
@@ -112,277 +83,41 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
-        /// Deserializes data from a the content of a fetch response.
+        /// Builds the path of an API file from its configured template.
         /// </summary>
-        /// <param name="responseContent">Content of a fetch response.</param>
-        /// <returns>Deserialized data.</returns>
-        protected abstract Task<Result<T>> DeserializeDataAsync(string responseContent);
-
-        /// <summary>
-        /// Tries to deserialize an array.
-        /// </summary>
-        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
-        /// <param name="propertyName">Name of the property to deserialize.</param>
-        /// <param name="value">Deserialized value when successful.</param>
-        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
-        protected bool TryDeserializeArray(JsonElement jsonElement, string propertyName, out ArrayEnumerator value)
+        /// <param name="pathTemplate">Path template, where <c>{0}</c> is replaced by the game mode API value and <c>{1}</c> by the language.</param>
+        /// <param name="gameModeApiValue">Game mode API value.</param>
+        /// <param name="language">Language, for translations files.</param>
+        /// <returns>Path of the API file.</returns>
+        protected static string BuildApiPath(string pathTemplate, string gameModeApiValue, string? language = null)
         {
-            value = new ArrayEnumerator();
+            string path = pathTemplate.Replace("{0}", gameModeApiValue);
 
-            if (jsonElement.ValueKind != JsonValueKind.Object)
+            if (language != null)
             {
-                return false;
+                path = path.Replace("{1}", language);
             }
 
-            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
-            {
-                return false;
-            }
-
-            if (propertyJson.ValueKind == JsonValueKind.Array)
-            {
-                value = propertyJson.EnumerateArray();
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Tries to deserialize a boolean value.
-        /// </summary>
-        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
-        /// <param name="propertyName">Name of the property to deserialize.</param>
-        /// <param name="value">Deserialized value when successful.</param>
-        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
-        protected bool TryDeserializeBoolean(JsonElement jsonElement, string propertyName, out bool value)
-        {
-            value = false;
-
-            if (jsonElement.ValueKind != JsonValueKind.Object)
-            {
-                return false;
-            }
-
-            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
-            {
-                return false;
-            }
-
-            if (propertyJson.ValueKind == JsonValueKind.False || propertyJson.ValueKind == JsonValueKind.True)
-            {
-                value = propertyJson.GetBoolean();
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Tries to deserialize a double value.
-        /// </summary>
-        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
-        /// <param name="propertyName">Name of the property to deserialize.</param>
-        /// <param name="value">Deserialized value when successful.</param>
-        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
-        protected bool TryDeserializeDouble(JsonElement jsonElement, string propertyName, out double value)
-        {
-            value = 0;
-
-            if (jsonElement.ValueKind != JsonValueKind.Object)
-            {
-                return false;
-            }
-
-            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
-            {
-                return false;
-            }
-
-            if (propertyJson.ValueKind == JsonValueKind.Number)
-            {
-                value = propertyJson.GetDouble();
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Tries to deserialize an object value.
-        /// </summary>
-        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
-        /// <param name="propertyName">Name of the property to deserialize.</param>
-        /// <param name="value">Deserialized value when successful.</param>
-        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
-        protected bool TryDeserializeObject(JsonElement jsonElement, string propertyName, out JsonElement value)
-        {
-            value = new JsonElement();
-
-            if (jsonElement.ValueKind != JsonValueKind.Object)
-            {
-                return false;
-            }
-
-            if (jsonElement.TryGetProperty(propertyName, out JsonElement element))
-            {
-                if (element.ValueKind == JsonValueKind.Object)
-                {
-                    value = element;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Tries to deserialize a string value.
-        /// </summary>
-        /// <param name="jsonElement">Json element containing the property to deserialize.</param>
-        /// <param name="propertyName">Name of the property to deserialize.</param>
-        /// <param name="value">Deserialized value when successful.</param>
-        /// <returns><c>true</c> when the deserialization succeeds; otherwise <c>false</c>.</returns>
-        protected bool TryDeserializeString(JsonElement jsonElement, string propertyName, out string value)
-        {
-            value = string.Empty;
-
-            if (jsonElement.ValueKind != JsonValueKind.Object)
-            {
-                return false;
-            }
-
-            if (!jsonElement.TryGetProperty(propertyName, out JsonElement propertyJson))
-            {
-                return false;
-            }
-
-            if (propertyJson.ValueKind == JsonValueKind.String)
-            {
-                value = propertyJson.GetString()!;
-
-                return true;
-            }
-
-            return false;
+            return path;
         }
 
         /// <summary>
         /// Executes the fetch operation.
         /// </summary>
         /// <returns>Fetched data.</returns>
-        private async Task<Result<T>> ExecuteFetch()
-        {
-            if (string.IsNullOrWhiteSpace(ConfigurationWrapper.Values.ApiUrl)
-                || string.IsNullOrWhiteSpace(ApiQuery))
-            {
-                string error = Properties.Resources.InvalidConfiguration;
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
-
-            Logger.LogInformation(Properties.Resources.FetchingApiData, DataType.ToString());
-
-            string responseContent;
-
-            try
-            {
-                using HttpRequestMessage request = new(HttpMethod.Post, ConfigurationWrapper.Values.ApiUrl);
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                string content = JsonSerializer.Serialize(new { Query = ApiQuery }, SerializerOptions);
-                request.Content = new StringContent(content, Encoding.UTF8, "application/json");
-
-                IHttpClientWrapper client = HttpClientWrapperFactory.Create();
-                Task<HttpResponseMessage> fetchTask = client.SendAsync(request);
-
-                if (!fetchTask.Wait(ConfigurationWrapper.Values.ExecutionTimeout * 1000))
-                {
-                    string error = string.Format(Properties.Resources.ExecutionDelayExceeded, DataType.ToString());
-                    Logger.LogError(error);
-
-                    return Result.Fail(error);
-                }
-
-                responseContent = await fetchTask.Result.Content.ReadAsStringAsync();
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.ApiFetchError, DataType.ToString(), e);
-                Logger.LogError(error);
-
-                return Result.Fail(error);
-            }
-
-            Result<string> isolatedDataResult = GetData(responseContent);
-
-            if (!isolatedDataResult.IsSuccess)
-            {
-                return isolatedDataResult.ToResult<T>();
-            }
-
-            Result<T> deserializedDataResult = await DeserializeDataAsync(isolatedDataResult.Value);
-
-            Logger.LogInformation(Properties.Resources.ApiDataFetched, DataType.ToString());
-
-            return deserializedDataResult;
-        }
+        protected abstract Task<Result<T>> ExecuteFetch();
 
         /// <summary>
-        /// Checks the validity of an API response data and gets its useful content.
+        /// Executes the fetch operation and stores the fetched data when it succeeds.
         /// </summary>
-        /// <param name="responseContent">API response content.</param>
-        /// <returns>Useful content of the API response content.</returns>
-        private Result<string> GetData(string responseContent)
+        private async Task ExecuteFetchAndStoreData()
         {
-            try
+            Result<T> fetchResult = await ExecuteFetch();
+
+            if (fetchResult.IsSuccess)
             {
-                JsonElement response = JsonDocument.Parse(responseContent).RootElement;
-
-                if (!response.TryGetProperty("data", out JsonElement data))
-                {
-                    string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
-                    Logger.LogError(error);
-
-                    return Result.Fail(error);
-                }
-
-                Match usefulDataKeyMatch = GetDataRegex().Match(ApiQuery);
-
-                if (!data.TryGetProperty(usefulDataKeyMatch.Groups[1].Value, out JsonElement isolatedData))
-                {
-                    string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
-                    Logger.LogError(error);
-
-                    return Result.Fail(error);
-                }
-
-                string isolatedDataRawText = isolatedData.GetRawText();
-
-                if (string.IsNullOrWhiteSpace(isolatedDataRawText) || isolatedDataRawText == "\"\"" || isolatedDataRawText == "[]" || isolatedDataRawText == "{}")
-                {
-                    string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), responseContent);
-                    Logger.LogError(error);
-
-                    return Result.Fail(error);
-                }
-
-                return Result.Ok(isolatedDataRawText);
-            }
-            catch (Exception e)
-            {
-                string error = string.Format(Properties.Resources.InvalidApiResponseData, DataType.ToString(), string.Join(Environment.NewLine + Environment.NewLine, responseContent, e));
-                Logger.LogError(error);
-
-                return Result.Fail(error);
+                FetchedData = fetchResult.Value;
             }
         }
-
-        [GeneratedRegex("^{ ?([a-zA-Z]+)")]
-        private static partial Regex GetDataRegex();
     }
 }
