@@ -3,7 +3,7 @@
 namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
 {
     /// <summary>
-    /// Provides the functionalities of a base class for API fetchers.
+    /// Provides the functionalities of a fetcher.
     /// </summary>
     public interface IApiFetcher<T>
         where T : class
@@ -15,7 +15,7 @@ namespace TotovBuilder.AzureFunctions.Abstractions.Fetchers
         T? FetchedData { get; }
 
         /// <summary>
-        /// Fetches data from the API.
+        /// Fetches data.
         /// </summary>
         /// <returns>Data fetch result.</returns>
         Task<Result> Fetch();

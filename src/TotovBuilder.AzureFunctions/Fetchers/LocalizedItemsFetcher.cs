@@ -10,42 +10,41 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     /// <summary>
     /// Represents a fetcher that fetches localized items.
     /// </summary>
-    public class LocalizedItemsFetcher : ILocalizedItemsFetcher
+    public class LocalizedItemsFetcher : ApiFetcher<IEnumerable<LocalizedItems>>, ILocalizedItemsFetcher
     {
-        private readonly ILogger<ItemsFetcher> Logger;
-        private readonly IHttpClientWrapperFactory HttpClientWrapperFactory;
+        /// <inheritdoc/>
+        protected override DataType DataType
+        {
+            get
+            {
+                return DataType.Items;
+            }
+        }
+
+        private readonly IApiRequester ApiRequester;
         private readonly IConfigurationWrapper ConfigurationWrapper;
         private readonly IItemCategoriesFetcher ItemCategoriesFetcher;
-        private readonly IItemMissingPropertiesFetcher ItemMissingPropertiesFetcher;
+        private readonly ILogger<ItemsFetcher> ItemsFetcherLogger;
         private readonly ITarkovValuesFetcher TarkovValuesFetcher;
-
-        /// <inheritdoc/>
-        public IEnumerable<LocalizedItems>? FetchedData { get; private set; } = null;
 
         public LocalizedItemsFetcher(
             ILogger<ItemsFetcher> logger,
-            IHttpClientWrapperFactory httpClientWrapperFactory,
+            IApiRequester apiRequester,
             IConfigurationWrapper configurationWrapper,
             IItemCategoriesFetcher itemCategoriesFetcher,
-            IItemMissingPropertiesFetcher itemMissingPropertiesFetcher,
             ITarkovValuesFetcher tarkovValuesFetcher)
+            : base(logger)
         {
-            Logger = logger;
-            HttpClientWrapperFactory = httpClientWrapperFactory;
+            ApiRequester = apiRequester;
             ConfigurationWrapper = configurationWrapper;
             ItemCategoriesFetcher = itemCategoriesFetcher;
-            ItemMissingPropertiesFetcher = itemMissingPropertiesFetcher;
+            ItemsFetcherLogger = logger;
             TarkovValuesFetcher = tarkovValuesFetcher;
         }
 
         /// <inheritdoc/>
-        public Task<Result> Fetch()
+        protected override async Task<Result<IEnumerable<LocalizedItems>>> ExecuteFetch()
         {
-            if (FetchedData != null)
-            {
-                return Task.FromResult(Result.Ok());
-            }
-
             List<ItemsFetcher> itemFetchers = [];
             List<Task<Result>> fetchTasks = [];
 
@@ -53,17 +52,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
             {
                 ItemsFetcher itemsFetcher = new(
                     language,
-                    Logger,
-                    HttpClientWrapperFactory,
+                    ItemsFetcherLogger,
+                    ApiRequester,
                     ConfigurationWrapper,
                     ItemCategoriesFetcher,
-                    ItemMissingPropertiesFetcher,
                     TarkovValuesFetcher);
                 itemFetchers.Add(itemsFetcher);
                 fetchTasks.Add(itemsFetcher.Fetch());
             }
 
-            Task.WaitAll([.. fetchTasks]);
+            await Task.WhenAll(fetchTasks);
             List<LocalizedItems> fetchedData = [];
 
             foreach (ItemsFetcher itemFetcher in itemFetchers.Where(ife => ife.FetchedData != null))
@@ -77,12 +75,10 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             if (fetchedData.Count == 0)
             {
-                return Task.FromResult(Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.Items.ToString())));
+                return Result.Fail(string.Format(Properties.Resources.NoDataFetched, DataType.ToString()));
             }
 
-            FetchedData = fetchedData;
-
-            return Task.FromResult(Result.Ok());
+            return Result.Ok(fetchedData.AsEnumerable());
         }
     }
 }

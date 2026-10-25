@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
@@ -33,21 +31,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PresetsJson) };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(TestData.ItemsJson);
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -68,7 +52,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 
@@ -94,50 +78,37 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(@"{
   ""data"": {
-    ""items"": [
-      {
-      },
-      {
+    ""items"": {
+      ""invalid-item"": {},
+      ""test-preset-not-existing"": {
         ""containsItems"": [
-            {
-            ""item"": {
-                ""id"": ""5a16b7e1fcdbcb00165aa6c9""
-            },
-            ""quantity"": 1
-            }
+          {
+            ""item"": ""5a16b7e1fcdbcb00165aa6c9"",
+            ""count"": 1
+          }
         ],
-        ""id"": ""test-preset-not-existing""
+        ""id"": ""test-preset-not-existing"",
+        ""properties"": {
+          ""propertiesType"": ""ItemPropertiesPreset""
+        }
       },
-      {
+      ""test-preset-face-shield-alone"": {
         ""containsItems"": [
-            {
-            ""item"": {
-                ""id"": ""5a16b7e1fcdbcb00165aa6c9""
-            },
-            ""quantity"": 1
-            }
+          {
+            ""item"": ""5a16b7e1fcdbcb00165aa6c9"",
+            ""count"": 1
+          }
         ],
-        ""id"": ""test-preset-face-shield-alone""
+        ""id"": ""test-preset-face-shield-alone"",
+        ""properties"": {
+          ""propertiesType"": ""ItemPropertiesPreset""
+        }
       }
-    ]
+    }
   }
-}") };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+}");
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -158,7 +129,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 
@@ -187,37 +158,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(@"{
   ""data"": {
-    ""items"": [
-      {
+    ""items"": {
+      ""test-preset-not-existing"": {
         ""containsItems"": [
-            {
-            ""item"": {
-                ""id"": ""5a16b7e1fcdbcb00165aa6c9""
-            },
-            ""quantity"": 1
-            }
+          {
+            ""item"": ""5a16b7e1fcdbcb00165aa6c9"",
+            ""count"": 1
+          }
         ],
-        ""id"": ""test-preset-not-existing""
+        ""id"": ""test-preset-not-existing"",
+        ""properties"": {
+          ""propertiesType"": ""ItemPropertiesPreset""
+        }
       }
-    ]
+    }
   }
-}") };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+}");
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -238,7 +196,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 
@@ -260,37 +218,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(@"{
   ""data"": {
-    ""items"": [
-      {
+    ""items"": {
+      ""test-preset-magazine-with-incompatible-ammunition"": {
         ""containsItems"": [
-            {
-            ""item"": {
-                ""id"": ""601aa3d2b2bcb34913271e6d""
-            },
-            ""quantity"": 30
-            }
+          {
+            ""item"": ""601aa3d2b2bcb34913271e6d"",
+            ""count"": 30
+          }
         ],
-        ""id"": ""test-preset-magazine-with-incompatible-ammunition""
+        ""id"": ""test-preset-magazine-with-incompatible-ammunition"",
+        ""properties"": {
+          ""propertiesType"": ""ItemPropertiesPreset""
+        }
       }
-    ]
+    }
   }
-}") };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+}");
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -404,7 +349,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 
@@ -432,37 +377,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(@"{
   ""data"": {
-    ""items"": [
-      {
+    ""items"": {
+      ""test-preset-non-magazine-item-with-ammunition"": {
         ""containsItems"": [
-            {
-              ""item"": {
-                  ""id"": ""601aa3d2b2bcb34913271e6d""
-              },
-              ""quantity"": 30
-            }
+          {
+            ""item"": ""601aa3d2b2bcb34913271e6d"",
+            ""count"": 30
+          }
         ],
-        ""id"": ""test-preset-non-magazine-item-with-ammunition""
+        ""id"": ""test-preset-non-magazine-item-with-ammunition"",
+        ""properties"": {
+          ""propertiesType"": ""ItemPropertiesPreset""
+        }
       }
-    ]
+    }
   }
-}") };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+}");
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -543,7 +475,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 
@@ -571,37 +503,24 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
-          ""data"": {
-            ""items"": [
-              {
-                ""containsItems"": [
-                  {
-                    ""item"": {
-                      ""id"": ""57e3dba62459770f0c32322b""
-                    },
-                    ""quantity"": 1
-                  }
-                ],
-                ""id"": ""584147732459775a2b6d9f12""
-              }
-            ]
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(@"{
+  ""data"": {
+    ""items"": {
+      ""584147732459775a2b6d9f12"": {
+        ""containsItems"": [
+          {
+            ""item"": ""57e3dba62459770f0c32322b"",
+            ""count"": 1
           }
-        }") };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+        ],
+        ""id"": ""584147732459775a2b6d9f12"",
+        ""properties"": {
+          ""propertiesType"": ""ItemPropertiesPreset""
+        }
+      }
+    }
+  }
+}");
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -622,7 +541,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 
@@ -665,49 +584,32 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(@"{
-          ""data"": {
-            ""items"": [
-              {
-                ""containsItems"": [
-                  {
-                    ""item"": {
-                      ""id"": ""5894a05586f774094708ef75""
-                    },
-                    ""quantity"": 1
-                  },
-                  {
-                    ""item"": {
-                      ""id"": ""5efb0da7a29a85116f6ea05f""
-                    },
-                    ""quantity"": 10
-                  },
-                  {
-                    ""item"": {
-                      ""id"": ""5c3df7d588a4501f290594e5""
-                    },
-                    ""quantity"": 20
-                  }
-                ],
-                ""id"": ""5a8ae43686f774377b73cfb3""
-              }
-            ]
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(@"{
+  ""data"": {
+    ""items"": {
+      ""5a8ae43686f774377b73cfb3"": {
+        ""containsItems"": [
+          {
+            ""item"": ""5894a05586f774094708ef75"",
+            ""count"": 1
+          },
+          {
+            ""item"": ""5efb0da7a29a85116f6ea05f"",
+            ""count"": 10
+          },
+          {
+            ""item"": ""5c3df7d588a4501f290594e5"",
+            ""count"": 20
           }
-        }") };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+        ],
+        ""id"": ""5a8ae43686f774377b73cfb3"",
+        ""properties"": {
+          ""propertiesType"": ""ItemPropertiesPreset""
+        }
+      }
+    }
+  }
+}");
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -728,7 +630,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 
@@ -778,21 +680,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
                 .Returns(TestData.AzureFunctionsConfiguration)
                 .Verifiable();
 
-            Mock<IHttpClientWrapper> httpClientWrapperMock = new();
-            httpClientWrapperMock
-                .Setup(m => m.SendAsync(It.IsAny<HttpRequestMessage>()))
-                .Returns(async () =>
-                {
-                    await Task.Delay(1000);
-                    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(TestData.PresetsJson) };
-                })
-                .Verifiable();
-
-            Mock<IHttpClientWrapperFactory> httpClientWrapperFactoryMock = new();
-            httpClientWrapperFactoryMock
-                .Setup(m => m.Create())
-                .Returns(httpClientWrapperMock.Object)
-                .Verifiable();
+            Mock<IApiRequester> apiRequesterMock = ApiRequesterMock.Create(TestData.ItemsJson);
 
             Mock<ILocalizedItemsFetcher> localizedItemsFetcherMock = new();
             localizedItemsFetcherMock
@@ -802,7 +690,7 @@ namespace TotovBuilder.AzureFunctions.Test.Fetchers
 
             PresetsFetcher fetcher = new(
                 new Mock<ILogger<PresetsFetcher>>().Object,
-                httpClientWrapperFactoryMock.Object,
+                apiRequesterMock.Object,
                 configurationWrapperMock.Object,
                 localizedItemsFetcherMock.Object);
 

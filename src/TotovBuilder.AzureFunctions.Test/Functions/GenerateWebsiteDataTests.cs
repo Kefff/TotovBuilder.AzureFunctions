@@ -109,6 +109,28 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                             },
                             Language = "fr",
                             Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "pvp-season",
+                                FallbackGameModeName = "pvp",
+                                Name = "pvp-season"
+                            },
+                            Language = "en",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
+                        },
+                        new GameModeLocalizedPrices()
+                        {
+                            GameMode = new GameMode()
+                            {
+                                ApiQueryValue = "pvp-season",
+                                FallbackGameModeName = "pvp",
+                                Name = "pvp-season"
+                            },
+                            Language = "fr",
+                            Prices = [.. TestData.Prices, .. TestData.Barters]
                         }
                     ])
                 .Verifiable();
@@ -211,6 +233,14 @@ namespace TotovBuilder.AzureFunctions.Test.Functions
                 .Verifiable();
             azureBlobStorageManagerMock
                 .Setup(m => m.UpdateBlob("$web", "data/prices_pve_fr.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pvp-season_en.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
+                .Returns(Task.FromResult(Result.Ok()))
+                .Verifiable();
+            azureBlobStorageManagerMock
+                .Setup(m => m.UpdateBlob("$web", "data/prices_pvp-season_fr.json", expectedPrices, It.IsAny<BlobHttpHeaders>()))
                 .Returns(Task.FromResult(Result.Ok()))
                 .Verifiable();
             azureBlobStorageManagerMock

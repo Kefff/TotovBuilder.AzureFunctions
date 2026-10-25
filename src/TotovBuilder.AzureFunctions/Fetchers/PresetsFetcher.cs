@@ -18,15 +18,6 @@ namespace TotovBuilder.AzureFunctions.Fetchers
     public class PresetsFetcher : ApiFetcher<IEnumerable<InventoryItem>>, IPresetsFetcher
     {
         /// <inheritdoc/>
-        protected override string ApiQuery
-        {
-            get
-            {
-                return ConfigurationWrapper.Values.ApiPresetsQuery;
-            }
-        }
-
-        /// <inheritdoc/>
         protected override DataType DataType
         {
             get
@@ -36,6 +27,16 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         }
 
         /// <summary>
+        /// API requester.
+        /// </summary>
+        private readonly IApiRequester ApiRequester;
+
+        /// <summary>
+        /// Configuration wrapper.
+        /// </summary>
+        private readonly IConfigurationWrapper ConfigurationWrapper;
+
+        /// <summary>
         /// Items fetcher.
         /// </summary>
         private readonly ILocalizedItemsFetcher LocalizedItemsFetcher;
@@ -43,37 +44,55 @@ namespace TotovBuilder.AzureFunctions.Fetchers
         /// <summary>
         /// Initializes a new instance of the <see cref="PresetsFetcher"/> class.
         /// </summary>
-        /// <param name="httpClientWrapperFactory">HTTP client wrapper factory.</param>
-        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="logger">Logger.</param>
+        /// <param name="apiRequester">API requester.</param>
+        /// <param name="configurationWrapper">Configuration wrapper.</param>
         /// <param name="localizedItemsFetcher">Localized items fetcher.</param>
         public PresetsFetcher(
             ILogger<PresetsFetcher> logger,
-            IHttpClientWrapperFactory httpClientWrapperFactory,
+            IApiRequester apiRequester,
             IConfigurationWrapper configurationWrapper,
-            ILocalizedItemsFetcher localizedItemsFetcher
-        ) : base(logger, httpClientWrapperFactory, configurationWrapper)
+            ILocalizedItemsFetcher localizedItemsFetcher)
+            : base(logger)
         {
+            ApiRequester = apiRequester;
+            ConfigurationWrapper = configurationWrapper;
             LocalizedItemsFetcher = localizedItemsFetcher;
         }
 
         /// <inheritdoc/>
-        protected override async Task<Result<IEnumerable<InventoryItem>>> DeserializeDataAsync(string responseContent)
+        protected override async Task<Result<IEnumerable<InventoryItem>>> ExecuteFetch()
         {
-            List<Task> deserializationTasks = [];
-            ConcurrentBag<InventoryItem> presets = [];
-            Result itemsResult = await LocalizedItemsFetcher.Fetch();
+            string itemsPath = BuildApiPath(ConfigurationWrapper.Values.ApiItemsPath, ConfigurationWrapper.Values.ItemsGameMode);
+            Task<Result<JsonElement>> itemsDataTask = ApiRequester.RequestData(itemsPath);
+            Task<Result> itemsTask = LocalizedItemsFetcher.Fetch();
+
+            await Task.WhenAll(itemsDataTask, itemsTask);
+
+            Result allTasksResult = Result.Merge(itemsDataTask.Result.ToResult(), itemsTask.Result);
+
+            if (allTasksResult.IsFailed)
+            {
+                return allTasksResult;
+            }
+
+            JsonElement itemsDataJson = itemsDataTask.Result.Value;
+
+            Result<JsonElement> itemsResult = ItemsData.GetItems(itemsDataJson, itemsPath, Logger);
 
             if (itemsResult.IsFailed)
             {
-                return itemsResult;
+                return itemsResult.ToResult();
             }
 
-            JsonElement presetsJson = JsonDocument.Parse(responseContent).RootElement;
+            JsonElement itemsJson = itemsResult.Value;
 
-            foreach (JsonElement itemJson in presetsJson.EnumerateArray())
+            List<Task> deserializationTasks = [];
+            ConcurrentBag<InventoryItem> presets = [];
+
+            foreach (JsonProperty itemJson in itemsJson.EnumerateObject().Where(i => ItemsData.IsPreset(i.Value)))
             {
-                deserializationTasks.Add(Task.Run(() => DeserializeData(itemJson, presets)));
+                deserializationTasks.Add(Task.Run(() => DeserializeData(itemJson.Value, presets)));
             }
 
             await Task.WhenAll(deserializationTasks);
@@ -326,7 +345,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
 
             foreach (JsonElement containedItemJson in presetJson.GetProperty("containsItems").EnumerateArray())
             {
-                string containedItemId = containedItemJson.GetProperty("item").GetProperty("id").GetString()!;
+                string containedItemId = containedItemJson.GetProperty("item").GetString()!;
 
                 if (containedItemId == baseItem.Id)
                 {
@@ -335,7 +354,7 @@ namespace TotovBuilder.AzureFunctions.Fetchers
                 }
 
                 IItem containedItem = items.First(i => i.Id == containedItemId);
-                int quantity = containedItemJson.GetProperty("quantity").GetInt32();
+                int quantity = containedItemJson.GetProperty("count").GetInt32();
 
                 PresetContainedItem presetContainedItem = new(containedItem, quantity);
                 containedItems.Enqueue(presetContainedItem);

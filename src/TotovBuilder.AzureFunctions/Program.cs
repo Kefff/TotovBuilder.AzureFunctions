@@ -1,7 +1,9 @@
-﻿using Microsoft.Azure.Functions.Worker;
+﻿using System.Net;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using TotovBuilder.AzureFunctions.Abstractions.Fetchers;
 using TotovBuilder.AzureFunctions.Abstractions.Utils;
 using TotovBuilder.AzureFunctions.Abstractions.Wrappers;
@@ -15,7 +17,13 @@ IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices((hopstBuilderContext, services) =>
     {
-        services.AddHttpClient();
+        services
+            .AddHttpClient(Options.DefaultName)
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+            {
+                // API files are large and served compressed
+                AutomaticDecompression = DecompressionMethods.All
+            });
 
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
@@ -23,12 +31,13 @@ IHost host = new HostBuilder()
         services.AddSingleton<IConfigurationLoader, ConfigurationLoader>();
         services.AddSingleton<IConfigurationWrapper, ConfigurationWrapper>();
         services.AddSingleton<IHttpClientWrapperFactory, HttpClientWrapperFactory>();
+        services.AddSingleton(TimeProvider.System);
 
+        services.AddSingleton<IApiRequester, ApiRequester>();
         services.AddSingleton<IAzureFunctionsConfigurationFetcher, AzureFunctionsConfigurationFetcher>();
         services.AddSingleton<IChangelogFetcher, ChangelogFetcher>();
         services.AddSingleton<IGameModeLocalizedPricesFetcher, GameModeLocalizedPricesFetcher>();
         services.AddSingleton<IItemCategoriesFetcher, ItemCategoriesFetcher>();
-        services.AddSingleton<IItemMissingPropertiesFetcher, ItemMissingPropertiesFetcher>();
         services.AddSingleton<ILocalizedItemsFetcher, LocalizedItemsFetcher>();
         services.AddSingleton<IPresetsFetcher, PresetsFetcher>();
         services.AddSingleton<ITarkovValuesFetcher, TarkovValuesFetcher>();
